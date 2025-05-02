@@ -1,6 +1,7 @@
 import './App.css'
 import Nav from "./component/Nav.tsx";
-import ImageForm from "./component/ImageForm.tsx";
+import ImageUpload from "./component/ImageUpload/ImageUpload.tsx";
+import {Toaster} from "react-hot-toast";
 
 
 function App() {
@@ -9,9 +10,13 @@ function App() {
       <Nav/>
       <div className='container'>
         <div>
-          <ImageForm/>
+          <ImageUpload/>
         </div>
       </div>
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+      />
     </div>
   )
 }
