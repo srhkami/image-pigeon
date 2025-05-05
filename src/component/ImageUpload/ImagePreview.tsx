@@ -14,7 +14,7 @@ export default function ImagePreview({images, setImages}: Props) {
   ))
 
   return (
-    <div className='flex flex-col'>
+    <div className='columns-1'>
       {imageList}
     </div>
   )

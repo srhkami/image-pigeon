@@ -59,7 +59,7 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
   }
 
   return (
-    <div className="card bg-base-100 border shadow-sm my-2 mx-auto p-1" style={{maxWidth: '720px'}}>
+    <div className="card bg-base-100 border shadow-sm my-2 mx-auto p-1 w-1/2 h-96" >
       <div className='absolute top-0 left-0 bg-white text-black opacity-75 rounded-tl'>
         <span className='text-sm mr-1'>編號</span>
         <span className='font-semibold'>{index + 1} </span>
@@ -73,7 +73,8 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
         <img
           src={img.preview}
           alt={img.remark}
-          style={{maxWidth: '720px', maxHeight: '405px'}}
+          className=''
+          // style={{maxWidth: '720px', maxHeight: '405px'}}
         />
       </figure>
       <hr/>

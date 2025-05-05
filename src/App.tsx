@@ -30,9 +30,9 @@ function App() {
           </div>
         </div>
       </div>
-
+      {/*圖片預覽*/}
       <ImagePreview images={images} setImages={setImages}/>
-
+      {/*底端欄*/}
       <div className='sticky bottom-0 bg-black border-t-2 flex py-2'>
         <div>
           共上傳 {images.length} 張圖片
@@ -40,14 +40,6 @@ function App() {
         <button className='btn btn-sm mx-2 ml-auto'>列印</button>
         <button className='btn btn-sm mx-2'>另存PDF</button>
       </div>
-      {/*</div>*/}
-
-      {/*<Nav/>*/}
-      {/*<div className='container'>*/}
-      {/*  <div>*/}
-      {/*    <ImageUpload/>*/}
-      {/*  </div>*/}
-      {/*</div>*/}
       <Toaster
         position="top-center"
         reverseOrder={false}
