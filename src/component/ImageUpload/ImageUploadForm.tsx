@@ -1,6 +1,7 @@
 import {SubmitHandler, useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
 import {CustomImage, TDefault} from "../../utils/type.ts";
+import toast from "react-hot-toast";
 
 type TFormValue = {
   image: FileList,
@@ -9,9 +10,10 @@ type TFormValue = {
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
   readonly defaultInfo: TDefault,
+  readonly setIsModalShow: (value: boolean) => void,
 }
 
-export default function ImageUploadForm({setImages, defaultInfo}: Props) {
+export default function ImageUploadForm({setImages, defaultInfo, setIsModalShow}: Props) {
 
 
   const {register, handleSubmit, reset} = useForm<TFormValue>();
@@ -23,7 +25,9 @@ export default function ImageUploadForm({setImages, defaultInfo}: Props) {
     const newImages: CustomImage[] = files.map(file => new CustomImage(file, defaultInfo.remark));
     // 將新上傳的圖片加入現有state列表
     setImages(prev => [...prev, ...newImages]);
+    toast.success('新增成功');
     reset();
+    setIsModalShow(false);
   }
 
   return (
