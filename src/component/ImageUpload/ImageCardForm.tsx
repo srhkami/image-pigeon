@@ -1,6 +1,7 @@
 import {SubmitHandler, useForm} from "react-hook-form";
 import {MdDeleteForever} from "react-icons/md";
 import {FaRegEdit, FaCaretSquareUp, FaCaretSquareDown} from "react-icons/fa";
+import {FaArrowRotateRight, FaArrowRotateLeft} from "react-icons/fa6";
 import React from "react";
 import {CustomImage} from "../../utils/type.ts";
 import toast from "react-hot-toast";
@@ -14,8 +15,23 @@ type Props = {
 
 export default function ImageCardForm({img, index, images, setImages}: Props) {
 
-  const {register, handleSubmit} = useForm<CustomImage>({values: img});
+  const {register, handleSubmit} = useForm<CustomImage>({defaultValues: {remark: img.remark}});
 
+  // 修改圖片備註
+  const handleEditImage: SubmitHandler<CustomImage> = (formData) => {
+    setImages(prev => {
+      // 篩選出這個項目進行修改
+      return prev.map((imgItem, i) => {
+        if (i === index) {
+          imgItem.editRemark(formData.remark);
+        }
+        return imgItem;
+      });
+    });
+    toast.success(`編號${index+1} 修改成功`);
+  };
+
+  // 移除圖片
   const handleRemoveImage = () => {
     setImages(prev => {
       // 釋放 memory
@@ -25,23 +41,8 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
     });
   };
 
-  const handleEditImage: SubmitHandler<CustomImage> = (formData) => {
-    setImages(prev => {
-      // 篩選出這個項目進行修改
-      return prev.map((imgItem, i) => {
-        if (i === index) {
-          imgItem.editTime(formData.time);
-          imgItem.editPlace(formData.place);
-          imgItem.editRemark(formData.remark);
-        }
-        return imgItem;
-      });
-    });
-    toast.success('儲存成功');
-  };
-
+  // 項目往上移
   const handleUp = () => {
-    // 項目往上移
     const updateList = [...images];
     if (index !== 0) {
       [updateList[index], updateList[index - 1]] = [updateList[index - 1], updateList[index]]
@@ -49,8 +50,8 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
     setImages(updateList);
   }
 
+  // 項目往下移
   const handleDown = () => {
-    // 項目往下移
     const updateList = [...images];
     if (index !== updateList.length - 1) {
       [updateList[index], updateList[index + 1]] = [updateList[index + 1], updateList[index]]
@@ -58,51 +59,77 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
     setImages(updateList);
   }
 
+  const handleRotate = (value: 90 | -90) => {
+    const newRotation = (img.rotation + value) % 360
+    img.setRotation(newRotation as 0 | 90 | 180 | 270);
+    setImages(prev => {
+      // 篩選出這個項目進行修改
+      return prev.map((imgItem, i) => {
+        if (i === index) {
+          imgItem.setRotation(newRotation as 0 | 90 | 180 | 270);
+        }
+        return imgItem;
+      });
+    });
+  }
+
   return (
-    <div className="card bg-base-100 border shadow-sm my-2 mx-auto p-1 w-1/2 h-96" >
-      <div className='absolute top-0 left-0 bg-white text-black opacity-75 rounded-tl'>
+    <div className="card bg-base-100 border shadow-sm my-2 mx-auto p-1 md:w-2/3 lg:w-1/2 items-center justify-center">
+      <div className='absolute top-0 left-0 bg-white text-black opacity-75 rounded-tl z-10'>
         <span className='text-sm mr-1'>編號</span>
         <span className='font-semibold'>{index + 1} </span>
       </div>
-      <div className='absolute top-0 right-1 rounded-tr flex flex-col'>
-        <button className='btn btn-sm btn-soft btn-info my-1' onClick={handleUp} title='上移'><FaCaretSquareUp/>
+      <div className='absolute top-0 right-1 rounded-tr flex flex-col z-10'>
+        <button className='btn btn-sm btn-soft btn-info my-1' onClick={handleUp} title='上移'>
+          <FaCaretSquareUp/>
         </button>
-        <button className='btn btn-sm btn-soft btn-info' onClick={handleDown} title='下移'><FaCaretSquareDown/></button>
+        <button className='btn btn-sm btn-soft btn-info' onClick={handleDown} title='下移'>
+          <FaCaretSquareDown/>
+        </button>
+        <button className='btn btn-sm btn-soft btn-info my-1' onClick={() => handleRotate(90)} title='右旋'>
+          <FaArrowRotateRight/>
+        </button>
+        <button className='btn btn-sm btn-soft btn-info my-1' onClick={() => handleRotate(-90)} title='右旋'>
+          <FaArrowRotateLeft/>
+        </button>
       </div>
-      <figure className='justify-center items-center flex'>
-        <img
-          src={img.preview}
-          alt={img.remark}
-          className=''
-          // style={{maxWidth: '720px', maxHeight: '405px'}}
-        />
+      <figure className='relative aspect-video w-full max-w-xl overflow-hidden'>
+        <div className="absolute inset-0 flex items-center justify-center"
+             style={{
+               transform: `rotate(${img.rotation}deg)`,
+               transformOrigin: 'center',
+             }}>
+          <img
+            src={img.preview}
+            alt={img.remark}
+            className="object-contain max-w-full max-h-full"
+          />
+        </div>
       </figure>
       <hr/>
-      <div className="p-2">
+      <div className="w-full p-2">
         <form onSubmit={handleSubmit(handleEditImage)}>
-          <table className='w-full'>
-            <tbody>
-            <tr>
-              <th className='px-1 text-end py-1' style={{width: '6rem'}}>攝影時間：</th>
-              <td className='py-1 flex justify-start'>
-                <input type="text" className="input input-xs" {...register('time')}/>
-              </td>
-            </tr>
-            <tr className='py-1'>
-              <th className='px-1 text-end py-1'>攝影地點：</th>
-              <td className='py-1 flex justify-start'>
-                <input type="text" className="input input-xs" {...register('place')}/>
-              </td>
-            </tr>
-            <tr className='py-1'>
-              <th className='px-1 text-end py-1'>說明：</th>
-              <td className='py-1 flex justify-start'>
-                <input type="text" className="input input-xs" {...register('remark')}/>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-          <div className="card-actions justify-between">
+          {/*<table className='w-full'>*/}
+          {/*  <tbody>*/}
+          {/*  <tr className='py-1'>*/}
+          {/*    <th className='px-1 text-end py-1'>攝影地點：</th>*/}
+          {/*    <td className='py-1 flex justify-start'>*/}
+          {/*      <input type="text" className="input input-xs" {...register('place')}/>*/}
+          {/*    </td>*/}
+          {/*  </tr>*/}
+          {/*  <tr className='py-1'>*/}
+          {/*    <th className='px-1 text-end py-1'>說明：</th>*/}
+          {/*    <td className='py-1 flex justify-start'>*/}
+          {/*      <input type="text" className="input input-xs" {...register('remark')}/>*/}
+          {/*    </td>*/}
+          {/*  </tr>*/}
+          {/*  </tbody>*/}
+          {/*</table>*/}
+          <div>
+            <textarea id='remark' className="textarea textarea-sm w-full"
+                      placeholder="可輸入多行" {...register('remark')}></textarea>
+          </div>
+          <div className="card-actions justify-between mt-2">
             <button type='button' className='btn btn-sm btn-soft btn-error' onClick={handleRemoveImage}>
               <MdDeleteForever className='text-lg'/>刪除
             </button>

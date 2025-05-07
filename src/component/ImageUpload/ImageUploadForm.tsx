@@ -20,7 +20,7 @@ export default function ImageUploadForm({setImages, defaultInfo}: Props) {
     // 取得檔案列表
     const files = Array.from(formData.image);
     // 將每個檔案轉換成自定義的圖片物件
-    const newImages: CustomImage[] = files.map(file => new CustomImage(file, defaultInfo.time, defaultInfo.place, defaultInfo.remark));
+    const newImages: CustomImage[] = files.map(file => new CustomImage(file, defaultInfo.remark));
     // 將新上傳的圖片加入現有state列表
     setImages(prev => [...prev, ...newImages]);
     reset();

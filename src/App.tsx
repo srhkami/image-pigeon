@@ -1,5 +1,5 @@
 import './App.css'
-import {Toaster} from "react-hot-toast";
+import toast, {Toaster} from "react-hot-toast";
 import {useState} from "react";
 import {CustomImage, TDefault} from "./utils/type.ts";
 import InfoForm from "./component/InfoForm/InfoForm.tsx";
@@ -9,8 +9,25 @@ import ImagePreview from "./component/ImageUpload/ImagePreview.tsx";
 
 function App() {
 
-  const [defaultInfo, setDefaultInfo] = useState<TDefault>({title: '預設標題', remark: '無', time: '無', place: '無'});
+  const [defaultInfo, setDefaultInfo] = useState<TDefault>({title: '刑案照片黏貼表', remark: '無'});
   const [images, setImages] = useState<Array<CustomImage>>([]);
+
+  const handleSendData = () => {
+    const data = {
+      title: defaultInfo.title,
+      images: images,
+    }
+
+    window.pywebview.api.send_images(data)
+      .then(res => {
+        console.log(res);
+        if (res.status == 200) {
+          toast.success(res.message);
+        } else {
+          toast.error(res.message);
+        }
+      })
+  }
 
   return (
     <div className='h-full'>
@@ -38,7 +55,8 @@ function App() {
           共上傳 {images.length} 張圖片
         </div>
         <button className='btn btn-sm mx-2 ml-auto'>列印</button>
-        <button className='btn btn-sm mx-2'>另存PDF</button>
+        <button className='btn btn-sm mx-2' onClick={handleSendData}>發送</button>
+
       </div>
       <Toaster
         position="top-center"

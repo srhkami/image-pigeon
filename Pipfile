@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 pywebview = "*"
+python-docx = "*"
+pillow = "*"
 
 [dev-packages]
 

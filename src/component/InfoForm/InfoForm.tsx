@@ -11,7 +11,10 @@ type Props = {
 
 export default function InfoForm({setDefaultInfo}: Props) {
 
-  const {register, handleSubmit} = useForm<TDefault>();
+  const {register, handleSubmit} = useForm<TDefault>({defaultValues:{
+    title: '刑案照片黏貼表',
+    remark: '時間：年月日時分\n地點：XX市\n說明：嫌疑人OOO',
+    }});
 
   const onSubmit: SubmitHandler<TDefault> = (formData) => {
     setDefaultInfo(formData);
@@ -22,12 +25,11 @@ export default function InfoForm({setDefaultInfo}: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className='flex'>
       <div className='mx-auto'>
         <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-          <legend className="fieldset-legend">預設設定</legend>
-          <TextInput name='title' label={'預設標題'} register={register}/>
-          <TextInput name='time' type='date' label={'預設日期'} register={register}/>
-          <TextInput name='palce' label={'預設地點'} register={register}/>
-          <TextInput name='remark' label={'預設說明'} register={register}/>
-          <p className="label text-gray-500 mt-2">您可以在上傳圖片前賦予預設設定</p>
+          <legend className="fieldset-legend">自訂文字</legend>
+          <TextInput name='title' label={'檔案標題'} register={register}/>
+          {/*<TextInput name='remark' label={'預設說明'} register={register}/>*/}
+          <label htmlFor='remark' className="label">圖片的預設說明</label>
+          <textarea id='remark' className="textarea textarea-sm" placeholder="可輸入多行" {...register('remark')}></textarea>
           <button className="btn btn-neutral mt-2">儲存</button>
         </fieldset>
       </div>
