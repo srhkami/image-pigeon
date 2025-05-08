@@ -3,10 +3,11 @@ import toast, {Toaster} from "react-hot-toast";
 import {useState} from "react";
 import {CustomImage, TDefault} from "./utils/type.ts";
 import InfoForm from "./component/InfoForm/InfoForm.tsx";
-import ImageUploadForm from "./component/ImageUpload/ImageUploadForm.tsx";
-import ImagePreview from "./component/ImageUpload/ImagePreview.tsx";
+import ImagePreview from "./component/ImagePreview/ImagePreview.tsx";
 import Nav from "./component/Layout/Nav.tsx";
 import Modal from "./component/Layout/Modal.tsx";
+import UploadMultiple from "./component/ImageUpload/UploadMultiple.tsx";
+import UploadLongScreen from "./component/ImageUpload/UploadLongScreen.tsx";
 
 
 function App() {
@@ -36,7 +37,7 @@ function App() {
   return (
     <div className='h-full'>
       <Nav/>
-      {/*<div className='f-lex flex-col items-center justify-center'>*/}
+
       <InfoForm setDefaultInfo={setDefaultInfo}/>
       <div className="divider"></div>
       {/*圖片預覽*/}
@@ -47,11 +48,11 @@ function App() {
         <div className="tabs tabs-lift mx-auto">
           <input type="radio" name="my_tabs_3" className="tab" aria-label="普通上傳" defaultChecked/>
           <div className="tab-content bg-base-100 border-base-300 p-6">
-            <ImageUploadForm setImages={setImages} defaultInfo={defaultInfo} setIsModalShow={setIsModalShow}/>
+            <UploadMultiple setImages={setImages} defaultInfo={defaultInfo} setIsModalShow={setIsModalShow}/>
           </div>
           <input type="radio" name="my_tabs_3" className="tab" aria-label="長截圖分割"/>
           <div className="tab-content bg-base-100 border-base-300 p-6">
-            Tab content 2
+            <UploadLongScreen setImages={setImages} defaultInfo={defaultInfo} setIsModalShow={setIsModalShow}/>
           </div>
         </div>
       </Modal>

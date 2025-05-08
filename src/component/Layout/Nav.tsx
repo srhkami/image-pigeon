@@ -21,7 +21,7 @@ export default function Nav() {
         </div>
       </div>
       <div className="navbar-center">
-        <a className="btn btn-ghost text-xl">貼圖鴿手</a>
+        <a className="btn btn-ghost text-xl">貼圖小鴿手</a>
       </div>
       <div className="navbar-end">
         <BtnThemeToggle/>

@@ -13,21 +13,24 @@ type Props = {
   readonly setIsModalShow: (value: boolean) => void,
 }
 
-export default function ImageUploadForm({setImages, defaultInfo, setIsModalShow}: Props) {
-
+/* 新增多張圖片 */
+export default function UploadMultiple({setImages, defaultInfo, setIsModalShow}: Props) {
 
   const {register, handleSubmit, reset} = useForm<TFormValue>();
 
   const omSubmit: SubmitHandler<TFormValue> = (formData) => {
-    // 取得檔案列表
-    const files = Array.from(formData.image);
-    // 將每個檔案轉換成自定義的圖片物件
-    const newImages: CustomImage[] = files.map(file => new CustomImage(file, defaultInfo.remark));
-    // 將新上傳的圖片加入現有state列表
-    setImages(prev => [...prev, ...newImages]);
-    toast.success('新增成功');
-    reset();
-    setIsModalShow(false);
+    (async () => {
+      // 將每個檔案轉換成 CustomImage 並初始化（包含 base64、尺寸）
+      const files = Array.from(formData.image);
+      const imageInstances = files.map(file => new CustomImage(file, defaultInfo.remark));
+      const readyImages = await Promise.all(imageInstances.map(img => img.init()));
+
+      // 更新圖片狀態
+      setImages(prev => [...prev, ...readyImages]);
+      toast.success('新增成功');
+      reset();
+      setIsModalShow(false);
+    })();
   }
 
   return (
