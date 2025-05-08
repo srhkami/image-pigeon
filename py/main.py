@@ -6,7 +6,12 @@ from response import Response
 
 
 class Api:
-  def send_images(self, data):
+  def save_docx(self, data):
+    """
+    儲存圖片成docx檔
+    :param data:
+    :return:
+    """
     title = data.get('title')  # 文件標題
     files = data.get('images')  # 圖片清單
     images = []  # python 圖片的清單
@@ -33,5 +38,5 @@ class Api:
 
 if __name__ == '__main__':
   api = Api()
-  window = webview.create_window('照片整理器', 'http://localhost:5173', js_api=api)
+  window = webview.create_window('貼圖小鴿手', 'http://localhost:5173', js_api=api)
   webview.start(debug=True)
