@@ -1,6 +1,6 @@
 import {SubmitHandler, useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
-import {CustomImage, TDefault} from "../../utils/type.ts";
+import {CustomImage} from "../../utils/type.ts";
 import toast from "react-hot-toast";
 
 type TFormValue = {
@@ -9,12 +9,12 @@ type TFormValue = {
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
-  readonly defaultInfo: TDefault,
+  readonly defaultRemark: string,
   readonly setIsModalShow: (value: boolean) => void,
 }
 
 /* 新增多張圖片 */
-export default function UploadMultiple({setImages, defaultInfo, setIsModalShow}: Props) {
+export default function UploadMultiple({setImages, defaultRemark, setIsModalShow}: Props) {
 
   const {register, handleSubmit, reset} = useForm<TFormValue>();
 
@@ -22,7 +22,7 @@ export default function UploadMultiple({setImages, defaultInfo, setIsModalShow}:
     (async () => {
       // 將每個檔案轉換成 CustomImage 並初始化（包含 base64、尺寸）
       const files = Array.from(formData.image);
-      const imageInstances = files.map(file => new CustomImage(file, defaultInfo.remark));
+      const imageInstances = files.map(file => new CustomImage(file, defaultRemark));
       const readyImages = await Promise.all(imageInstances.map(img => img.init()));
 
       // 更新圖片狀態

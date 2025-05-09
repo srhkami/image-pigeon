@@ -1,41 +1,74 @@
 from docx import Document
-from docx.shared import Inches, Cm
-from docx.enum.table import WD_ALIGN_VERTICAL, WD_TABLE_ALIGNMENT
+from docx.shared import Cm
+from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor
-from log import log
-from image import CustomImage
+from PIL import Image
+from handle_image import CustomImage
+from handle_log import log
+
+
+def two_of_page(images):
+  """
+  一頁兩張的函數
+  :param images:
+  :return: 創建後的DOC檔
+  """
+  doc = Document()
+  doc = set_font(doc)
+  for index, image in enumerate(images):
+    img = Image.open(image.stream)
+    show_type = 'H'  # 預設設定為高9公分
+    if img.width / img.height > 15 / 9:
+      # 大於預設寬高比15：9，設定寬為15公分。
+      show_type = 'W'
+    doc = add_table(doc, image, index + 1, show_type=show_type)
+  return doc
+
+
+def add_header(doc, title_text):
+  """
+  Word檔加入標頭
+  :param doc: DOC檔
+  :param title_text: 檔案標題文字
+  :return: 編輯後的DOC檔
+  """
+  header = doc.sections[0].header
+  title = header.paragraphs[0].add_run(title_text)
+  title.font.size = Pt(20)
+  title.font.bold = True
+  header.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+  log().debug('加入標頭成功')
+  return doc
 
 
 def set_font(doc):
-  '''
+  """
   用以設定預設字體及大小
-  '''
+  """
   try:
     doc.styles['Normal'].font.name = "Times New Roman"
     doc.styles['Normal'].element.rPr.rFonts.set(qn('w:eastAsia'), u'標楷體')
     doc.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'標楷體')
     doc.styles['Normal'].font.size = Pt(12)
     doc.styles['Normal'].font.color.rgb = RGBColor(0, 0, 0)
-    log().debug('設定預設字體成功')
-  except:
-    log().error('設定預設字體失敗', exc_info=True)
-  return doc
+    log().debug('設定字體成功')
+    return doc
+  except Exception as e:
+    log().exception(str(e))
+    raise AttributeError('找不到指定字體')
 
 
-def number(no):
-  '''
+def handle_number(no: int) -> str:
+  """
   用以處理編號的函數
   :return: 處理完的文字
-  '''
-  if no < 10:
-    return f'編號\n0{no}'
-  else:
-    return f'編號\n{no}'
+  """
+  return f'編號\n0{no}' if no < 10 else f'編號\n{no}'
 
 
-def add_table(doc, image:CustomImage, index, show_type='H', mode=1):
+def add_table(doc, image: CustomImage, index, show_type='H', mode=1):
   """
   :param doc: 傳入的doc文件
   :param image: 傳入的圖片物件
@@ -44,7 +77,6 @@ def add_table(doc, image:CustomImage, index, show_type='H', mode=1):
   :param mode: 如果為2，代表是多張模式
   :return: 回傳doc文件
   """
-  # 創建表格
   try:
     # 創建5*3的空表格
     table = doc.add_table(rows=5, cols=3, style='Table Grid')
@@ -67,32 +99,15 @@ def add_table(doc, image:CustomImage, index, show_type='H', mode=1):
     table.cell(0, 0).merge(table.cell(0, 2))
     table.cell(1, 0).merge(table.cell(4, 0))
     table.cell(1, 1).merge(table.cell(4, 2))
-    # table.cell(4, 1).merge(table.cell(4, 2))
-    # table.cell(3, 0).merge(table.cell(4, 0))
-    # table.cell(3, 1).merge(table.cell(4, 1))
 
     # 寫入文字及對齊
-    table.cell(1, 0).text = number(index)  ## 寫入編號
-    table.cell(1, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER  ## 表格文字垂直置中
-    table.cell(1, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  ## 文字水平置中
-    # table.cell(1, 0).text = '攝影時間'
-    # table.cell(1, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    # table.cell(1, 1).text = options['time']
-    # table.cell(2, 0).text = '攝影地點'
-    # table.cell(2, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    # table.cell(2, 1).text = options['place']
-    # table.cell(1, 1).text = '說明'
-    # table.cell(3, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-    # table.cell(1, 1).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    table.cell(1, 0).text = handle_number(index)  # 寫入編號
+    table.cell(1, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
+    table.cell(1, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # 文字水平置中
     table.cell(1, 1).text = image.remark
     table.cell(1, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
-    log().debug(f'編號{index} 表格創建成功')
-  except:
-    log().error(f'編號{index} 表格創建失敗', exc_info=True)
-
-  # 寫入圖片
-  try:
+    # 寫入圖片
     if mode == 1:
       if show_type == 'H':
         table.cell(0, 0).paragraphs[0].add_run().add_picture(image.stream, height=Cm(9))
@@ -104,8 +119,6 @@ def add_table(doc, image:CustomImage, index, show_type='H', mode=1):
     #     table.cell(0, 0).paragraphs[0].add_run().add_picture(img, height=Cm(9))
     table.cell(0, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
     table.cell(0, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    log().debug(f'編號{index} 圖片黏貼完成')
-  except:
-    log().error(f'編號{index} 圖片黏貼失敗', exc_info=True)
-
-  return doc
+    return doc
+  except Exception as e:
+    log().exception(str(e))

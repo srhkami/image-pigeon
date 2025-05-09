@@ -1,7 +1,7 @@
 import base64
 from io import BytesIO
 from PIL import Image
-from log import log
+from handle_log import log
 import math
 
 
@@ -20,7 +20,8 @@ class CustomImage:
 def base64_to_image(base64_str: str, rotation) -> BytesIO:
   """
   將base64圖片轉化成BytesIO
-  :param base64_str:
+  :param base64_str: base64的字串
+  :param rotation: 角度
   :return: BytesIO
   """
   __, encoded = base64_str.split(",", 1)  # 去掉 "data:image/xxx;base64,"
@@ -61,6 +62,11 @@ def crop_img(image: CustomImage):
 
 
 def pil_image_to_base64(img: Image.Image) -> dict:
+  """
+  將Pillow的圖片物件轉化為要傳回前端的字典
+  :param img:
+  :return:
+  """
   buffer = BytesIO()
   img.save(buffer, format="JPEG")
   base64_str = base64.b64encode(buffer.getvalue()).decode("utf-8")

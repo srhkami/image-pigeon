@@ -7,13 +7,15 @@ import ImagePreview from "./component/ImagePreview/ImagePreview.tsx";
 import Nav from "./component/Layout/Nav.tsx";
 import Footer from "./component/Layout/Footer.tsx";
 import ModalUpload from "./component/ImageUpload/ModalUpload.tsx";
+import ModalOutput from "./component/ImageUpload/ModalOutput.tsx";
 
 
 function App() {
 
   const [defaultInfo, setDefaultInfo] = useState<TDefault>({title: '刑案照片黏貼表', remark: '無'});
   const [images, setImages] = useState<Array<CustomImage>>([]);
-  const [isModalShow, setIsModalShow] = useState<boolean>(false);
+  const [isUploadShow, setIsUploadShow] = useState<boolean>(false); // 上傳對話框
+  const [isOutputShow, setIsOutputShow] = useState<boolean>(false); // 輸出對話框
 
   return (
     <div className='h-full'>
@@ -27,12 +29,12 @@ function App() {
       <Footer
         images={images}
         defaultInfo={defaultInfo}
-        handleUploadModalClose={() => setIsModalShow(false)}
+        handleUploadModalShow={() => setIsUploadShow(true)}
+        handleOutputModalShow={() => setIsOutputShow(true)}
       />
-      {/*新增圖片的對話框*/}
-      <ModalUpload isModalShow={isModalShow} setIsModalShow={setIsModalShow}
-                   setImages={setImages} defaultInfo={defaultInfo}
-      />
+      {/*對話框*/}
+      <ModalUpload isModalShow={isUploadShow} setIsModalShow={setIsUploadShow} setImages={setImages}/>
+      <ModalOutput isModalShow={isOutputShow} setIsModalShow={setIsOutputShow}/>
       {/*快速彈窗*/}
       <Toaster
         position="top-center"

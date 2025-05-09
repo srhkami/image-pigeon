@@ -1,4 +1,8 @@
 class Response:
+  """
+  自訂的回應類別
+  """
+
   def __init__(self, status, message='', data=None):
     self.status = status
     self.message = message

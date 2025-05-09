@@ -1,7 +1,7 @@
 import webview
-import json
-from image import CustomImage, crop_img
-from word import one_of_one
+import os.path
+from handle_image import CustomImage, crop_img
+from handle_doc import two_of_page, add_header
 from response import Response
 
 
@@ -18,9 +18,22 @@ class Api:
     for file in files:
       image = CustomImage(file)  # 逐一轉化成python自訂物件
       images.append(image)
+    doc = two_of_page(images)
+    doc = add_header(doc, title)
+
+    path = webview.windows[0].create_file_dialog(
+      webview.SAVE_DIALOG,
+      save_filename=f'{title}.docx',
+      file_types=('Word 文件 (*.docx)',)
+    )
+
+    if not path:
+      return Response(400, '已取消儲存').to_dict()
     try:
-      one_of_one(title, images)
+      doc.save(path)
       return Response(200, '儲存成功').to_dict()
+    except PermissionError:
+      return Response(500, '請先關閉相同檔名之檔案').to_dict()
     except Exception as e:
       return Response(500, str(e)).to_dict()
 
@@ -30,13 +43,14 @@ class Api:
     :param file
     :return:
     """
-    print(file)
     image = CustomImage(file)
     images = crop_img(image)
     return {'status': 200, 'data': images}
 
 
 if __name__ == '__main__':
+  debug_mode = True
   api = Api()
-  window = webview.create_window('貼圖小鴿手', 'http://localhost:5173', js_api=api)
-  webview.start(debug=True)
+  url = os.path.join(os.getcwd(), './web/index.html') if not debug_mode else 'http://localhost:5173'
+  window = webview.create_window('貼圖小鴿手', url, js_api=api)
+  webview.start(debug=debug_mode)

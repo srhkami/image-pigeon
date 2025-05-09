@@ -1,6 +1,6 @@
 import {useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
-import {CustomImage, TDefault} from "../../utils/type.ts";
+import {CustomImage} from "../../utils/type.ts";
 import toast from "react-hot-toast";
 
 type TFormValue = {
@@ -9,18 +9,18 @@ type TFormValue = {
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
-  readonly defaultInfo: TDefault,
+  readonly defaultRemark: string,
   readonly setIsModalShow: (value: boolean) => void,
 }
 
 /* 新增長截圖，並傳至後端自動分割，之後提供預覽 */
-export default function UploadLongScreen({setImages, defaultInfo, setIsModalShow}: Props) {
+export default function UploadLongScreen({setImages, defaultRemark, setIsModalShow}: Props) {
 
   const {register, handleSubmit, reset} = useForm<TFormValue>();
 
   const omSubmit = async (formData: TFormValue) => {
     // 將圖片轉化為自訂物件
-    const image = new CustomImage(formData.image[0], defaultInfo.remark)
+    const image = new CustomImage(formData.image[0], defaultRemark)
     // 等待 base64 等欄位初始化完成
     const readyImage = await image.init();
     // 將初始化完成的圖片傳給後端
@@ -28,7 +28,7 @@ export default function UploadLongScreen({setImages, defaultInfo, setIsModalShow
     // 後端處理完成，將base64列表重新轉化為自訂物件
     if (res.status === 200) {
       const imageObjs = await Promise.all(
-        res.data.map((imgData) => CustomImage.fromBase64(imgData, defaultInfo.remark))
+        res.data.map((imgData) => CustomImage.fromBase64(imgData, defaultRemark))
       );
       // 更新圖片狀態
       setImages(prev => [...prev, ...imageObjs]);
