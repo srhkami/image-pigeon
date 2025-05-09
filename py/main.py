@@ -49,8 +49,13 @@ class Api:
 
 
 if __name__ == '__main__':
-  debug_mode = True
+  debug_mode = False
   api = Api()
   url = os.path.join(os.getcwd(), './web/index.html') if not debug_mode else 'http://localhost:5173'
-  window = webview.create_window('貼圖小鴿手', url, js_api=api)
+  window = webview.create_window(
+    title='貼圖小鴿手',
+    url=url,
+    js_api=api,
+    min_size=(800, 500)
+  )
   webview.start(debug=debug_mode)

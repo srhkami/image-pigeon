@@ -1,8 +1,3 @@
-export type TDefault = {
-  title: string;
-  remark: string;
-};
-
 export type Response<T> = {
   status: number,
   message: string,

@@ -1,40 +1,77 @@
 import './App.css'
 import {Toaster} from "react-hot-toast";
 import {useState} from "react";
-import {CustomImage, TDefault} from "./utils/type.ts";
-import InfoForm from "./component/InfoForm/InfoForm.tsx";
+import {CustomImage} from "./utils/type.ts";
 import ImagePreview from "./component/ImagePreview/ImagePreview.tsx";
 import Nav from "./component/Layout/Nav.tsx";
 import Footer from "./component/Layout/Footer.tsx";
 import ModalUpload from "./component/ImageUpload/ModalUpload.tsx";
-import ModalOutput from "./component/ImageUpload/ModalOutput.tsx";
+import ModalOutput from "./component/ImageOutput/ModalOutput.tsx";
 
 
 function App() {
 
-  const [defaultInfo, setDefaultInfo] = useState<TDefault>({title: '刑案照片黏貼表', remark: '無'});
   const [images, setImages] = useState<Array<CustomImage>>([]);
   const [isUploadShow, setIsUploadShow] = useState<boolean>(false); // 上傳對話框
   const [isOutputShow, setIsOutputShow] = useState<boolean>(false); // 輸出對話框
 
   return (
-    <div className='h-full'>
+    <div>
       <Nav/>
-      <InfoForm setDefaultInfo={setDefaultInfo}/>
-      <div className="divider"></div>
-      {/*圖片預覽*/}
+
+      {!images.length &&
+        <div className='h-screen flex justify-center items-center'>
+          <div className="card bg-neutral text-neutral-content w-96">
+            <div className='card-body'>
+              <div className='grid grid-cols-4 gap-4'>
+                <div className="badge badge-md badge-accent my-3">Step 1</div>
+                <div className='col-span-3 text-lg font-bold flex items-center'>
+                  點擊左下角
+                  <button className='btn btn-sm btn-primary ml-2'>
+                    新增圖片
+                  </button>
+                </div>
+                <div className="badge badge-md badge-accent my-3">Step 2</div>
+                <div className='col-span-3 text-lg font-bold flex items-center'>
+                  預覽、排序、編輯圖片
+                </div>
+                <div className="badge badge-md badge-accent my-3">Step 3</div>
+                <div className='col-span-3 text-lg font-bold flex items-center'>
+                  點擊右下角
+                  <button className='btn btn-sm btn-success ml-2'>
+                    輸出檔案
+                  </button>
+                </div>
+                <div className='col-span-4 text-lg font-bold mt-3'>
+                  恭喜您完成一份照片黏貼表！
+                </div>
+              </div>
+              <div className='divider divider-info'></div>
+              <div className='grid grid-cols-4 gap-2 '>
+                <div>作者：</div>
+                <div className='col-span-3 text-start'>蔡智楷 C.K.SAI</div>
+              </div>
+              <div className='grid grid-cols-4 gap-2 '>
+                <div>版本：</div>
+                <div className='col-span-3 text-start'>1140501</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
       <ImagePreview images={images} setImages={setImages}/>
+      {/*圖片預覽*/}
 
       {/*底端欄*/}
       <Footer
         images={images}
-        defaultInfo={defaultInfo}
         handleUploadModalShow={() => setIsUploadShow(true)}
         handleOutputModalShow={() => setIsOutputShow(true)}
       />
       {/*對話框*/}
       <ModalUpload isModalShow={isUploadShow} setIsModalShow={setIsUploadShow} setImages={setImages}/>
-      <ModalOutput isModalShow={isOutputShow} setIsModalShow={setIsOutputShow}/>
+      <ModalOutput isModalShow={isOutputShow} setIsModalShow={setIsOutputShow} images={images}/>
       {/*快速彈窗*/}
       <Toaster
         position="top-center"

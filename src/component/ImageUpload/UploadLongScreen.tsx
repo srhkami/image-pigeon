@@ -19,6 +19,7 @@ export default function UploadLongScreen({setImages, defaultRemark, setIsModalSh
   const {register, handleSubmit, reset} = useForm<TFormValue>();
 
   const omSubmit = async (formData: TFormValue) => {
+    toast.loading('處理中，請稍候...')
     // 將圖片轉化為自訂物件
     const image = new CustomImage(formData.image[0], defaultRemark)
     // 等待 base64 等欄位初始化完成
@@ -28,10 +29,15 @@ export default function UploadLongScreen({setImages, defaultRemark, setIsModalSh
     // 後端處理完成，將base64列表重新轉化為自訂物件
     if (res.status === 200) {
       const imageObjs = await Promise.all(
-        res.data.map((imgData) => CustomImage.fromBase64(imgData, defaultRemark))
+        res.data.map((imgData: {
+          base64: string,
+          width: number,
+          height: number,
+        }) => CustomImage.fromBase64(imgData, defaultRemark))
       );
       // 更新圖片狀態
       setImages(prev => [...prev, ...imageObjs]);
+      toast.dismiss();
       toast.success('新增成功');
       reset();
       setIsModalShow(false);

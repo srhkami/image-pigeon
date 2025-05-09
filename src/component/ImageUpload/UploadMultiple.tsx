@@ -20,6 +20,7 @@ export default function UploadMultiple({setImages, defaultRemark, setIsModalShow
 
   const omSubmit: SubmitHandler<TFormValue> = (formData) => {
     (async () => {
+      toast.loading('處理中，請稍候...')
       // 將每個檔案轉換成 CustomImage 並初始化（包含 base64、尺寸）
       const files = Array.from(formData.image);
       const imageInstances = files.map(file => new CustomImage(file, defaultRemark));
@@ -27,6 +28,7 @@ export default function UploadMultiple({setImages, defaultRemark, setIsModalShow
 
       // 更新圖片狀態
       setImages(prev => [...prev, ...readyImages]);
+      toast.dismiss();
       toast.success('新增成功');
       reset();
       setIsModalShow(false);
