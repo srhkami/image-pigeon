@@ -18,10 +18,9 @@ function App() {
   return (
     <div>
       <Nav/>
-
       {!images.length &&
-        <div className='h-screen flex justify-center items-center'>
-          <div className="card bg-neutral text-neutral-content w-96">
+        <div className='flex justify-center items-center'>
+          <div className="card bg-neutral text-neutral-content w-96 my-28">
             <div className='card-body'>
               <div className='grid grid-cols-4 gap-4'>
                 <div className="badge badge-md badge-accent my-3">Step 1</div>

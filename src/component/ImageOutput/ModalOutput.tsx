@@ -1,6 +1,6 @@
 import Modal from "../Layout/Modal.tsx";
 import {CustomImage} from "../../utils/type.ts";
-import {useForm} from "react-hook-form";
+import {SubmitHandler, useForm} from "react-hook-form";
 import {BiSolidFileExport} from "react-icons/bi";
 import toast from "react-hot-toast";
 import {FaRegFileWord, FaRegFilePdf} from "react-icons/fa6";
@@ -14,19 +14,26 @@ type Props = {
 type TFormValue = {
   title: string,
   piece: '2' | '6',
+  min_size: number,
+  quality: 100 | 90 | 80 | 70,
 }
 
 export default function ModalOutput({images, isModalShow, setIsModalShow}: Props) {
 
   const handleModalHide = () => setIsModalShow(false);
-  const {register, watch} = useForm<TFormValue>({defaultValues: {title: '刑案照片黏貼表'}});
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: {errors}
+  } = useForm<TFormValue>({defaultValues: {title: '刑案照片黏貼表', min_size: 1000}});
 
-  const [title, piece] = watch(['title', 'piece']);
+  const [piece] = watch(['piece']);
 
-  const handleSaveDocx = () => {
+  const handleSaveDocx: SubmitHandler<TFormValue> = (formData) => {
     toast.loading('處理中，請稍候...')
     const data = {
-      title: title,
+      ...formData,
       images: images,
     }
     window.pywebview.api.save_docx(data)
@@ -34,6 +41,7 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
         console.log(res);
         toast.dismiss();
         if (res.status == 200) {
+          setIsModalShow(false);
           toast.success(res.message);
         } else {
           toast.error(res.message);
@@ -55,13 +63,28 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
               <legend className="fieldset-legend">輸出設定</legend>
               <label htmlFor='title' className="label">檔案標題</label>
               <input type='text' id='title'
-                     className="input input-sm" {...register('title', {required: true})}/>
+                     className="input input-sm" {...register('title', {required: "此欄位必填"})}/>
+              <span className="label text-error">{errors.title?.message}</span>
               <label htmlFor='piece' className='label'>格式</label>
               <select className="select select-sm" id='piece' {...register('piece')}>
                 <option value='2'>一頁 2 張圖片</option>
                 <option value='6' disabled>一頁 6 張圖片</option>
               </select>
-              {piece === '6' && <span className="label text-error">僅適用全部為手機截圖等直式圖片</span>}
+              {piece === '6' && <span className="label text-error text-sm">僅適用全部為手機截圖等直式圖片</span>}
+              <label htmlFor='min_size' className="label">圖片壓縮最小尺寸</label>
+              <input type='number' id='min_size'
+                     className="input input-sm" {...register('min_size', {
+                required: '此欄位必填',
+                min: {value: 500, message: '最小值為500'},
+              })}/>
+              <span className="label text-error">{errors.min_size?.message}</span>
+              <label htmlFor='quality' className='label'>壓縮率</label>
+              <select className="select select-sm" id='quality' {...register('quality')}>
+                <option value='80'>中（80%）</option>
+                <option value='90'>低（90%）</option>
+                <option value='70'>高（70%）</option>
+                <option value='100'>不壓縮</option>
+              </select>
             </fieldset>
           </div>
           <div className='divider'></div>
@@ -71,7 +94,7 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
               <FaRegFilePdf/>
               儲存PDF
             </button>
-            <button type='button' className='btn btn-success btn-sm ml-2' onClick={handleSaveDocx}>
+            <button type='button' className='btn btn-success btn-sm ml-2' onClick={handleSubmit(handleSaveDocx)}>
               <FaRegFileWord/>
               儲存Word
             </button>

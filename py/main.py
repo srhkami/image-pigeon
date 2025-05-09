@@ -3,6 +3,7 @@ import os.path
 from handle_image import CustomImage, crop_img
 from handle_doc import two_of_page, add_header
 from response import Response
+from handle_log import log
 
 
 class Api:
@@ -14,10 +15,13 @@ class Api:
     """
     title = data.get('title')  # 文件標題
     files = data.get('images')  # 圖片清單
+    min_size = data.get('min_size')  # 最小尺寸
+    quality = data.get('quality')  # 壓縮率
     images = []  # python 圖片的清單
     for file in files:
-      image = CustomImage(file)  # 逐一轉化成python自訂物件
+      image = CustomImage(file, min_size, quality)  # 逐一轉化成python自訂物件
       images.append(image)
+
     doc = two_of_page(images)
     doc = add_header(doc, title)
 
