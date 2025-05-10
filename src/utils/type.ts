@@ -106,3 +106,9 @@ export class CustomImage {
     this.rotation = value; // 角度保持在 0~359
   }
 }
+
+export type TVersionCheck = {
+  version: string,
+  changelog: string,
+  url: string,
+}
