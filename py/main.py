@@ -6,6 +6,9 @@ from response import Response
 from handle_log import log
 
 
+DEBUG_MODE = False
+
+
 class Api:
   def save_docx(self, data):
     """
@@ -56,6 +59,9 @@ class Api:
     try:
       image = CustomImage(file)
       images = crop_img(image)
+      if not len(images):
+        log().error('此圖片非屬於長截圖')
+        return Response(400, message='此圖片非屬於長截圖').to_dict()
       log().info('分割成功，執行完畢')
       return Response(200, message='新增成功', data=images).to_dict()
     except Exception as e:
@@ -64,13 +70,12 @@ class Api:
 
 
 if __name__ == '__main__':
-  debug_mode = False
   api = Api()
-  url = os.path.join(os.getcwd(), './web/index.html') if not debug_mode else 'http://localhost:5173'
+  url = os.path.join(os.getcwd(), './web/index.html') if not DEBUG_MODE else 'http://localhost:5173'
   window = webview.create_window(
     title='貼圖小鴿手',
     url=url,
     js_api=api,
     min_size=(800, 500)
   )
-  webview.start(debug=debug_mode)
+  webview.start(debug=DEBUG_MODE)
