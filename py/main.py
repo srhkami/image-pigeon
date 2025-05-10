@@ -18,6 +18,8 @@ class Api:
     min_size = data.get('min_size')  # 最小尺寸
     quality = data.get('quality')  # 壓縮率
     images = []  # python 圖片的清單
+    log().info(f'【{title}】儲存Word開始執行')
+    log().info(f'共有{len(files)}張圖，最小尺寸{min_size}，壓縮率{quality}')
     for file in files:
       image = CustomImage(file, min_size, quality)  # 逐一轉化成python自訂物件
       images.append(image)
@@ -30,15 +32,19 @@ class Api:
       save_filename=f'{title}.docx',
       file_types=('Word 文件 (*.docx)',)
     )
+    log().debug(f'存檔位置：{path}')
 
     if not path:
       return Response(400, '已取消儲存').to_dict()
     try:
       doc.save(path)
+      log().info('儲存成功，執行完畢')
       return Response(200, '儲存成功').to_dict()
     except PermissionError:
+      log().exception('有相同檔名未關閉', exc_info=True)
       return Response(500, '請先關閉相同檔名之檔案').to_dict()
     except Exception as e:
+      log().exception(str(e), exc_info=True)
       return Response(500, str(e)).to_dict()
 
   def crop_image(self, file):
@@ -47,9 +53,14 @@ class Api:
     :param file
     :return:
     """
-    image = CustomImage(file)
-    images = crop_img(image)
-    return {'status': 200, 'data': images}
+    try:
+      image = CustomImage(file)
+      images = crop_img(image)
+      log().info('分割成功，執行完畢')
+      return Response(200, message='新增成功', data=images).to_dict()
+    except Exception as e:
+      log().exception(str(e), exc_info=True)
+      return Response(500, message=str(e)).to_dict()
 
 
 if __name__ == '__main__':

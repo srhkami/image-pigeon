@@ -38,9 +38,12 @@ export default function UploadLongScreen({setImages, defaultRemark, setIsModalSh
       // 更新圖片狀態
       setImages(prev => [...prev, ...imageObjs]);
       toast.dismiss();
-      toast.success('新增成功');
+      toast.success(res.message);
       reset();
       setIsModalShow(false);
+    } else {
+      toast.dismiss();
+      toast.error(res.message);
     }
   }
 
@@ -50,7 +53,7 @@ export default function UploadLongScreen({setImages, defaultRemark, setIsModalSh
         <div className='mx-auto'>
           <fieldset className="fieldset">
             <label htmlFor='id_image' className='fieldset-legend'>上傳長截圖：</label>
-            <input id='id_image' type="file" accept="image/*" className="file-input file-input-sm"
+            <input id='id_image' type="file" accept=".jpg,.jpeg,.png" className="file-input file-input-sm"
                    {...register('image')}/>
           </fieldset>
         </div>
