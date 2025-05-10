@@ -6,7 +6,7 @@ from response import Response
 from handle_log import log
 
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 
 class Api:
@@ -76,6 +76,7 @@ if __name__ == '__main__':
     title='貼圖小鴿手',
     url=url,
     js_api=api,
-    min_size=(800, 500)
+    min_size=(800, 500),
+    maximized=True,
   )
   webview.start(debug=DEBUG_MODE)

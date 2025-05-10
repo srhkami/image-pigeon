@@ -5,6 +5,7 @@ import {FaArrowRotateRight, FaArrowRotateLeft} from "react-icons/fa6";
 import React from "react";
 import {CustomImage} from "../../utils/type.ts";
 import toast from "react-hot-toast";
+import {MdOutlineCallMerge} from "react-icons/md";
 
 type Props = {
   readonly img: CustomImage,
@@ -28,7 +29,7 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
         return imgItem;
       });
     });
-    toast.success(`編號${index+1} 修改成功`);
+    toast.success(`編號${index + 1} 修改成功`);
   };
 
   // 移除圖片
@@ -59,6 +60,7 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
     setImages(updateList);
   }
 
+  // 旋轉照片角度
   const handleRotate = (value: 90 | -90) => {
     const newRotation = (img.rotation + value) % 360
     img.setRotation(newRotation as 0 | 90 | 180 | 270);
@@ -71,6 +73,40 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
         return imgItem;
       });
     });
+  }
+
+  const handleCheckMerge = () => {
+    toast(t => (
+      <div>
+        <span className='font-bold'>是否將本張圖片與上張圖片左右合併？</span>
+        <div className='text-sm text-info text-start'>完成後會生成一張新的圖片</div>
+        <div className='flex justify-end mt-2'>
+          <button className='btn btn-sm btn-success' onClick={handleMerge}>確定</button>
+          <button className='btn btn-sm ml-2' onClick={() => toast.dismiss(t.id)}>取消</button>
+        </div>
+      </div>
+    ))
+  }
+
+  // 照片合併
+  const handleMerge = async () => {
+    if (index === 0) {
+      toast.error('沒有上一張圖')
+      return
+    }
+    // 初始化上一張圖片
+    const imgA = await images[index - 1].init();
+    // 初始化本張圖片
+    const imgB = await img.init();
+    const mergedImage = await CustomImage.mergeSideBySide(imgA, imgB, "左右合併圖片");
+    // 將圖片插入下方
+    const updatedImages = [
+      ...images.slice(0, index + 1),
+      mergedImage,
+      ...images.slice(index + 1),
+    ];
+    setImages(updatedImages);
+    toast.success('合併成功')
   }
 
   return (
@@ -91,6 +127,9 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
         </button>
         <button className='btn btn-sm btn-soft btn-info my-1' onClick={() => handleRotate(-90)} title='右旋'>
           <FaArrowRotateLeft/>
+        </button>
+        <button className='btn btn-sm btn-soft btn-info my-1' onClick={handleCheckMerge} title='與上圖合併'>
+          <MdOutlineCallMerge className='text-xl'/>
         </button>
       </div>
       <figure className='relative aspect-video w-full max-w-xl overflow-hidden'>

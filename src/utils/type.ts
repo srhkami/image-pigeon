@@ -56,6 +56,46 @@ export class CustomImage {
     return customImage;
   }
 
+  /* 將兩張圖片相鄰合併 */
+  static async mergeSideBySide(img1: CustomImage, img2: CustomImage, remark: string): Promise<CustomImage> {
+    if (!img1.base64 || !img2.base64) {
+      throw new Error("Both images must be initialized (have base64)");
+    }
+
+    const image1 = await CustomImage.loadImage(img1.base64);
+    const image2 = await CustomImage.loadImage(img2.base64);
+
+    const width = (img1.width || image1.width) + (img2.width || image2.width);
+    const height = Math.max(img1.height || image1.height, img2.height || image2.height);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error("Cannot get canvas context");
+
+    ctx.drawImage(image1, 0, 0);
+    ctx.drawImage(image2, img1.width || image1.width, 0);
+
+    const mergedBase64 = canvas.toDataURL("image/png");
+
+    return await CustomImage.fromBase64({
+      base64: mergedBase64,
+      width,
+      height,
+    }, remark);
+  }
+
+  /* 工具方法：將 base64 轉成 HTMLImageElement */
+  private static loadImage(base64: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = base64;
+    });
+  }
+
   /* 修改說明 */
   editRemark(newRemark: string) {
     this.remark = newRemark;
