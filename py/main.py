@@ -1,10 +1,9 @@
 import webview
 import os.path
 from handle_image import CustomImage, crop_img
-from handle_doc import two_of_page, add_header
+from handle_doc import creat_docx, add_header
 from response import Response
 from handle_log import log
-
 
 DEBUG_MODE = True
 
@@ -18,8 +17,9 @@ class Api:
     """
     title = data.get('title')  # 文件標題
     files = data.get('images')  # 圖片清單
-    min_size = data.get('min_size')  # 最小尺寸
-    quality = data.get('quality')  # 壓縮率
+    min_size = int(data.get('min_size'))  # 最小尺寸
+    quality = int(data.get('quality'))  # 壓縮率
+    mode = int(data.get('mode'))  # 模式
     images = []  # python 圖片的清單
     log().info(f'【{title}】儲存Word開始執行')
     log().info(f'共有{len(files)}張圖，最小尺寸{min_size}，壓縮率{quality}')
@@ -27,7 +27,7 @@ class Api:
       image = CustomImage(file, min_size, quality)  # 逐一轉化成python自訂物件
       images.append(image)
 
-    doc = two_of_page(images)
+    doc = creat_docx(images, mode)
     doc = add_header(doc, title)
 
     path = webview.windows[0].create_file_dialog(
@@ -70,6 +70,7 @@ class Api:
 
 
 if __name__ == '__main__':
+  log().info('請耐心等待程式開啟......')
   api = Api()
   url = os.path.join(os.getcwd(), './web/index.html') if not DEBUG_MODE else 'http://localhost:5173'
   window = webview.create_window(
@@ -79,4 +80,5 @@ if __name__ == '__main__':
     min_size=(800, 500),
     maximized=True,
   )
+  log().debug('程式開啟成功')
   webview.start(debug=DEBUG_MODE)

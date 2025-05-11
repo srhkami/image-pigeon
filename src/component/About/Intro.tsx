@@ -1,8 +1,13 @@
 import {BsFillPersonLinesFill} from "react-icons/bs";
 import {MdNumbers} from "react-icons/md";
 import {AppVersion} from "../../utils/info.ts";
+import {TVersionCheck} from "../../utils/type.ts";
 
-export default function Intro() {
+type Props = {
+  versionData: TVersionCheck | null,
+}
+
+export default function Intro({versionData}: Props) {
   return (
     <div className='flex justify-center items-center'>
       <div className="card bg-neutral text-neutral-content w-96 my-20">
@@ -43,7 +48,12 @@ export default function Intro() {
               <MdNumbers className='mr-2'/>
               版本
             </div>
-            <div className='col-span-3 text-start'>{AppVersion}</div>
+            <div className='col-span-3 text-start'>
+              {AppVersion}
+              {versionData?.version !== AppVersion &&
+                <a className='link link-warning' href={versionData?.url} target='_blank'>（下載新版本）</a>
+              }
+            </div>
             <div className='col-span-4 flex justify-end'>
               本軟體分享於 <a href="https://trafficpigeon.com/" className="link link-primary"
                               target='_blank'>交通鴿手</a>

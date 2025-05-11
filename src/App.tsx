@@ -32,7 +32,7 @@ function App() {
   return (
     <div>
       <Nav/>
-      {!images.length && <Intro/>}
+      {!images.length && <Intro versionData={versionData}/>}
       {/*圖片預覽*/}
       <ImagePreview images={images} setImages={setImages}/>
       {/*底端欄*/}

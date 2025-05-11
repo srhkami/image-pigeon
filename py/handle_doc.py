@@ -9,21 +9,21 @@ from handle_image import CustomImage
 from handle_log import log
 
 
-def two_of_page(images):
+def creat_docx(images: list[CustomImage], mode: int):
   """
   一頁兩張的函數
   :param images:
+  :param mode:
   :return: 創建後的DOC檔
   """
   doc = Document()
   doc = set_font(doc)
-  for index, image in enumerate(images):
-    img = Image.open(image.stream)
-    show_type = 'H'  # 預設設定為高9公分
-    if img.width / img.height > 15 / 9:
-      # 大於預設寬高比15：9，設定寬為15公分。
-      show_type = 'W'
-    doc = add_table(doc, image, index + 1, show_type=show_type)
+  if mode == 2:
+    for index, image in enumerate(images):
+      doc = add_table_two_of_page(doc, image, index + 1)
+  elif mode == 6:
+    for i in range(0, len(images), 3):
+      doc = add_table_six_of_page(doc, images[i:i + 3], i + 1)
   return doc
 
 
@@ -65,10 +65,10 @@ def handle_number(no: int) -> str:
   用以處理編號的函數
   :return: 處理完的文字
   """
-  return f'編號\n0{no}' if no < 10 else f'編號\n{no}'
+  return f'0{no}' if no < 10 else str(no)
 
 
-def add_table_two_of_page(doc, image: CustomImage, index, show_type='H'):
+def add_table_two_of_page(doc, image: CustomImage, index: int):
   """
   建立一頁2張圖片的表格
   :param doc: 傳入的doc文件
@@ -97,32 +97,19 @@ def add_table_two_of_page(doc, image: CustomImage, index, show_type='H'):
       table=table,
       image=image,
       index=index,
+      image_cell=table.cell(0, 0),
       number_cell=table.cell(1, 0),
       remark_cell=table.cell(1, 1),
       max_height=9,
       max_width=15,
     )
-    # # 寫入文字及對齊
-    # table.cell(1, 0).text = handle_number(index)  # 寫入編號
-    # table.cell(1, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
-    # table.cell(1, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # 文字水平置中
-    # table.cell(1, 1).text = image.remark  # 寫入說明
-    # table.cell(1, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-    #
-    # # 視長寬寫入圖片
-    # if show_type == 'H':
-    #   table.cell(0, 0).paragraphs[0].add_run().add_picture(image.stream, height=Cm(9))
-    # else:
-    #   table.cell(0, 0).paragraphs[0].add_run().add_picture(image.stream, width=Cm(15))
-    # table.cell(0, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-    # table.cell(0, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     return doc
 
   except Exception as e:
     log().exception(str(e))
 
 
-def add_table_six_of_page(doc, images: list[CustomImage], index, show_type='H'):
+def add_table_six_of_page(doc, images: list[CustomImage], index):
   """
   建立一頁6張圖片的表格
   :param doc: 傳入的doc文件
@@ -143,74 +130,79 @@ def add_table_six_of_page(doc, images: list[CustomImage], index, show_type='H'):
       for cell in table.columns[i].cells:
         cell.width = Cm(5.2)
 
-    # 寫入文字及對齊
-    if images[0]:
+    handle_table_write(
+      table=table,
+      image=images[0],
+      index=index,
+      image_cell=table.cell(0, 0),
+      number_cell=table.cell(1, 0),
+      remark_cell=table.cell(2, 0),
+      max_height=9,
+      max_width=5,
+    )
+    if len(images) >= 2:
+      handle_table_write(
+        table=table,
+        image=images[1],
+        index=index + 1,
+        image_cell=table.cell(0, 1),
+        number_cell=table.cell(1, 1),
+        remark_cell=table.cell(2, 1),
+        max_height=9,
+        max_width=5,
+      )
+    if len(images) >= 3:
+      handle_table_write(
+        table=table,
+        image=images[2],
+        index=index + 2,
+        image_cell=table.cell(0, 2),
+        number_cell=table.cell(1, 2),
+        remark_cell=table.cell(2, 2),
+        max_height=9,
+        max_width=5,
+      )
 
-
-
-
-      table.cell(1, 0).text = handle_number(index)  # 寫入編號
-      table.cell(1, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
-      table.cell(1, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # 文字水平置中
-      table.cell(2, 0).text = images[0].remark  # 寫入說明
-      table.cell(2, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-    if images[1]:
-      table.cell(1, 1).text = handle_number(index + 1)  # 寫入編號
-      table.cell(1, 1).text = handle_number(index)  # 寫入編號
-      table.cell(1, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
-      table.cell(1, 1).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # 文字水平置中
-      table.cell(2, 1).text = images[0].remark  # 寫入說明
-      table.cell(2, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-    if images[2]:
-      table.cell(1, 2).text = handle_number(index + 2)  # 寫入編號
-      table.cell(1, 2).text = handle_number(index)  # 寫入編號
-      table.cell(1, 2).vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
-      table.cell(1, 2).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # 文字水平置中
-      table.cell(2, 2).text = images[0].remark  # 寫入說明
-      table.cell(2, 2).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-
-    # # 寫入圖片
-    # if show_type == 'H':
-    #   table.cell(0, 0).paragraphs[0].add_run().add_picture(image.stream, height=Cm(9))
-    # else:
-    #   table.cell(0, 0).paragraphs[0].add_run().add_picture(image.stream, width=Cm(5.2))
-    # table.cell(0, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-    # table.cell(0, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     return doc
 
   except Exception as e:
     log().exception(str(e))
 
 
-def handle_table_write(table, image: CustomImage, index, number_cell,
+def handle_table_write(table, image: CustomImage, index, image_cell, number_cell,
                        remark_cell, max_height: int, max_width: int):
   """
   寫入單一表格的資訊
   :param table: 表格
   :param image: 圖片物件
   :param index: 編號
+  :param image_cell: 圖片的表格
   :param number_cell: 編號的表格
   :param remark_cell: 說明的表格
   :param max_height: 表格長上限
   :param max_width: 表格寬上限
   :return:
   """
-  # 寫入文字及對齊
-  number_cell.text = handle_number(index)  # 寫入編號
-  number_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
-  number_cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # 文字水平置中
-  remark_cell.text = image.remark  # 寫入說明
-  remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 文字水平置中
-  remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.TOP  # 表格文字垂直置頂
+  try:
+    # 寫入文字及對齊
+    number_cell.text = handle_number(index)  # 寫入編號
+    number_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
+    number_cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # 文字水平置中
+    remark_cell.text = image.remark  # 寫入說明
+    remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 文字水平置中
+    remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.TOP  # 表格文字垂直置頂
 
-  img = Image.open(image.stream)
-  if img.width / img.height < max_height / max_width:
-    # 小於預設寬高比15：9，設定高為表格上限
-    table.cell(0, 0).paragraphs[0].add_run().add_picture(image.stream, height=Cm(max_height))
-  else:
-    # 大於預設寬高比15：9，設定寬為表格上限
-    table.cell(0, 0).paragraphs[0].add_run().add_picture(image.stream, width=Cm(max_width))
+    img = Image.open(image.stream)
+    if img.width / img.height < max_height / max_width:
+      # 小於預設寬高比15：9，設定高為表格上限
+      image_cell.paragraphs[0].add_run().add_picture(image.stream, height=Cm(max_height))
+    else:
+      # 大於預設寬高比15：9，設定寬為表格上限
+      image_cell.paragraphs[0].add_run().add_picture(image.stream, width=Cm(max_width))
 
-  # 設定圖片位置
-  table.cell(0, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-  table.cell(0, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    # 設定圖片位置
+    table.cell(0, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+    table.cell(0, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    log().info(f'編號{index}圖片寫入完成')
+  except Exception as e:
+    log().error(f'編號{index}圖片寫入失敗，{str(e)}', exc_info=True)

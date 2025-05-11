@@ -13,7 +13,7 @@ type Props = {
 
 type TFormValue = {
   title: string,
-  piece: '2' | '6',
+  mode: '2' | '6',
   min_size: number,
   quality: 100 | 90 | 80 | 70,
 }
@@ -28,7 +28,7 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
     formState: {errors}
   } = useForm<TFormValue>({defaultValues: {title: '刑案照片黏貼表', min_size: 1000}});
 
-  const [piece] = watch(['piece']);
+  const [mode] = watch(['mode']);
 
   const handleSaveDocx: SubmitHandler<TFormValue> = (formData) => {
     toast.loading('處理中，請稍候...')
@@ -64,12 +64,12 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
               <input type='text' id='title'
                      className="input input-sm" {...register('title', {required: "此欄位必填"})}/>
               <span className="label text-error">{errors.title?.message}</span>
-              <label htmlFor='piece' className='label'>格式</label>
-              <select className="select select-sm" id='piece' {...register('piece')}>
+              <label htmlFor='mode' className='label'>格式</label>
+              <select className="select select-sm" id='mode' {...register('mode')}>
                 <option value='2'>一頁 2 張圖片</option>
-                <option value='6' disabled>一頁 6 張圖片</option>
+                <option value='6'>一頁 6 張圖片</option>
               </select>
-              {piece === '6' && <span className="label text-error text-sm">僅適用全部為手機截圖等直式圖片</span>}
+              {mode === '6' && <span className="label text-error text-sm">僅適用全部為手機截圖等直式圖片</span>}
               <label htmlFor='min_size' className="label">圖片壓縮最小尺寸</label>
               <input type='number' id='min_size'
                      className="input input-sm" {...register('min_size', {
@@ -79,8 +79,8 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
               <span className="label text-error">{errors.min_size?.message}</span>
               <label htmlFor='quality' className='label'>壓縮率</label>
               <select className="select select-sm" id='quality' {...register('quality')}>
-                <option value='80'>中（80%）</option>
-                <option value='90'>低（90%）</option>
+                <option value='90' >低（90%）</option>
+                <option value='80' selected>中（80%）</option>
                 <option value='70'>高（70%）</option>
                 <option value='100'>不壓縮</option>
               </select>

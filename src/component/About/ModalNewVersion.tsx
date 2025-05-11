@@ -12,7 +12,7 @@ type Props = {
 export default function ModalNewVersion({isShow, onHide, data}: Props) {
   return (
     <Modal isShow={isShow} onHide={onHide} closeButton>
-      <div className='text-xl  font-bold mt-1 mb-4'>有新版本可供下載！</div>
+      <div className='text-lg font-bold mt-1 mb-4'>有新版本可供下載！</div>
       <div className='grid grid-cols-4'>
         <div className='flex justify-start items-center my-3'>
           <MdNumbers className='mr-2'/>

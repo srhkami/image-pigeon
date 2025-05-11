@@ -1,6 +1,7 @@
 import BtnThemeToggle from "./BtnThemeToggle.tsx";
 import ModalAbout from "../About/ModalAbout.tsx";
 import {useState} from "react";
+import ModalSetting from "./ModalSetting.tsx";
 
 export default function Nav() {
 
@@ -31,6 +32,7 @@ export default function Nav() {
         <a className="btn btn-ghost text-xl">貼圖小鴿手</a>
       </div>
       <div className="navbar-end">
+        <ModalSetting/>
         <BtnThemeToggle/>
       </div>
       <ModalAbout isShow={isAboutShow} setIsShow={setIsAboutShow}/>
