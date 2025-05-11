@@ -78,7 +78,7 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
   const handleCheckMerge = () => {
     toast(t => (
       <div>
-        <span className='font-bold'>是否將本張圖片與上張圖片左右合併？</span>
+        <span className='font-bold'>是否將本張圖片與上張圖片合併？</span>
         <div className='text-sm text-error text-start'>此操作無法復原</div>
         <div className='flex justify-end mt-2'>
           <button className='btn btn-sm btn-success' onClick={() => {
@@ -104,7 +104,7 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
     const imgA = await images[index - 1].init();
     // 初始化本張圖片
     const imgB = await img.init();
-    const mergedImage = await CustomImage.mergeSideBySide(imgA, imgB, "左右合併圖片");
+    const mergedImage = await CustomImage.mergeSideBySide(imgA, imgB);
     // 將圖片插入，並移除舊有圖片
     const updatedImages = [
       ...images.slice(0, index - 1),

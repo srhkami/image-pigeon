@@ -8,8 +8,8 @@ import Footer from "./component/Layout/Footer.tsx";
 import ModalUpload from "./component/ImageUpload/ModalUpload.tsx";
 import ModalOutput from "./component/ImageOutput/ModalOutput.tsx";
 import Intro from "./component/About/Intro.tsx";
-import ModalNewVersion from "./component/ModalNewVersion.tsx";
-import {handleCheckVersion} from "./utils/info.ts";
+import ModalNewVersion from "./component/About/ModalNewVersion.tsx";
+import {AppVersion, handleCheckVersion} from "./utils/info.ts";
 
 
 function App() {
@@ -23,6 +23,7 @@ function App() {
   useEffect(() => {
     handleCheckVersion()
       .then(data => {
+        if (data.version !== AppVersion)
         setVersionData(data);
         setIsVersionShow(true);
       })

@@ -1,15 +1,15 @@
-import Modal from "./Layout/Modal.tsx";
+import Modal from "../Layout/Modal.tsx";
 import {MdNumbers} from "react-icons/md"
 import {HiOutlineClipboardList} from "react-icons/hi";
-import {TVersionCheck} from "../utils/type.ts";
+import {TVersionCheck} from "../../utils/type.ts";
 
-type Props ={
-  isShow: boolean,
-  onHide:()=>void,
-  data: TVersionCheck | null,
+type Props = {
+  readonly isShow: boolean,
+  readonly onHide: () => void,
+  readonly data: TVersionCheck | null,
 }
 
-export default function ModalNewVersion({isShow, onHide, data}:Props){
+export default function ModalNewVersion({isShow, onHide, data}: Props) {
   return (
     <Modal isShow={isShow} onHide={onHide} closeButton>
       <div className='text-xl  font-bold mt-1 mb-4'>有新版本可供下載！</div>
@@ -30,7 +30,7 @@ export default function ModalNewVersion({isShow, onHide, data}:Props){
         </div>
       </div>
       <div className='flex justify-end'>
-        <a className='btn btn-sm btn-soft btn-info' href={data?.url}>立即更新</a>
+        <a className='btn btn-sm btn-soft btn-info' href={data?.url} target='_blank'>立即更新</a>
       </div>
     </Modal>
   )

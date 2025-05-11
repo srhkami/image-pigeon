@@ -57,7 +57,7 @@ export class CustomImage {
   }
 
   /* 將兩張圖片相鄰合併 */
-  static async mergeSideBySide(img1: CustomImage, img2: CustomImage, remark: string): Promise<CustomImage> {
+  static async mergeSideBySide(img1: CustomImage, img2: CustomImage): Promise<CustomImage> {
     if (!img1.base64 || !img2.base64) {
       throw new Error("Both images must be initialized (have base64)");
     }
@@ -83,7 +83,7 @@ export class CustomImage {
       base64: mergedBase64,
       width,
       height,
-    }, remark);
+    }, img1.remark);
   }
 
   /* 工具方法：將 base64 轉成 HTMLImageElement */

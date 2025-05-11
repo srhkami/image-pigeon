@@ -51,7 +51,7 @@ def set_font(doc):
     doc.styles['Normal'].font.name = "Times New Roman"
     doc.styles['Normal'].element.rPr.rFonts.set(qn('w:eastAsia'), u'標楷體')
     doc.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'標楷體')
-    doc.styles['Normal'].font.size = Pt(12)
+    doc.styles['Normal'].font.size = Pt(11)
     doc.styles['Normal'].font.color.rgb = RGBColor(0, 0, 0)
     log().debug('設定字體成功')
     return doc
@@ -79,32 +79,29 @@ def add_table(doc, image: CustomImage, index, show_type='H', mode=1):
   """
   try:
     # 創建5*3的空表格
-    table = doc.add_table(rows=5, cols=3, style='Table Grid')
+
+    table = doc.add_table(rows=2, cols=2, style='Table Grid')
 
     # 設定Col的寬度
     for cell in table.columns[0].cells:
-      cell.width = Cm(2)
+      cell.width = Cm(1.5)
     for cell in table.columns[1].cells:
-      cell.width = Cm(12.5)
-    for cell in table.columns[2].cells:
-      cell.width = Cm(2.5)
+      cell.width = Cm(15.5)
 
     # 設定Row的高度
     table.rows[0].height = Cm(9)
+    table.rows[1].height = Cm(2.2)
 
-    # 表格置中對齊
-    # table.direction = WD_TABLE_ALIGNMENT.CENTER
-
-    # 合併表格
-    table.cell(0, 0).merge(table.cell(0, 2))
-    table.cell(1, 0).merge(table.cell(4, 0))
-    table.cell(1, 1).merge(table.cell(4, 2))
+    # # 合併表格
+    table.cell(0, 0).merge(table.cell(0, 1))
+    # table.cell(1, 0).merge(table.cell(4, 0))
+    # table.cell(1, 1).merge(table.cell(4, 2))
 
     # 寫入文字及對齊
     table.cell(1, 0).text = handle_number(index)  # 寫入編號
     table.cell(1, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
     table.cell(1, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # 文字水平置中
-    table.cell(1, 1).text = image.remark
+    table.cell(1, 1).text = image.remark  # 寫入說明
     table.cell(1, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
     # 寫入圖片
@@ -113,12 +110,9 @@ def add_table(doc, image: CustomImage, index, show_type='H', mode=1):
         table.cell(0, 0).paragraphs[0].add_run().add_picture(image.stream, height=Cm(9))
       else:
         table.cell(0, 0).paragraphs[0].add_run().add_picture(image.stream, width=Cm(15))
-    # if mode == 2:
-    #   # 如果mode是2，代表傳入的是清單，需循環取值
-    #   for img in img_path:
-    #     table.cell(0, 0).paragraphs[0].add_run().add_picture(img, height=Cm(9))
     table.cell(0, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
     table.cell(0, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     return doc
+
   except Exception as e:
     log().exception(str(e))

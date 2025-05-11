@@ -1,13 +1,14 @@
 import axios from "axios";
-import {VersionCheck} from "./type.ts";
+import {TVersionCheck} from "./type.ts";
 
-export const AppVersion = '1140510.1'
+export const AppVersion = '1140511'
 
 /* 檢查新版本 */
-export const handleCheckVersion = async ()=>{
-   const res = await axios({
-    method:'GET',
-    url:'https://api.trafficpigeon.com/api/app/image/latest',
+export const handleCheckVersion = async () => {
+  const res = await axios({
+    method: 'GET',
+    url:'https://t.trafficpigeon.com/api/app/image/latest/',
+    // url: 'http://127.0.0.1:8000/api/app/image/latest/',
   })
-  return res.data as VersionCheck
+  return res.data as TVersionCheck
 }
