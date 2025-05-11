@@ -38,7 +38,6 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
     }
     window.pywebview.api.save_docx(data)
       .then(res => {
-        console.log(res);
         toast.dismiss();
         if (res.status == 200) {
           setIsModalShow(false);

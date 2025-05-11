@@ -35,7 +35,7 @@ def base64_to_image(base64_str: str, rotation, min_size: int, quality: int) -> B
     new_img = img.rotate(rotation, expand=True)
     # 如果小於設定尺寸，長寬都減至50%
     width, height = new_img.size
-    if width >= min_size * 2 or height >= min_size * 2:
+    if int(width) >= min_size * 2 or int(height) >= min_size * 2:
       new_img = new_img.resize((width // 2, height // 2))
 
     # 存成 BytesIO 給 docx 用

@@ -5,7 +5,7 @@ export default function BtnThemeToggle() {
 
   const [theme, setTheme] = useState(() => {
     // 初始化從 localStorage 讀取，或預設為 light
-    return localStorage.getItem("theme") || "light";
+    return localStorage.getItem("theme") || "dark";
   });
 
   useEffect(() => {

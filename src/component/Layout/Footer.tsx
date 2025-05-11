@@ -16,7 +16,9 @@ export default function Footer({images, handleUploadModalShow, handleOutputModal
       <div className='ml-2 my-auto'>
         共有 {images.length} 張圖片
       </div>
-      <button className='btn btn-sm btn-success mx-2 ml-auto' onClick={handleOutputModalShow}>輸出檔案</button>
+      <button className={'btn btn-sm btn-success mx-2 ml-auto ' + (!images.length && 'btn-disabled')}
+              onClick={handleOutputModalShow}>輸出檔案
+      </button>
     </div>
   )
 }
