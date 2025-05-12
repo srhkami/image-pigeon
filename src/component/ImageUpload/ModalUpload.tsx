@@ -5,6 +5,7 @@ import {CustomImage} from "../../utils/type.ts";
 import {Dispatch, SetStateAction} from "react";
 import {MdOutlineUploadFile} from "react-icons/md";
 import {useForm} from "react-hook-form";
+import { IoMdAlert } from "react-icons/io";
 
 type Props = {
   readonly isModalShow: boolean,
@@ -36,6 +37,10 @@ export default function ModalUpload({isModalShow, setIsModalShow, setImages}: Pr
                       {...register('remark')}></textarea>
           </label>
         </form>
+      </div>
+      <div role="alert" className="alert mt-2">
+        <IoMdAlert className='text-lg'/>
+        <span>預設說明會套用在此次新增的每一張圖片上</span>
       </div>
       <div className='divider'></div>
       <div className="tabs tabs-lift mx-auto">

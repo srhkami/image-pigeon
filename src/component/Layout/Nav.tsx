@@ -1,7 +1,6 @@
 import BtnThemeToggle from "./BtnThemeToggle.tsx";
 import ModalAbout from "../About/ModalAbout.tsx";
 import {useState} from "react";
-import ModalSetting from "./ModalSetting.tsx";
 
 export default function Nav() {
 
@@ -20,11 +19,9 @@ export default function Nav() {
           <ul
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-            <li><a href='https://trafficpigeon.com' target='_blank'>前往 交通鴿手</a></li>
             <li>
               <button onClick={() => setIsAboutShow(true)}>關於</button>
             </li>
-
           </ul>
         </div>
       </div>
@@ -32,7 +29,6 @@ export default function Nav() {
         <a className="btn btn-ghost text-xl">貼圖小鴿手</a>
       </div>
       <div className="navbar-end">
-        <ModalSetting/>
         <BtnThemeToggle/>
       </div>
       <ModalAbout isShow={isAboutShow} setIsShow={setIsAboutShow}/>

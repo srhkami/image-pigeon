@@ -7,7 +7,6 @@ from handle_log import log
 
 DEBUG_MODE = True
 
-
 class Api:
   def save_docx(self, data):
     """
@@ -67,7 +66,6 @@ class Api:
     except Exception as e:
       log().exception(str(e), exc_info=True)
       return Response(500, message=str(e)).to_dict()
-
 
 if __name__ == '__main__':
   if DEBUG_MODE:

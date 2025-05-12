@@ -25,7 +25,7 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
     register,
     handleSubmit,
     formState: {errors}
-  } = useForm<TFormValue>({defaultValues: {title: '刑案照片黏貼表', min_size: 1000}});
+  } = useForm<TFormValue>({defaultValues: {title: '照片黏貼表', min_size: 1000}});
 
   const handleSaveDocx: SubmitHandler<TFormValue> = (formData) => {
     toast.loading('處理中，請稍候...')
@@ -44,7 +44,6 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
         }
       })
   }
-
 
   return (
     <Modal isShow={isModalShow} onHide={handleModalHide} closeButton>

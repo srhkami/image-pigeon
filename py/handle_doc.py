@@ -68,7 +68,7 @@ def handle_number(no: int) -> str:
   用以處理編號的函數
   :return: 處理完的文字
   """
-  return f'0{no}' if no < 10 else str(no)
+  return f'編號0{no}' if no < 10 else f'編號{no}'
 
 
 def add_table_two_of_page_horizontal(doc, image: CustomImage, index: int):
@@ -95,7 +95,6 @@ def add_table_two_of_page_horizontal(doc, image: CustomImage, index: int):
     table.cell(0, 0).merge(table.cell(0, 1))
 
     handle_table_write(
-      table=table,
       image=image,
       index=index,
       image_cell=table.cell(0, 0),
@@ -132,7 +131,6 @@ def add_table_two_of_page_vertical(doc, images: list[CustomImage], index: int):
       cell.width = Cm(7.8)
 
     handle_table_write(
-      table=table,
       image=images[0],
       index=index,
       image_cell=table.cell(0, 0),
@@ -143,7 +141,6 @@ def add_table_two_of_page_vertical(doc, images: list[CustomImage], index: int):
     )
     if len(images) >= 2:
       handle_table_write(
-        table=table,
         image=images[1],
         index=index + 1,
         image_cell=table.cell(0, 1),
@@ -179,7 +176,6 @@ def add_table_six_of_page(doc, images: list[CustomImage], index):
         cell.width = Cm(5.2)
 
     handle_table_write(
-      table=table,
       image=images[0],
       index=index,
       image_cell=table.cell(0, 0),
@@ -190,7 +186,6 @@ def add_table_six_of_page(doc, images: list[CustomImage], index):
     )
     if len(images) >= 2:
       handle_table_write(
-        table=table,
         image=images[1],
         index=index + 1,
         image_cell=table.cell(0, 1),
@@ -201,7 +196,6 @@ def add_table_six_of_page(doc, images: list[CustomImage], index):
       )
     if len(images) >= 3:
       handle_table_write(
-        table=table,
         image=images[2],
         index=index + 2,
         image_cell=table.cell(0, 2),
@@ -217,11 +211,10 @@ def add_table_six_of_page(doc, images: list[CustomImage], index):
     log().exception(str(e))
 
 
-def handle_table_write(table, image: CustomImage, index, image_cell, number_cell,
+def handle_table_write(image: CustomImage, index, image_cell, number_cell,
                        remark_cell, max_height: int | float, max_width: int | float):
   """
   寫入單一表格的資訊
-  :param table: 表格
   :param image: 圖片物件
   :param index: 編號
   :param image_cell: 圖片的表格
