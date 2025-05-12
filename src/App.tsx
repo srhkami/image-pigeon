@@ -23,16 +23,17 @@ function App() {
   useEffect(() => {
     handleCheckVersion()
       .then(data => {
-        if (data.version !== AppVersion)
-        setVersionData(data);
-        setIsVersionShow(true);
+        if (data.version !== AppVersion) {
+          setVersionData(data);
+          setIsVersionShow(true);
+        }
       })
   }, []);
 
   return (
     <div>
       <Nav/>
-      {!images.length && <Intro versionData={versionData}/>}
+      {!images.length && <Intro/>}
       {/*圖片預覽*/}
       <ImagePreview images={images} setImages={setImages}/>
       {/*底端欄*/}
@@ -44,7 +45,7 @@ function App() {
       {/*對話框*/}
       <ModalUpload isModalShow={isUploadShow} setIsModalShow={setIsUploadShow} setImages={setImages}/>
       <ModalOutput isModalShow={isOutputShow} setIsModalShow={setIsOutputShow} images={images}/>
-      <ModalNewVersion isShow={isVersionShow} onHide={()=>setIsVersionShow(false)} data={versionData}/>
+      <ModalNewVersion isShow={isVersionShow} onHide={() => setIsVersionShow(false)} data={versionData}/>
       {/*快速彈窗*/}
       <Toaster
         position="top-center"

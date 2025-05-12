@@ -18,9 +18,12 @@ def creat_docx(images: list[CustomImage], mode: int):
   """
   doc = Document()
   doc = set_font(doc)
-  if mode == 2:
+  if mode == 1:
     for index, image in enumerate(images):
-      doc = add_table_two_of_page(doc, image, index + 1)
+      doc = add_table_two_of_page_horizontal(doc, image, index + 1)
+  elif mode == 2:
+    for i in range(0, len(images), 2):
+      doc = add_table_two_of_page_vertical(doc, images[i:i + 2], i + 1)
   elif mode == 6:
     for i in range(0, len(images), 3):
       doc = add_table_six_of_page(doc, images[i:i + 3], i + 1)
@@ -68,14 +71,12 @@ def handle_number(no: int) -> str:
   return f'0{no}' if no < 10 else str(no)
 
 
-def add_table_two_of_page(doc, image: CustomImage, index: int):
+def add_table_two_of_page_horizontal(doc, image: CustomImage, index: int):
   """
-  建立一頁2張圖片的表格
+  建立一頁2張圖片的表格(水平圖片，上下排佈）
   :param doc: 傳入的doc文件
   :param image: 傳入的圖片物件
   :param index: 序號，已經轉換成從1開始
-  :param show_type: 設定高或寬的模式
-  :param mode: 如果為2，代表是多張模式
   :return: 回傳doc文件
   """
   try:
@@ -109,13 +110,60 @@ def add_table_two_of_page(doc, image: CustomImage, index: int):
     log().exception(str(e))
 
 
+def add_table_two_of_page_vertical(doc, images: list[CustomImage], index: int):
+  """
+  建立一頁2張圖片的表格(垂直圖片，左右排佈）
+  :param doc: 傳入的doc文件
+  :param images: 傳入的圖片物件清單，最多會傳入兩張圖片
+  :param index: 序號，已經轉換成從1開始
+  :return: 回傳doc文件
+  """
+  try:
+    # 創建2*2的空表格
+    table = doc.add_table(rows=3, cols=2, style='Table Grid')
+    # 設定Row的高度
+    table.rows[0].height = Cm(18.2)
+    table.rows[1].height = Cm(0.8)
+    table.rows[2].height = Cm(3.5)
+    # 設定Col的寬度
+    for cell in table.columns[0].cells:
+      cell.width = Cm(7.8)
+    for cell in table.columns[1].cells:
+      cell.width = Cm(7.8)
+
+    handle_table_write(
+      table=table,
+      image=images[0],
+      index=index,
+      image_cell=table.cell(0, 0),
+      number_cell=table.cell(1, 0),
+      remark_cell=table.cell(2, 0),
+      max_height=18,
+      max_width=7.6,
+    )
+    if len(images) >= 2:
+      handle_table_write(
+        table=table,
+        image=images[1],
+        index=index + 1,
+        image_cell=table.cell(0, 1),
+        number_cell=table.cell(1, 1),
+        remark_cell=table.cell(2, 1),
+        max_height=18,
+        max_width=7.6,
+      )
+    return doc
+
+  except Exception as e:
+    log().exception(str(e))
+
+
 def add_table_six_of_page(doc, images: list[CustomImage], index):
   """
   建立一頁6張圖片的表格
   :param doc: 傳入的doc文件
   :param images: 傳入的圖片物件清單，最多會傳入三張圖片
   :param index: 序號，已經轉換成從1開始
-  :param show_type: 設定高或寬的模式
   :return: 回傳doc文件
   """
   try:
@@ -170,7 +218,7 @@ def add_table_six_of_page(doc, images: list[CustomImage], index):
 
 
 def handle_table_write(table, image: CustomImage, index, image_cell, number_cell,
-                       remark_cell, max_height: int, max_width: int):
+                       remark_cell, max_height: int | float, max_width: int | float):
   """
   寫入單一表格的資訊
   :param table: 表格
@@ -192,17 +240,20 @@ def handle_table_write(table, image: CustomImage, index, image_cell, number_cell
     remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 文字水平置中
     remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.TOP  # 表格文字垂直置頂
 
+    # 處理圖片寬高
     img = Image.open(image.stream)
-    if img.width / img.height < max_height / max_width:
-      # 小於預設寬高比15：9，設定高為表格上限
-      image_cell.paragraphs[0].add_run().add_picture(image.stream, height=Cm(max_height))
-    else:
-      # 大於預設寬高比15：9，設定寬為表格上限
+    default_aspect_ratio = max_width / max_height  # 預設寬高比
+    image_aspect_ratio = img.width / img.height  # 圖片寬高比
+    if image_aspect_ratio > default_aspect_ratio:
+      # 圖片更扁，設定寬為表格上限
       image_cell.paragraphs[0].add_run().add_picture(image.stream, width=Cm(max_width))
+    else:
+      # 圖片更長，設定高為表格上限
+      image_cell.paragraphs[0].add_run().add_picture(image.stream, height=Cm(max_height))
 
     # 設定圖片位置
-    table.cell(0, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-    table.cell(0, 0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    image_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+    image_cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     log().info(f'編號{index}圖片寫入完成')
   except Exception as e:
     log().error(f'編號{index}圖片寫入失敗，{str(e)}', exc_info=True)

@@ -24,11 +24,8 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
   const {
     register,
     handleSubmit,
-    watch,
     formState: {errors}
   } = useForm<TFormValue>({defaultValues: {title: '刑案照片黏貼表', min_size: 1000}});
-
-  const [mode] = watch(['mode']);
 
   const handleSaveDocx: SubmitHandler<TFormValue> = (formData) => {
     toast.loading('處理中，請稍候...')
@@ -63,24 +60,24 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
               <label htmlFor='title' className="label">檔案標題</label>
               <input type='text' id='title'
                      className="input input-sm" {...register('title', {required: "此欄位必填"})}/>
-              <span className="label text-error">{errors.title?.message}</span>
-              <label htmlFor='mode' className='label'>格式</label>
+              {errors.title && <span className="text-xs text-error text-start">{errors.title.message}</span>}
+              <label htmlFor='mode' className='label'>排版</label>
               <select className="select select-sm" id='mode' {...register('mode')}>
-                <option value='2'>一頁 2 張圖片</option>
-                <option value='6'>一頁 6 張圖片</option>
+                <option value='1'>一頁 2 張(上下排佈，適用橫式圖片)</option>
+                <option value='2'>一頁 2 張(左右排佈，適用直式圖片)</option>
+                <option value='6'>一頁 6 張(適用直式圖片)</option>
               </select>
-              {mode === '6' && <span className="label text-error text-sm">僅適用全部為手機截圖等直式圖片</span>}
               <label htmlFor='min_size' className="label">圖片壓縮最小尺寸</label>
               <input type='number' id='min_size'
                      className="input input-sm" {...register('min_size', {
                 required: '此欄位必填',
                 min: {value: 500, message: '最小值為500'},
               })}/>
-              <span className="label text-error">{errors.min_size?.message}</span>
+              {errors.min_size && <span className="text-xs text-error text-start">{errors.min_size.message}</span>}
               <label htmlFor='quality' className='label'>壓縮率</label>
-              <select className="select select-sm" id='quality' {...register('quality')}>
-                <option value='90' >低（90%）</option>
-                <option value='80' selected>中（80%）</option>
+              <select className="select select-sm" id='quality' defaultValue='80' {...register('quality')}>
+                <option value='90'>低（90%）</option>
+                <option value='80'>中（80%）</option>
                 <option value='70'>高（70%）</option>
                 <option value='100'>不壓縮</option>
               </select>

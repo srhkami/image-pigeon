@@ -70,6 +70,8 @@ class Api:
 
 
 if __name__ == '__main__':
+  if DEBUG_MODE:
+    log().error('注意！！DEBUG模式已開啟！！')
   log().info('請耐心等待程式開啟......')
   api = Api()
   url = os.path.join(os.getcwd(), './web/index.html') if not DEBUG_MODE else 'http://localhost:5173'
