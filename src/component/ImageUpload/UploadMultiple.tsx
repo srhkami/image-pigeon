@@ -11,15 +11,17 @@ type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
   readonly defaultRemark: string,
   readonly setIsModalShow: (value: boolean) => void,
+  readonly setIsLoading: (value: boolean) => void,
 }
 
 /* 新增多張圖片 */
-export default function UploadMultiple({setImages, defaultRemark, setIsModalShow}: Props) {
+export default function UploadMultiple({setImages, defaultRemark, setIsModalShow, setIsLoading}: Props) {
 
   const {register, handleSubmit, reset} = useForm<TFormValue>();
 
   const omSubmit: SubmitHandler<TFormValue> = (formData) => {
     (async () => {
+      setIsLoading(true);
       toast.loading('處理中，請稍候...')
       // 將每個檔案轉換成 CustomImage 並初始化（包含 base64、尺寸）
       const files = Array.from(formData.image);
@@ -28,6 +30,7 @@ export default function UploadMultiple({setImages, defaultRemark, setIsModalShow
 
       // 更新圖片狀態
       setImages(prev => [...prev, ...readyImages]);
+      setIsLoading(false);
       toast.dismiss();
       toast.success('新增成功');
       reset();

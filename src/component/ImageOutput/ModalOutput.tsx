@@ -5,6 +5,7 @@ import {BiSolidFileExport} from "react-icons/bi";
 import toast from "react-hot-toast";
 import {FaRegFileWord, FaRegFilePdf} from "react-icons/fa6";
 import {useState} from "react";
+import AlertLoading from "../Layout/AlertLoading.tsx";
 
 type Props = {
   readonly images: CustomImage[],
@@ -101,21 +102,27 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
             </fieldset>
           </div>
           <div className='divider'></div>
-          <div className='mt-4 flex'>
-            <button type='button' className={'btn btn-accent btn-sm mr-auto ' + (isLoading && 'btn-disabled')}
-                    onClick={handleSubmit(handleSaveImages)}>
-              另存圖片
-            </button>
-            <button className='btn btn-success btn-sm btn-disabled'>
-              <FaRegFilePdf/>
-              儲存PDF
-            </button>
-            <button type='button' className={'btn btn-success btn-sm ml-2 ' + (isLoading && 'btn-disabled')}
-                    onClick={handleSubmit(handleSaveDocx)}>
-              <FaRegFileWord/>
-              儲存Word
-            </button>
-          </div>
+          {isLoading ?
+            <AlertLoading/>
+            :
+            <div className='mt-4 flex'>
+              <button type='button' className='btn btn-accent btn-sm mr-auto'
+                      onClick={handleSubmit(handleSaveImages)}>
+                另存圖片
+              </button>
+              <button className='btn btn-success btn-sm btn-disabled'>
+                <FaRegFilePdf/>
+                儲存PDF
+              </button>
+              <button type='button' className='btn btn-success btn-sm ml-2 '
+                      onClick={handleSubmit(handleSaveDocx)}>
+                <FaRegFileWord/>
+                儲存Word
+              </button>
+            </div>
+
+          }
+
         </form>
       </div>
     </Modal>

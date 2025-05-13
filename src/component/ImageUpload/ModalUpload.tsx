@@ -2,10 +2,11 @@ import UploadMultiple from "./UploadMultiple.tsx";
 import UploadLongScreen from "./UploadLongScreen.tsx";
 import Modal from "../Layout/Modal.tsx";
 import {CustomImage} from "../../utils/type.ts";
-import {Dispatch, SetStateAction} from "react";
+import {Dispatch, SetStateAction, useState} from "react";
 import {MdOutlineUploadFile} from "react-icons/md";
 import {useForm} from "react-hook-form";
-import { IoMdAlert } from "react-icons/io";
+import {IoMdAlert} from "react-icons/io";
+import AlertLoading from "../Layout/AlertLoading.tsx";
 
 type Props = {
   readonly isModalShow: boolean,
@@ -15,12 +16,13 @@ type Props = {
 
 export default function ModalUpload({isModalShow, setIsModalShow, setImages}: Props) {
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const {register, watch} = useForm({
     defaultValues: {
       remark: '時間：年月日時分\n地點：XX市\n說明：嫌疑人OOO',
     }
   })
-
   const [remark] = watch(['remark']);
 
   return (
@@ -43,16 +45,23 @@ export default function ModalUpload({isModalShow, setIsModalShow, setImages}: Pr
         <span>預設說明會套用在此次新增的每一張圖片上</span>
       </div>
       <div className='divider'></div>
-      <div className="tabs tabs-lift mx-auto">
-        <input type="radio" name="my_tabs_3" className="tab" aria-label="普通上傳" defaultChecked/>
-        <div className="tab-content bg-base-100 border-base-300 p-6">
-          <UploadMultiple setImages={setImages} defaultRemark={remark} setIsModalShow={setIsModalShow}/>
-        </div>
-        <input type="radio" name="my_tabs_3" className="tab" aria-label="長截圖分割"/>
-        <div className="tab-content bg-base-100 border-base-300 p-6">
-          <UploadLongScreen setImages={setImages} defaultRemark={remark} setIsModalShow={setIsModalShow}/>
-        </div>
-      </div>
+      {
+        isLoading ?
+          <AlertLoading/>
+          :
+          <div className="tabs tabs-lift mx-auto">
+            <input type="radio" name="my_tabs_3" className="tab" aria-label="普通上傳" defaultChecked/>
+            <div className="tab-content bg-base-100 border-base-300 p-6">
+              <UploadMultiple setImages={setImages} defaultRemark={remark}
+                              setIsModalShow={setIsModalShow} setIsLoading={setIsLoading}/>
+            </div>
+            <input type="radio" name="my_tabs_3" className="tab" aria-label="長截圖分割"/>
+            <div className="tab-content bg-base-100 border-base-300 p-6">
+              <UploadLongScreen setImages={setImages} defaultRemark={remark}
+                                setIsModalShow={setIsModalShow} setIsLoading={setIsLoading}/>
+            </div>
+          </div>
+      }
     </Modal>
   )
 }

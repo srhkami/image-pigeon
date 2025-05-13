@@ -11,14 +11,16 @@ type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
   readonly defaultRemark: string,
   readonly setIsModalShow: (value: boolean) => void,
+  readonly setIsLoading: (value: boolean) => void,
 }
 
 /* 新增長截圖，並傳至後端自動分割，之後提供預覽 */
-export default function UploadLongScreen({setImages, defaultRemark, setIsModalShow}: Props) {
+export default function UploadLongScreen({setImages, defaultRemark, setIsModalShow,setIsLoading}: Props) {
 
   const {register, handleSubmit, reset} = useForm<TFormValue>();
 
   const omSubmit = async (formData: TFormValue) => {
+    setIsLoading(true);
     toast.loading('處理中，請稍候...')
     // 將圖片轉化為自訂物件
     const image = new CustomImage(formData.image[0], defaultRemark)
@@ -37,11 +39,13 @@ export default function UploadLongScreen({setImages, defaultRemark, setIsModalSh
       );
       // 更新圖片狀態
       setImages(prev => [...prev, ...imageObjs]);
+      setIsLoading(false);
       toast.dismiss();
       toast.success(res.message);
       reset();
       setIsModalShow(false);
     } else {
+      setIsLoading(false);
       toast.dismiss();
       toast.error(res.message);
     }
