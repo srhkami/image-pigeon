@@ -7,7 +7,7 @@ import { FaShareAlt } from "react-icons/fa";
 export default function Intro() {
   return (
     <div className='flex justify-center items-center'>
-      <div className="card bg-neutral text-neutral-content w-96 my-20">
+      <div className="card bg-neutral text-neutral-content w-96 my-10">
         <div className='card-body'>
           <div className='grid grid-cols-4 gap-4'>
             <div className="badge badge-md badge-accent my-3">Step 1</div>

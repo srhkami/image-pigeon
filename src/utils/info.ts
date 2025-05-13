@@ -1,7 +1,7 @@
 import axios from "axios";
 import {TVersionCheck} from "./type.ts";
 
-export const AppVersion = '1.1.0_1140513'
+export const AppVersion = '1.1（1140513）'
 
 /* 檢查新版本 */
 export const handleCheckVersion = async () => {

@@ -92,7 +92,7 @@ function Collapse({title, textList = [], defaultChecked = false, children = null
       return <li className="pb-2 text-xs opacity-60">{text}</li>
     }
     return (
-      <li className="list-row" key='index'>
+      <li className="list-row" key={index}>
         <span className='mr-1'>{index}.</span>{text}
       </li>
     )
@@ -110,7 +110,6 @@ function Collapse({title, textList = [], defaultChecked = false, children = null
             {items}
           </ul>
         }
-
       </div>
     </div>
   )

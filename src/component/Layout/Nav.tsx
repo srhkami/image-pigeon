@@ -1,10 +1,12 @@
 import BtnThemeToggle from "./BtnThemeToggle.tsx";
-import ModalAbout from "../About/ModalAbout.tsx";
+import ModalDisclaimer from "../About/ModalDisclaimer.tsx";
 import {useState} from "react";
+import ModalChangelog from "../About/ModalChangelog.tsx";
 
 export default function Nav() {
 
-  const [isAboutShow, setIsAboutShow] = useState<boolean>(false)
+  const [isDisclaimerShow, setIsDisclaimerShow] = useState<boolean>(false);
+  const [isChangelogShow, setIsChangelogShow] = useState<boolean>(false);
 
   return (
     <div className="navbar bg-base-100 shadow-sm sticky top-0 z-20">
@@ -20,7 +22,10 @@ export default function Nav() {
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
             <li>
-              <button onClick={() => setIsAboutShow(true)}>關於</button>
+              <button onClick={() => setIsDisclaimerShow(true)}>免責聲明</button>
+            </li>
+            <li>
+              <button onClick={() => setIsChangelogShow(true)}>更新日誌</button>
             </li>
           </ul>
         </div>
@@ -31,7 +36,8 @@ export default function Nav() {
       <div className="navbar-end">
         <BtnThemeToggle/>
       </div>
-      <ModalAbout isShow={isAboutShow} setIsShow={setIsAboutShow}/>
+      <ModalDisclaimer isShow={isDisclaimerShow} setIsShow={setIsDisclaimerShow}/>
+      <ModalChangelog isShow={isChangelogShow} setIsShow={setIsChangelogShow}/>
     </div>
   )
 }
