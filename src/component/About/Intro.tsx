@@ -60,7 +60,7 @@ export default function Intro() {
               {AppVersion}
             </div>
             <div className='col-span-2 flex'>
-              <a className='btn btn-info btn-sm btn-soft ml-auto'
+              <a className='btn btn-info btn-sm btn-soft ml-auto' target='_blank'
                       href='https://drive.google.com/drive/folders/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm?usp=drive_link'>
                 檢查新版
               </a>
@@ -68,8 +68,8 @@ export default function Intro() {
             <div className='col-span-5 flex justify-start items-center mt-2'>
               <FaShareAlt  className='mr-2'/>
               本軟體分享於
-              <a className='link link-info' href="https://trafficpigeon.com/"
-                 target='_blank'>「交通鴿手」</a>
+              <a className='link link-info ml-1' href="https://trafficpigeon.com/"
+                 target='_blank'>交通鴿手</a>
             </div>
           </div>
         </div>

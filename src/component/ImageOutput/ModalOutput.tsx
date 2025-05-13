@@ -1,9 +1,10 @@
 import Modal from "../Layout/Modal.tsx";
-import {CustomImage} from "../../utils/type.ts";
+import {CustomImage, TOutputData} from "../../utils/type.ts";
 import {SubmitHandler, useForm} from "react-hook-form";
 import {BiSolidFileExport} from "react-icons/bi";
 import toast from "react-hot-toast";
 import {FaRegFileWord, FaRegFilePdf} from "react-icons/fa6";
+import {useState} from "react";
 
 type Props = {
   readonly images: CustomImage[],
@@ -11,23 +12,19 @@ type Props = {
   readonly setIsModalShow: (value: boolean) => void,
 }
 
-type TFormValue = {
-  title: string,
-  mode: '2' | '6',
-  min_size: number,
-  quality: 100 | 90 | 80 | 70,
-}
-
 export default function ModalOutput({images, isModalShow, setIsModalShow}: Props) {
+
+  const [isLoading, setIsLoading] = useState(false); // 載中入狀態，要禁止按鈕
 
   const handleModalHide = () => setIsModalShow(false);
   const {
     register,
     handleSubmit,
     formState: {errors}
-  } = useForm<TFormValue>({defaultValues: {title: '照片黏貼表', min_size: 1000}});
+  } = useForm<TOutputData>({defaultValues: {title: '照片黏貼表', min_size: 1000}});
 
-  const handleSaveDocx: SubmitHandler<TFormValue> = (formData) => {
+  const handleSaveDocx: SubmitHandler<TOutputData> = (formData) => {
+    setIsLoading(true);
     toast.loading('處理中，請稍候...')
     const data = {
       ...formData,
@@ -35,6 +32,27 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
     }
     window.pywebview.api.save_docx(data)
       .then(res => {
+        setIsLoading(false);
+        toast.dismiss();
+        if (res.status == 200) {
+          setIsModalShow(false);
+          toast.success(res.message);
+        } else {
+          toast.error(res.message);
+        }
+      })
+  }
+
+  const handleSaveImages: SubmitHandler<TOutputData> = (formData) => {
+    setIsLoading(true);
+    toast.loading('處理中，請稍候...')
+    const data = {
+      ...formData,
+      images: images,
+    }
+    window.pywebview.api.save_images(data)
+      .then(res => {
+        setIsLoading(false);
         toast.dismiss();
         if (res.status == 200) {
           setIsModalShow(false);
@@ -84,12 +102,16 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
           </div>
           <div className='divider'></div>
           <div className='mt-4 flex'>
-            <button className='btn btn-success btn-sm mr-auto btn-disabled'>直接列印</button>
+            <button type='button' className={'btn btn-accent btn-sm mr-auto ' + (isLoading && 'btn-disabled')}
+                    onClick={handleSubmit(handleSaveImages)}>
+              另存圖片
+            </button>
             <button className='btn btn-success btn-sm btn-disabled'>
               <FaRegFilePdf/>
               儲存PDF
             </button>
-            <button type='button' className='btn btn-success btn-sm ml-2' onClick={handleSubmit(handleSaveDocx)}>
+            <button type='button' className={'btn btn-success btn-sm ml-2 ' + (isLoading && 'btn-disabled')}
+                    onClick={handleSubmit(handleSaveDocx)}>
               <FaRegFileWord/>
               儲存Word
             </button>

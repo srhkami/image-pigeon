@@ -1,37 +1,33 @@
+import json
+from PIL import Image
 import webview
 import os.path
 from handle_image import CustomImage, crop_img
 from handle_doc import creat_docx, add_header
-from response import Response
+from handle_request import OutputData, Response
 from handle_log import log
+
 
 DEBUG_MODE = True
 
+
 class Api:
-  def save_docx(self, data):
+  def save_docx(self, request):
     """
     儲存圖片成docx檔
-    :param data:
+    :param request: 情求的資料
     :return:
     """
-    title = data.get('title')  # 文件標題
-    files = data.get('images')  # 圖片清單
-    min_size = int(data.get('min_size'))  # 最小尺寸
-    quality = int(data.get('quality'))  # 壓縮率
-    mode = int(data.get('mode'))  # 模式
-    images = []  # python 圖片的清單
-    log().info(f'【{title}】儲存Word開始執行')
-    log().info(f'共有{len(files)}張圖，最小尺寸{min_size}，壓縮率{quality}')
-    for file in files:
-      image = CustomImage(file, min_size, quality)  # 逐一轉化成python自訂物件
-      images.append(image)
+    data = OutputData(request)
+    log().info(f'【{data.title}】儲存Word開始執行')
+    log().info(json.dumps(data.to_dict(), ensure_ascii=False))
 
-    doc = creat_docx(images, mode)
-    doc = add_header(doc, title)
+    doc = creat_docx(data)
+    doc = add_header(doc, data.title)
 
     path = webview.windows[0].create_file_dialog(
       webview.SAVE_DIALOG,
-      save_filename=f'{title}.docx',
+      save_filename=f'{data.title}.docx',
       file_types=('Word 文件 (*.docx)',)
     )
     log().debug(f'存檔位置：{path}')
@@ -66,6 +62,32 @@ class Api:
     except Exception as e:
       log().exception(str(e), exc_info=True)
       return Response(500, message=str(e)).to_dict()
+
+  def save_images(self, request):
+    """
+    直接儲存壓縮後的圖片
+    :param request:
+    :return:
+    """
+    data = OutputData(request)
+    log().info(f'【{data.title}】壓縮圖片')
+    log().info(json.dumps(data.to_dict(), ensure_ascii=False))
+
+    folder = webview.windows[0].create_file_dialog(
+      webview.FOLDER_DIALOG,
+      allow_multiple=False
+    )
+    log().debug(f'存檔位置：{folder[0]}')
+
+    if not folder:
+      return Response(400, '已取消儲存').to_dict()
+    for index, image in enumerate(data.to_images()):
+      img = Image.open(image.stream)
+      filename = f'{data.title}_{index + 1}.jpg'
+      save_path = os.path.join(folder[0], filename)
+      img.save(save_path)
+    return Response(200, '儲存成功').to_dict()
+
 
 if __name__ == '__main__':
   if DEBUG_MODE:

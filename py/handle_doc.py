@@ -6,27 +6,29 @@ from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor
 from PIL import Image
 from handle_image import CustomImage
+from handle_request import OutputData
 from handle_log import log
 
 
-def creat_docx(images: list[CustomImage], mode: int):
+def creat_docx(data: OutputData):
   """
   一頁兩張的函數
-  :param images:
-  :param mode:
+  :param data:
   :return: 創建後的DOC檔
   """
   doc = Document()
   doc = set_font(doc)
-  if mode == 1:
-    for index, image in enumerate(images):
-      doc = add_table_two_of_page_horizontal(doc, image, index + 1)
-  elif mode == 2:
-    for i in range(0, len(images), 2):
-      doc = add_table_two_of_page_vertical(doc, images[i:i + 2], i + 1)
-  elif mode == 6:
-    for i in range(0, len(images), 3):
-      doc = add_table_six_of_page(doc, images[i:i + 3], i + 1)
+  images = data.to_images()
+  match data.mode:
+    case 1:
+      for index, image in enumerate(images):
+        doc = add_table_two_of_page_horizontal(doc, image, index + 1)
+    case 2:
+      for i in range(0, len(images), 2):
+        doc = add_table_two_of_page_vertical(doc, images[i:i + 2], i + 1)
+    case 6:
+      for i in range(0, len(images), 3):
+        doc = add_table_six_of_page(doc, images[i:i + 3], i + 1)
   return doc
 
 

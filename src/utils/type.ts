@@ -4,6 +4,14 @@ export type Response<T> = {
   data: T,
 }
 
+export type TOutputData = {
+  title: string,
+  images: Array<CustomImage>,
+  min_size: number,
+  mode: number,
+  quality: 100 | 90 | 80 | 70,
+}
+
 export class CustomImage {
   file: File | null;
   preview: string;
