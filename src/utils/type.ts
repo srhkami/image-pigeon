@@ -122,3 +122,9 @@ export type TVersionCheck = {
   changelog: string,
   url: string,
 }
+
+export type TVersionObject = {
+  version: string,
+  date: string,
+  logs: Array<{ color: 'new' | 'info' | 'fix', text: string }>,
+}

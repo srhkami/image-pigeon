@@ -8,7 +8,7 @@ from handle_request import OutputData, Response
 from handle_log import log
 
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 
 class Api:
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     log().error('注意！！DEBUG模式已開啟！！')
   log().info('請耐心等待程式開啟......')
   api = Api()
-  url = os.path.join(os.getcwd(), './web/index.html') if not DEBUG_MODE else 'http://localhost:5173'
+  url = os.path.join(os.getcwd(), './html/index.html') if not DEBUG_MODE else 'http://localhost:5173'
   window = webview.create_window(
     title='貼圖小鴿手',
     url=url,

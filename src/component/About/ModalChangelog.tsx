@@ -1,6 +1,7 @@
 import Modal from "../Layout/Modal.tsx";
 import {ReactNode} from "react";
 import {LuNotebookTabs} from "react-icons/lu";
+import {CHANGELOG_LIST} from "../../utils/info.ts";
 
 type Props = {
   readonly isShow: boolean,
@@ -10,6 +11,15 @@ type Props = {
 /* 各類功能提示的對話框 */
 export default function ModalChangelog({isShow, setIsShow}: Props) {
 
+  const Collapses = CHANGELOG_LIST.map(item=>{
+    return(
+      <Collapse
+        title={item.version+'（'+item.date+'）'}
+        itemList={item.logs}
+      />
+    )
+  })
+
   return (
     <Modal isShow={isShow} onHide={() => setIsShow(false)} closeButton>
       <div className='text-lg font-bold flex items-center justify-center'>
@@ -17,45 +27,8 @@ export default function ModalChangelog({isShow, setIsShow}: Props) {
         更新日誌
       </div>
       <div className='divider mt-0'></div>
-      <div className=''>
-        <Collapse
-          title='1.2（1140516）'
-          itemList={[
-            {color: "new", text: '加入調整「說明文字對齊」、「字體大小」功能'},
-            {color: "new", text: '加入「聯繫作者」對話框'},
-          ]}
-        />
-        <Collapse
-          title='1.1（1140513）'
-          itemList={[
-            {color: "new", text: '加入「另存圖片」功能'},
-            {color: "new", text: '加入「免責聲明」'},
-            {color: "new", text: '加入「更新日誌」'},
-            {color: "new", text: '現在處理過程中會顯示新的提示'},
-          ]}
-        />
-        <Collapse
-          title='1.0（1140512）'
-          itemList={[
-            {color: "new", text: '加入「一頁兩張左右排版」'},
-            {color: "new", text: '加入「主要功能介紹」'},
-            {color: "fix", text: '修復圖片長寬可能超出表格的問題'},
-          ]}
-        />
-        <Collapse
-          title='0.9（1140511）'
-          itemList={[
-            {color: "new", text: '加入「檢查更新」功能'},
-            {color: "new", text: '加入「合併圖片」功能'},
-            {color: "new", text: '發佈公開測試版'},
-          ]}
-        />
-        <Collapse
-          title='0.8（1140510）'
-          itemList={[
-            {color: "new", text: '完成基礎功能，發佈內部測試版'},
-          ]}
-        />
+      <div>
+        {Collapses}
       </div>
     </Modal>
   )
