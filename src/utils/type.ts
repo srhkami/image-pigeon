@@ -10,6 +10,8 @@ export type TOutputData = {
   min_size: number,
   mode: number,
   quality: 100 | 90 | 80 | 70,
+  align_vertical: 'top' | 'center',
+  font_size: '10'| '11' | '12' | '13' | '14',
 }
 
 export class CustomImage {

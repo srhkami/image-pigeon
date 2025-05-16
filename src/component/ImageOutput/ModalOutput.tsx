@@ -71,7 +71,7 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
         <span className='text-lg font-bold'>輸出檔案</span>
       </div>
       <div className='mt-5'>
-        <form>
+        <form onSubmit={handleSubmit(handleSaveDocx)}>
           <div className='flex justify-center'>
             <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
               <legend className="fieldset-legend">輸出設定</legend>
@@ -79,26 +79,54 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
               <input type='text' id='title'
                      className="input input-sm" {...register('title', {required: "此欄位必填"})}/>
               {errors.title && <span className="text-xs text-error text-start">{errors.title.message}</span>}
-              <label htmlFor='mode' className='label'>排版</label>
+              <label htmlFor='mode' className='label mt-2'>排版</label>
               <select className="select select-sm" id='mode' {...register('mode')}>
                 <option value='1'>一頁 2 張(上下排佈，適用橫式圖片)</option>
                 <option value='2'>一頁 2 張(左右排佈，適用直式圖片)</option>
                 <option value='6'>一頁 6 張(適用直式圖片)</option>
               </select>
-              <label htmlFor='min_size' className="label">圖片壓縮最小尺寸</label>
-              <input type='number' id='min_size'
-                     className="input input-sm" {...register('min_size', {
-                required: '此欄位必填',
-                min: {value: 500, message: '最小值為500'},
-              })}/>
-              {errors.min_size && <span className="text-xs text-error text-start">{errors.min_size.message}</span>}
-              <label htmlFor='quality' className='label'>壓縮率</label>
-              <select className="select select-sm" id='quality' defaultValue='80' {...register('quality')}>
-                <option value='90'>低（90%）</option>
-                <option value='80'>中（80%）</option>
-                <option value='70'>高（70%）</option>
-                <option value='100'>不壓縮</option>
-              </select>
+              <div className='flex mt-2'>
+                <div className='flex-1/2 pr-1'>
+                  <label htmlFor='align_vertical' className='label w-full'>說明文字對齊</label>
+                  <select className="select select-sm" id='align_vertical'
+                          defaultValue='center' {...register('align_vertical')}>
+                    <option value='top'>垂直置頂</option>
+                    <option value='center'>垂直置中</option>
+                  </select>
+                </div>
+                <div className='flex-1/2 pl-1'>
+                  <label htmlFor='font_size' className='label w-full'>字體大小</label>
+                  <select className="select select-sm" id='font_size' defaultValue='12' {...register('font_size')}>
+                    <option value='10'>小（10）</option>
+                    <option value='11'>偏小（11）</option>
+                    <option value='12'>普通（12）</option>
+                    <option value='13'>偏大（13）</option>
+                    <option value='14'>大（14）</option>
+                  </select>
+                </div>
+              </div>
+              <div className='flex mt-2'>
+                <div className='flex-1/2 pr-1'>
+                  <label htmlFor='quality' className='label w-full'>圖片壓縮率</label>
+                  <select className="select select-sm" id='quality' defaultValue='80' {...register('quality')}>
+                    <option value='90'>低（90%）</option>
+                    <option value='80'>中（80%）</option>
+                    <option value='70'>高（70%）</option>
+                    <option value='100'>不壓縮</option>
+                  </select>
+                </div>
+                <div className='flex-1/2 pl-1'>
+                  <label htmlFor='min_size' className="label w-full">壓縮最小尺寸</label>
+                  <input type='number' id='min_size'
+                         className="input input-sm" {...register('min_size', {
+                    required: '此欄位必填',
+                    min: {value: 500, message: '不得低於500'},
+                  })}/>
+                  {errors.min_size &&
+                    <div className="text-xs text-error text-start w-full">{errors.min_size.message}</div>}
+                </div>
+              </div>
+
             </fieldset>
           </div>
           <div className='divider'></div>

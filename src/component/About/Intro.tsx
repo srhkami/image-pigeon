@@ -2,7 +2,8 @@ import {BsFillPersonLinesFill} from "react-icons/bs";
 import {MdNumbers} from "react-icons/md";
 import {AppVersion} from "../../utils/info.ts";
 import ModalTip from "./ModalTip.tsx";
-import { FaShareAlt } from "react-icons/fa";
+import {FaShareAlt} from "react-icons/fa";
+import ModalFeedback from "./ModalFeedback.tsx";
 
 export default function Intro() {
   return (
@@ -49,8 +50,7 @@ export default function Intro() {
               <span className='text-xs'>嘉義縣警察局民雄分局</span>
             </div>
             <div className='col-span-2 flex'>
-              <a className='btn btn-info btn-sm btn-soft ml-auto' href="https://trafficpigeon.com/feedback/web"
-                 target='_blank'>聯繫作者</a>
+              <ModalFeedback/>
             </div>
             <div className='flex justify-start items-center'>
               <MdNumbers className='mr-2'/>
@@ -61,12 +61,12 @@ export default function Intro() {
             </div>
             <div className='col-span-2 flex'>
               <a className='btn btn-info btn-sm btn-soft ml-auto' target='_blank'
-                      href='https://drive.google.com/drive/folders/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm?usp=drive_link'>
+                 href='https://drive.google.com/drive/folders/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm?usp=drive_link'>
                 檢查新版
               </a>
             </div>
             <div className='col-span-5 flex justify-start items-center mt-2'>
-              <FaShareAlt  className='mr-2'/>
+              <FaShareAlt className='mr-2'/>
               本軟體分享於
               <a className='link link-info ml-1' href="https://trafficpigeon.com/"
                  target='_blank'>交通鴿手</a>

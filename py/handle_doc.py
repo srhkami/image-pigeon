@@ -17,18 +17,18 @@ def creat_docx(data: OutputData):
   :return: 創建後的DOC檔
   """
   doc = Document()
-  doc = set_font(doc)
+  doc = set_font(doc, data.font_size)
   images = data.to_images()
   match data.mode:
     case 1:
       for index, image in enumerate(images):
-        doc = add_table_two_of_page_horizontal(doc, image, index + 1)
+        doc = add_table_two_of_page_horizontal(doc, data.align_vertical, image, index + 1)
     case 2:
       for i in range(0, len(images), 2):
-        doc = add_table_two_of_page_vertical(doc, images[i:i + 2], i + 1)
+        doc = add_table_two_of_page_vertical(doc, data.align_vertical, images[i:i + 2], i + 1)
     case 6:
       for i in range(0, len(images), 3):
-        doc = add_table_six_of_page(doc, images[i:i + 3], i + 1)
+        doc = add_table_six_of_page(doc, data.align_vertical, images[i:i + 3], i + 1)
   return doc
 
 
@@ -48,7 +48,7 @@ def add_header(doc, title_text):
   return doc
 
 
-def set_font(doc):
+def set_font(doc, size: int):
   """
   用以設定預設字體及大小
   """
@@ -56,7 +56,7 @@ def set_font(doc):
     doc.styles['Normal'].font.name = "Times New Roman"
     doc.styles['Normal'].element.rPr.rFonts.set(qn('w:eastAsia'), u'標楷體')
     doc.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'標楷體')
-    doc.styles['Normal'].font.size = Pt(11)
+    doc.styles['Normal'].font.size = Pt(size)
     doc.styles['Normal'].font.color.rgb = RGBColor(0, 0, 0)
     log().debug('設定字體成功')
     return doc
@@ -73,10 +73,11 @@ def handle_number(no: int) -> str:
   return f'編號0{no}' if no < 10 else f'編號{no}'
 
 
-def add_table_two_of_page_horizontal(doc, image: CustomImage, index: int):
+def add_table_two_of_page_horizontal(doc, align, image: CustomImage, index: int):
   """
   建立一頁2張圖片的表格(水平圖片，上下排佈）
   :param doc: 傳入的doc文件
+  :param align: 對齊
   :param image: 傳入的圖片物件
   :param index: 序號，已經轉換成從1開始
   :return: 回傳doc文件
@@ -98,6 +99,7 @@ def add_table_two_of_page_horizontal(doc, image: CustomImage, index: int):
 
     handle_table_write(
       image=image,
+      align=align,
       index=index,
       image_cell=table.cell(0, 0),
       number_cell=table.cell(1, 0),
@@ -111,7 +113,7 @@ def add_table_two_of_page_horizontal(doc, image: CustomImage, index: int):
     log().exception(str(e))
 
 
-def add_table_two_of_page_vertical(doc, images: list[CustomImage], index: int):
+def add_table_two_of_page_vertical(doc, align, images: list[CustomImage], index: int):
   """
   建立一頁2張圖片的表格(垂直圖片，左右排佈）
   :param doc: 傳入的doc文件
@@ -134,6 +136,7 @@ def add_table_two_of_page_vertical(doc, images: list[CustomImage], index: int):
 
     handle_table_write(
       image=images[0],
+      align=align,
       index=index,
       image_cell=table.cell(0, 0),
       number_cell=table.cell(1, 0),
@@ -144,6 +147,7 @@ def add_table_two_of_page_vertical(doc, images: list[CustomImage], index: int):
     if len(images) >= 2:
       handle_table_write(
         image=images[1],
+        align=align,
         index=index + 1,
         image_cell=table.cell(0, 1),
         number_cell=table.cell(1, 1),
@@ -157,7 +161,7 @@ def add_table_two_of_page_vertical(doc, images: list[CustomImage], index: int):
     log().exception(str(e))
 
 
-def add_table_six_of_page(doc, images: list[CustomImage], index):
+def add_table_six_of_page(doc, align, images: list[CustomImage], index):
   """
   建立一頁6張圖片的表格
   :param doc: 傳入的doc文件
@@ -179,6 +183,7 @@ def add_table_six_of_page(doc, images: list[CustomImage], index):
 
     handle_table_write(
       image=images[0],
+      align=align,
       index=index,
       image_cell=table.cell(0, 0),
       number_cell=table.cell(1, 0),
@@ -189,6 +194,7 @@ def add_table_six_of_page(doc, images: list[CustomImage], index):
     if len(images) >= 2:
       handle_table_write(
         image=images[1],
+        align=align,
         index=index + 1,
         image_cell=table.cell(0, 1),
         number_cell=table.cell(1, 1),
@@ -199,6 +205,7 @@ def add_table_six_of_page(doc, images: list[CustomImage], index):
     if len(images) >= 3:
       handle_table_write(
         image=images[2],
+        align=align,
         index=index + 2,
         image_cell=table.cell(0, 2),
         number_cell=table.cell(1, 2),
@@ -213,8 +220,9 @@ def add_table_six_of_page(doc, images: list[CustomImage], index):
     log().exception(str(e))
 
 
-def handle_table_write(image: CustomImage, index, image_cell, number_cell,
-                       remark_cell, max_height: int | float, max_width: int | float):
+def handle_table_write(image: CustomImage, align, index,
+                       image_cell, number_cell, remark_cell,
+                       max_height: int | float, max_width: int | float):
   """
   寫入單一表格的資訊
   :param image: 圖片物件
@@ -232,8 +240,10 @@ def handle_table_write(image: CustomImage, index, image_cell, number_cell,
     number_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
     number_cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # 文字水平置中
     remark_cell.text = image.remark  # 寫入說明
-    remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 文字水平置中
-    remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.TOP  # 表格文字垂直置頂
+    if align == 'top':
+      remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.TOP  # 表格文字垂直置頂
+    elif align == 'center':
+      remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
 
     # 處理圖片寬高
     img = Image.open(image.stream)

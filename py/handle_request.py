@@ -13,6 +13,8 @@ class OutputData:
     self.min_size = int(data.get('min_size', 1000))  # 最小尺寸
     self.quality = int(data.get('quality', 80))  # 壓縮率
     self.mode = int(data.get('mode', 1))  # 模式
+    self.align_vertical = data.get('align_vertical')  # 垂直對齊
+    self.font_size = int(data.get('font_size'))  # 字體大小
 
   def to_images(self):
     """

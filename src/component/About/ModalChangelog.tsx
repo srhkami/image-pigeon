@@ -19,6 +19,13 @@ export default function ModalChangelog({isShow, setIsShow}: Props) {
       <div className='divider mt-0'></div>
       <div className=''>
         <Collapse
+          title='1.2（1140516）'
+          itemList={[
+            {color: "new", text: '加入調整「說明文字對齊」、「字體大小」功能'},
+            {color: "new", text: '加入「聯繫作者」對話框'},
+          ]}
+        />
+        <Collapse
           title='1.1（1140513）'
           itemList={[
             {color: "new", text: '加入「另存圖片」功能'},
