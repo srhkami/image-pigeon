@@ -15,6 +15,7 @@ class OutputData:
     self.mode = int(data.get('mode', 1))  # 模式
     self.align_vertical = data.get('align_vertical')  # 垂直對齊
     self.font_size = int(data.get('font_size'))  # 字體大小
+    self.path = data.get('path')  # 儲存路徑
 
   def to_images(self):
     """

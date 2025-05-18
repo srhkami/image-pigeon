@@ -20,6 +20,7 @@ function App() {
   const [isOutputShow, setIsOutputShow] = useState<boolean>(false); // 輸出對話框
   const [isVersionShow, setIsVersionShow] = useState<boolean>(false); // 輸出對話框
 
+  // 檢查新版本
   useEffect(() => {
     handleCheckVersion()
       .then(data => {

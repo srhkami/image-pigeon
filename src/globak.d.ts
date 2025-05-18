@@ -1,4 +1,4 @@
-import {CustomImage, Response, TOutputData} from "./utils/type.ts";
+import {CustomImage, Response, TOutputData, TSelectPath} from "./utils/type.ts";
 
 export {};
 
@@ -10,6 +10,7 @@ declare global {
         save_docx(data: TOutputData): Promise<Response<null>>,
         crop_image(image: CustomImage): Promise<Response<Array<{ base64: string, width: number, height: number }>>>,
         save_images(data: TOutputData): Promise<Response<null>>,
+        select_path(data: TSelectPath): Promise<Response<null>>,
       };
     }
   }

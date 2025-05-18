@@ -12,6 +12,13 @@ export const handleCheckVersion = async () => {
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '1.2.1',
+    date: '1140518',
+    logs: [
+      {color: "fix", text: '修復遇到未知錯誤不會提示的問題'},
+    ]
+  },
+  {
     version: '1.2',
     date: '1140516',
     logs: [

@@ -2,6 +2,7 @@ import {useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
 import {CustomImage} from "../../utils/type.ts";
 import toast from "react-hot-toast";
+import {checkStatus} from "../../utils/handleError.ts";
 
 type TFormValue = {
   image: FileList,
@@ -15,21 +16,22 @@ type Props = {
 }
 
 /* 新增長截圖，並傳至後端自動分割，之後提供預覽 */
-export default function UploadLongScreen({setImages, defaultRemark, setIsModalShow,setIsLoading}: Props) {
+export default function UploadLongScreen({setImages, defaultRemark, setIsModalShow, setIsLoading}: Props) {
 
   const {register, handleSubmit, reset} = useForm<TFormValue>();
 
   const omSubmit = async (formData: TFormValue) => {
-    setIsLoading(true);
-    toast.loading('處理中，請稍候...')
-    // 將圖片轉化為自訂物件
-    const image = new CustomImage(formData.image[0], defaultRemark)
-    // 等待 base64 等欄位初始化完成
-    const readyImage = await image.init();
-    // 將初始化完成的圖片傳給後端
-    const res = await window.pywebview.api.crop_image(readyImage);
-    // 後端處理完成，將base64列表重新轉化為自訂物件
-    if (res.status === 200) {
+    try {
+      setIsLoading(true);
+      toast.loading('處理中，請稍候...')
+      // 將圖片轉化為自訂物件
+      const image = new CustomImage(formData.image[0], defaultRemark)
+      // 等待 base64 等欄位初始化完成
+      const readyImage = await image.init();
+      // 將初始化完成的圖片傳給後端
+      const res = await window.pywebview.api.crop_image(readyImage);
+      // 後端處理完成，將base64列表重新轉化為自訂物件
+      checkStatus(res);
       const imageObjs = await Promise.all(
         res.data.map((imgData: {
           base64: string,
@@ -44,10 +46,11 @@ export default function UploadLongScreen({setImages, defaultRemark, setIsModalSh
       toast.success(res.message);
       reset();
       setIsModalShow(false);
-    } else {
+    } catch (error) {
       setIsLoading(false);
       toast.dismiss();
-      toast.error(res.message);
+      console.log(error);
+      throw error
     }
   }
 

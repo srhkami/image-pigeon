@@ -11,7 +11,13 @@ export type TOutputData = {
   mode: number,
   quality: 100 | 90 | 80 | 70,
   align_vertical: 'top' | 'center',
-  font_size: '10'| '11' | '12' | '13' | '14',
+  font_size: '10' | '11' | '12' | '13' | '14',
+  path: string,
+}
+
+export type TSelectPath = {
+  mode: 'word' | 'images',
+  title?: string,
 }
 
 export class CustomImage {
