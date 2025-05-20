@@ -20,22 +20,24 @@ export default function UploadMultiple({setImages, defaultRemark, setIsModalShow
   const {register, handleSubmit, reset} = useForm<TFormValue>();
 
   const omSubmit: SubmitHandler<TFormValue> = (formData) => {
-    (async () => {
-      setIsLoading(true);
-      toast.loading('處理中，請稍候...')
-      // 將每個檔案轉換成 CustomImage 並初始化（包含 base64、尺寸）
-      const files = Array.from(formData.image);
-      const imageInstances = files.map(file => new CustomImage(file, defaultRemark));
-      const readyImages = await Promise.all(imageInstances.map(img => img.init()));
-
-      // 更新圖片狀態
-      setImages(prev => [...prev, ...readyImages]);
-      setIsLoading(false);
-      toast.dismiss();
-      toast.success('新增成功');
-      reset();
-      setIsModalShow(false);
-    })();
+    toast.promise(
+      async () => {
+        setIsLoading(true);
+        // 將每個檔案轉換成 CustomImage 並初始化（包含 base64、尺寸）
+        const files = Array.from(formData.image);
+        const imageInstances = files.map(file => new CustomImage(file, defaultRemark));
+        const readyImages = await Promise.all(imageInstances.map(img => img.init()));
+        // 更新圖片狀態
+        setImages(prev => [...prev, ...readyImages]);
+        setIsLoading(false);
+        reset();
+        setIsModalShow(false);
+      }, {
+        loading: '處理中...',
+        success: '新增成功',
+        error: '處理失敗',
+      })
+      .catch(err => console.log(err))
   }
 
   return (

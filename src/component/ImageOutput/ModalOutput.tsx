@@ -26,53 +26,60 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
 
   const handleModalHide = () => setIsModalShow(false);
 
-
-  const handleSaveDocx: SubmitHandler<TOutputData> = async (formData) => {
-    try {
-      const res1 = await window.pywebview.api.select_path({mode: 'word', title: formData.title});
-      checkStatus(res1);
-      toast.loading('儲存中，請稍候...');
-      setIsLoading(true);
-      const data = {
-        ...formData,
-        images: images,
-        path: res1.message
-      }
-      const res2 = await window.pywebview.api.save_docx(data);
-      checkStatus(res2);
-      setIsLoading(false);
-      setIsModalShow(false);
-      toast.dismiss();
-      toast.success(res2.message);
-    } catch (error) {
-      setIsLoading(false);
-      console.log(error);
-      throw error;
-    }
+  const handleSaveDocx: SubmitHandler<TOutputData> = (formData) => {
+    toast.promise(
+      async () => {
+        try {
+          const res1 = await window.pywebview.api.select_path({mode: 'word', title: formData.title});
+          checkStatus(res1);
+          setIsLoading(true);
+          const data = {
+            ...formData,
+            images: images,
+            path: res1.message
+          }
+          const res2 = await window.pywebview.api.save_docx(data);
+          checkStatus(res2);
+          setIsLoading(false);
+          setIsModalShow(false);
+        } catch (error) {
+          setIsLoading(false);
+          throw error;
+        }
+      },
+      {
+        loading: '儲存中...',
+        success: '儲存成功',
+        error: (err) => `${err.toString()}`,
+      })
   }
 
-  const handleSaveImages: SubmitHandler<TOutputData> = async (formData) => {
-    try {
-      const res1 = await window.pywebview.api.select_path({mode: 'images'});
-      checkStatus(res1);
-      toast.loading('儲存中，請稍候...');
-      setIsLoading(true);
-      const data = {
-        ...formData,
-        images: images,
-        path: res1.message
+  const handleSaveImages: SubmitHandler<TOutputData> = (formData) => {
+    toast.promise(
+      async () => {
+        try {
+          const res1 = await window.pywebview.api.select_path({mode: 'images'});
+          checkStatus(res1);
+          setIsLoading(true);
+          const data = {
+            ...formData,
+            images: images,
+            path: res1.message
+          }
+          const res2 = await window.pywebview.api.save_images(data);
+          checkStatus(res2);
+          setIsLoading(false);
+          setIsModalShow(false);
+        } catch (error) {
+          setIsLoading(false);
+          throw error
+        }
+      }, {
+        loading: '儲存中...',
+        success: '儲存成功',
+        error: (err) => `${err.toString()}`,
       }
-      const res2 = await window.pywebview.api.save_images(data);
-      checkStatus(res2);
-      setIsLoading(false);
-      setIsModalShow(false);
-      toast.dismiss();
-      toast.success(res2.message);
-    } catch (error) {
-      setIsLoading(false);
-      console.log(error);
-      throw error
-    }
+    )
   }
 
   const nothing = (e: FormEvent<HTMLFormElement>) => e.preventDefault();
