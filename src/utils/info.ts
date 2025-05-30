@@ -12,6 +12,16 @@ export const handleCheckVersion = async () => {
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '1.3',
+    date: '1140531',
+    logs: [
+      {color: "new", text: '預覽圖片的說明欄位現在會自動儲存'},
+      {color: "info", text: '調整預覽圖片的排版'},
+      {color: "info", text: '輸出檔案的排版欄位不再預設選項'},
+      {color: "info", text: '上傳圖片新增支援jfif、bmp檔'},
+    ]
+  },
+  {
     version: '1.2.1',
     date: '1140518',
     logs: [

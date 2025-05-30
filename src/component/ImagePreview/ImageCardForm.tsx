@@ -1,6 +1,6 @@
 import {SubmitHandler, useForm} from "react-hook-form";
 import {MdDeleteForever} from "react-icons/md";
-import {FaRegEdit, FaCaretSquareUp, FaCaretSquareDown} from "react-icons/fa";
+import {FaCaretSquareUp, FaCaretSquareDown} from "react-icons/fa";
 import {FaArrowRotateRight, FaArrowRotateLeft} from "react-icons/fa6";
 import React from "react";
 import {CustomImage} from "../../utils/type.ts";
@@ -16,10 +16,13 @@ type Props = {
 
 export default function ImageCardForm({img, index, images, setImages}: Props) {
 
-  const {register, handleSubmit} = useForm<CustomImage>({defaultValues: {remark: img.remark}});
+  const {register,getValues } = useForm<CustomImage>({defaultValues: {remark: img.remark}});
 
   // 修改圖片備註
-  const handleEditImage: SubmitHandler<CustomImage> = (formData) => {
+  const handleEditImage: SubmitHandler<CustomImage> = () => {
+
+    const formData = getValues();
+    console.log(formData);
     setImages(prev => {
       // 篩選出這個項目進行修改
       return prev.map((imgItem, i) => {
@@ -29,7 +32,8 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
         return imgItem;
       });
     });
-    toast.success(`編號${index + 1} 修改成功`);
+    console.log(images);
+    toast.success(`編號${index + 1} 備註已儲存`);
   };
 
   // 移除圖片
@@ -117,15 +121,19 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
 
   return (
     <div className="card bg-base-100 border shadow-sm my-2 mx-auto p-1 md:w-2/3 lg:w-1/2 items-center justify-center">
-      <div className='absolute top-0 left-0 bg-white text-black opacity-75 rounded-tl z-10'>
-        <span className='text-sm mr-1'>編號</span>
-        <span className='font-semibold'>{index + 1} </span>
-      </div>
+      {/*<div className='absolute top-0 left-0 bg-white text-black opacity-75 rounded-tl z-10'>*/}
+      {/*  <span className='text-sm mr-1'>編號</span>*/}
+      {/*  <span className='font-semibold'>{index + 1} </span>*/}
+      {/*</div>*/}
       <div className='absolute top-0 right-1 rounded-tr flex flex-col z-10'>
+        <button type='button' className='btn btn-sm btn-soft btn-error mt-2 mb-1' onClick={handleRemoveImage}>
+          <MdDeleteForever className='text-lg'/>
+        </button>
+        <div className='divider my-1'></div>
         <button className='btn btn-sm btn-soft btn-info my-1' onClick={handleUp} title='上移'>
           <FaCaretSquareUp/>
         </button>
-        <button className='btn btn-sm btn-soft btn-info' onClick={handleDown} title='下移'>
+        <button className='btn btn-sm btn-soft btn-info my-1' onClick={handleDown} title='下移'>
           <FaCaretSquareDown/>
         </button>
         <button className='btn btn-sm btn-soft btn-info my-1' onClick={() => handleRotate(90)} title='右旋'>
@@ -152,36 +160,25 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
         </div>
       </figure>
       <hr/>
+      <div className='divider my-1'>
+        <span >編號</span>
+        <span className='font-semibold'>{index + 1} </span>
+      </div>
       <div className="w-full p-2">
-        <form onSubmit={handleSubmit(handleEditImage)}>
-          {/*<table className='w-full'>*/}
-          {/*  <tbody>*/}
-          {/*  <tr className='py-1'>*/}
-          {/*    <th className='px-1 text-end py-1'>攝影地點：</th>*/}
-          {/*    <td className='py-1 flex justify-start'>*/}
-          {/*      <input type="text" className="input input-xs" {...register('place')}/>*/}
-          {/*    </td>*/}
-          {/*  </tr>*/}
-          {/*  <tr className='py-1'>*/}
-          {/*    <th className='px-1 text-end py-1'>說明：</th>*/}
-          {/*    <td className='py-1 flex justify-start'>*/}
-          {/*      <input type="text" className="input input-xs" {...register('remark')}/>*/}
-          {/*    </td>*/}
-          {/*  </tr>*/}
-          {/*  </tbody>*/}
-          {/*</table>*/}
+        <form>
           <div>
             <textarea id='remark' className="textarea textarea-sm w-full"
-                      placeholder="可輸入多行" {...register('remark')}></textarea>
+                      placeholder="可輸入多行" {...register('remark', {onBlur: handleEditImage})}>
+            </textarea>
           </div>
-          <div className="card-actions justify-between mt-2">
-            <button type='button' className='btn btn-sm btn-soft btn-error' onClick={handleRemoveImage}>
-              <MdDeleteForever className='text-lg'/>刪除
-            </button>
-            <button type='submit' className='btn btn-sm btn-soft btn-accent'>
-              <FaRegEdit/>儲存修改
-            </button>
-          </div>
+          {/*<div className="card-actions justify-between mt-2">*/}
+            {/*<button type='button' className='btn btn-sm btn-soft btn-error' onClick={handleRemoveImage}>*/}
+            {/*  <MdDeleteForever className='text-lg'/>刪除*/}
+            {/*</button>*/}
+            {/*<button type='submit' className='btn btn-sm btn-soft btn-accent'>*/}
+            {/*  <FaRegEdit/>儲存修改*/}
+            {/*</button>*/}
+          {/*</div>*/}
         </form>
       </div>
     </div>

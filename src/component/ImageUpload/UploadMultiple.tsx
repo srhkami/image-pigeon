@@ -47,7 +47,7 @@ export default function UploadMultiple({setImages, defaultRemark, setIsModalShow
           <fieldset className="fieldset">
             <label htmlFor='id_image' className='fieldset-legend'>上傳多張圖片：</label>
             <input id='id_image' type="file"
-                   multiple accept=".jpg,.jpeg,.png" className="file-input file-input-sm"
+                   multiple accept=".jpg,.jpeg,.png,.jfif,.bmp" className="file-input file-input-sm"
                    {...register('image')}/>
           </fieldset>
         </div>

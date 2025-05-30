@@ -100,10 +100,11 @@ export default function ModalOutput({images, isModalShow, setIsModalShow}: Props
                      className="input input-sm" {...register('title', {required: "此欄位必填"})}/>
               {errors.title && <span className="text-xs text-error text-start">{errors.title.message}</span>}
               <label htmlFor='mode' className='label mt-2'>排版</label>
-              <select className="select select-sm" id='mode' {...register('mode')}>
-                <option value='1'>一頁 2 張(上下排佈，適用橫式圖片)</option>
-                <option value='2'>一頁 2 張(左右排佈，適用直式圖片)</option>
-                <option value='6'>一頁 6 張(適用直式圖片)</option>
+              <select className="select select-sm" id='mode' {...register('mode', {required:true})}>
+                <option value=''>請選擇</option>
+                <option value='1'>一頁 2 張（上下排佈，適用橫式圖片）</option>
+                <option value='2'>一頁 2 張（左右排佈，適用直式圖片）</option>
+                <option value='6'>一頁 6 張（適用直式圖片)</option>
               </select>
               <div className='flex mt-2'>
                 <div className='flex-1/2 pr-1'>
