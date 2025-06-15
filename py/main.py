@@ -60,7 +60,7 @@ class Api:
     :return:
     """
     data = OutputData(request)
-    log().info(f'【{data.title}】壓縮圖片')
+    log().info(f'【{data.title}】開始壓縮圖片')
     log().info(json.dumps(data.to_dict(), ensure_ascii=False))
     try:
       for index, image in enumerate(data.to_images()):
@@ -68,6 +68,7 @@ class Api:
         filename = f'{data.title}_{index + 1}.jpg'
         save_path = os.path.join(data.path, filename)
         img.save(save_path)
+        log().info(f'{filename} 儲存成功')
       return Response(200, '儲存成功').to_dict()
     except Exception as e:
       log().exception(str(e), exc_info=True)
@@ -96,7 +97,7 @@ class Api:
         allow_multiple=False
       )
       path = folder[0] if folder else None
-    log().debug(f'選擇存檔位置：{path}')
+    log().info(f'選擇存檔位置：{path}')
     if not path:
       return Response(400, '已取消儲存').to_dict()
     return Response(200, path).to_dict()
