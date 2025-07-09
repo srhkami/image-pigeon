@@ -15,7 +15,7 @@ type Props = {
 export default function ModalUpload({setImages}: Props) {
 
   const [isShow, setIsShow] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const {register, watch} = useForm({
     defaultValues: {

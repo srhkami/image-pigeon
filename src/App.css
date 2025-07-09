@@ -1,9 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap");
-
 @import "tailwindcss";
-@theme {
-  --font-noto: "Noto+Sans+TC", sans-sans;
-}
+
 @plugin "daisyui" ;
 @plugin "daisyui/theme" {
   name: "dark";
