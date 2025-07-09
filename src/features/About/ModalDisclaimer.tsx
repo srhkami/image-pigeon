@@ -1,4 +1,4 @@
-import Modal from "../Layout/Modal.tsx";
+import {Modal} from "@/component";
 
 type Props = {
   readonly isShow: boolean,

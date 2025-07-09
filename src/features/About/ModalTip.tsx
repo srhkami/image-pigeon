@@ -1,6 +1,6 @@
-import Modal from "../Layout/Modal.tsx";
 import {ReactNode, useState} from "react";
 import {FaStarHalfAlt} from "react-icons/fa";
+import {Button, Modal} from "@/component";
 
 /* 各類功能提示的對話框 */
 export default function ModalTip() {
@@ -9,9 +9,9 @@ export default function ModalTip() {
 
   return (
     <>
-      <button className='btn  btn-secondary btn-soft' onClick={() => setIsShow(true)}>
+      <Button color='accent' style='outline' onClick={() => setIsShow(true)}>
         主要功能介紹
-      </button>
+      </Button>
       <Modal isShow={isShow} onHide={() => setIsShow(false)} closeButton>
         <div className='text-lg font-bold flex items-center justify-center'>
           <FaStarHalfAlt className='text-warning mr-2'/>

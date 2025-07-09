@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import { FiMoon, FiSun  } from "react-icons/fi";
+import {Button} from "@/component";
 
 export default function BtnThemeToggle() {
 
@@ -19,8 +20,8 @@ export default function BtnThemeToggle() {
   };
 
   return (
-    <button onClick={toggleTheme} className='btn btn-ghost btn-circle'>
+    <Button style='ghost' shape='circle' onClick={toggleTheme}>
       {theme === "dark" ? <FiMoon className='text-lg'/> : <FiSun className='text-lg'/>  }
-    </button>
+    </Button>
   );
 }

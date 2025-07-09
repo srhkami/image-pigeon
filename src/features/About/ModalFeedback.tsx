@@ -1,6 +1,6 @@
-import Modal from "../Layout/Modal.tsx";
 import {useState} from "react";
 import QRcode from '../../assets/line_qrcode.jpg'
+import {Button, Modal} from "@/component";
 
 export default function ModalFeedback() {
 
@@ -8,9 +8,10 @@ export default function ModalFeedback() {
 
   return (
     <>
-      <button className='btn btn-info btn-sm btn-soft ml-auto' onClick={() => setIsModalShow(true)}>
+      <Button color='info' size='sm' style='outline' className='ml-auto'
+              onClick={() => setIsModalShow(true)}>
         聯繫作者
-      </button>
+      </Button>
       <Modal isShow={isModalShow} onHide={() => setIsModalShow(false)} closeButton>
         <div className='text-lg font-bold mb-2'>聯繫作者</div>
         <div className='flex'>

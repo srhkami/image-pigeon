@@ -1,9 +1,10 @@
 import {BsFillPersonLinesFill} from "react-icons/bs";
 import {MdNumbers} from "react-icons/md";
-import {AppVersion} from "../../utils/info.ts";
+import {AppVersion} from "@/utils/log.ts";
 import ModalTip from "./ModalTip.tsx";
 import {FaShareAlt} from "react-icons/fa";
 import ModalFeedback from "./ModalFeedback.tsx";
+import {Badge} from "@/component";
 
 export default function Intro() {
   return (
@@ -11,19 +12,20 @@ export default function Intro() {
       <div className="card bg-neutral text-neutral-content w-96 my-10">
         <div className='card-body'>
           <div className='grid grid-cols-4 gap-4'>
-            <div className="badge badge-md badge-accent my-3">Step 1</div>
+            <Badge color='accent'>Step 1</Badge>
+            {/*<div className="badge badge-md badge-accent my-3">Step 1</div>*/}
             <div className='col-span-3 text-lg font-bold flex items-center'>
               點擊左下角
-              <button className='btn btn-sm  btn-outline mx-2'>
+              <button className='btn btn-sm btn-outline mx-2'>
                 新增圖片
               </button>
               按鈕
             </div>
-            <div className="badge badge-md badge-accent my-3">Step 2</div>
+            <Badge color='accent'>Step 2</Badge>
             <div className='col-span-3 text-lg font-bold flex items-center'>
               預覽、排序、編輯圖片
             </div>
-            <div className="badge badge-md badge-accent my-3">Step 3</div>
+            <Badge color='accent'>Step 3</Badge>
             <div className='col-span-3 text-lg font-bold flex items-center'>
               點擊右下角
               <button className='btn btn-sm mx-2 btn-outline'>
@@ -60,7 +62,7 @@ export default function Intro() {
               {AppVersion}
             </div>
             <div className='col-span-2 flex'>
-              <a className='btn btn-info btn-sm btn-soft ml-auto' target='_blank'
+              <a className='btn btn-info btn-sm btn-outline ml-auto' target='_blank'
                  href='https://drive.google.com/drive/folders/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm?usp=drive_link'>
                 檢查新版
               </a>
