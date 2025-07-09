@@ -1,6 +1,7 @@
 import {useState} from "react";
 import QRcode from '../../assets/line_qrcode.jpg'
-import {Button, Modal} from "@/component";
+import {Button, Modal, ModalHeader} from "@/component";
+import { MdFeedback } from "react-icons/md";
 
 export default function ModalFeedback() {
 
@@ -13,7 +14,9 @@ export default function ModalFeedback() {
         聯繫作者
       </Button>
       <Modal isShow={isModalShow} onHide={() => setIsModalShow(false)} closeButton>
-        <div className='text-lg font-bold mb-2'>聯繫作者</div>
+        <ModalHeader className='justify-center text-lg font-bold mb-2'>
+          <MdFeedback className='mr-2'/>聯繫作者
+        </ModalHeader>
         <div className='flex'>
           <div className='flex-2/5 p-3'>
             <a href="https://line.me/ti/p/mvI1aBkiy6" className="" target='_blank'>

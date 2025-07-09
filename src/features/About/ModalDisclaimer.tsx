@@ -1,15 +1,18 @@
-import {Modal} from "@/component";
+import {Modal, ModalBody, ModalHeader} from "@/component";
 
 type Props = {
   readonly isShow: boolean,
   readonly setIsShow: (value: boolean) => void,
 }
 
+/* 免責聲明的對話框 */
 export default function ModalDisclaimer({isShow, setIsShow}: Props) {
   return (
     <Modal isShow={isShow} onHide={() => setIsShow(false)} closeButton>
-      <div className="card-body">
+      <ModalHeader className='justify-center'>
         <h2 className="card-title">免責聲明</h2>
+      </ModalHeader>
+      <ModalBody>
         <p className='text-start indent-7'>
           本程式使用 Python + React 編寫而成，除自動檢測更新功能外，其餘功能均不連網，不涉及任何上傳資訊至網際網路的功能。
         </p>
@@ -19,7 +22,7 @@ export default function ModalDisclaimer({isShow, setIsShow}: Props) {
         <p className='text-start indent-7 underline'>
           如您對上列事項有任何顧慮，請立即關閉並刪除此軟體，否則均視為您已同意本聲明。
         </p>
-      </div>
+      </ModalBody>
     </Modal>
   )
 }

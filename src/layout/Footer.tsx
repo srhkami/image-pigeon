@@ -1,6 +1,6 @@
 import {CustomImage} from "../utils/type.ts";
-import ModalOutput from "@/features/ImageOutput/ModalOutput.tsx";
-import ModalUpload from "@/features/ImageUpload/ModalUpload.tsx";
+import ModalOutput from "@/features/Output/ModalOutput.tsx";
+import ModalUpload from "@/features/Upload/ModalUpload.tsx";
 import {Dispatch, SetStateAction} from "react";
 
 type Props = {

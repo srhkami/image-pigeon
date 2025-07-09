@@ -2,12 +2,8 @@ import './App.css'
 import {Toaster} from "react-hot-toast";
 import {useState} from "react";
 import {CustomImage} from "./utils/type.ts";
-import ImagePreview from "@/features/ImagePreview/ImagePreview.tsx";
-import Nav from "./layout/Nav.tsx";
-import Footer from "./layout/Footer.tsx";
-import Intro from "@/features/About/Intro.tsx";
-import ModalNewVersion from "@/features/About/ModalNewVersion.tsx";
-
+import {Footer, Nav} from "@/layout";
+import {ImagePreview, Intro, ModalNewVersion} from "@/features";
 
 function App() {
 
@@ -16,9 +12,12 @@ function App() {
   return (
     <div>
       <Nav/>
-      {!images.length && <Intro/>}
-      {/*圖片預覽*/}
-      <ImagePreview images={images} setImages={setImages}/>
+      <div className='min-h-[84vh]'>
+
+        {!images.length && <Intro/>}
+        {/*圖片預覽*/}
+        <ImagePreview images={images} setImages={setImages}/>
+      </div>
       {/*底端欄*/}
       <Footer
         images={images}

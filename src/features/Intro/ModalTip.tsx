@@ -1,6 +1,7 @@
-import {ReactNode, useState} from "react";
+import {useState} from "react";
 import {FaStarHalfAlt} from "react-icons/fa";
-import {Button, Modal} from "@/component";
+import {Button, Modal, ModalBody, ModalHeader} from "@/component";
+import TipCollapse from "@/features/Intro/TipCollapse.tsx";
 
 /* 各類功能提示的對話框 */
 export default function ModalTip() {
@@ -13,13 +14,12 @@ export default function ModalTip() {
         主要功能介紹
       </Button>
       <Modal isShow={isShow} onHide={() => setIsShow(false)} closeButton>
-        <div className='text-lg font-bold flex items-center justify-center'>
+        <ModalHeader className='justify-center text-lg font-bold' divider>
           <FaStarHalfAlt className='text-warning mr-2'/>
           主要功能介紹
-        </div>
-        <div className='divider mt-0'></div>
-        <div className=''>
-          <Collapse
+        </ModalHeader>
+        <ModalBody>
+          <TipCollapse
             title='自動帶入預設說明'
             textList={[
               '同一個時、地、說明文字，不斷複製貼上很麻煩？',
@@ -30,7 +30,7 @@ export default function ModalTip() {
             ]}
           />
 
-          <Collapse
+          <TipCollapse
             title='自動分割長截圖'
             textList={[
               '民眾提供對話記錄長截圖，不知怎麼黏貼？',
@@ -39,7 +39,7 @@ export default function ModalTip() {
               '現在長截圖已經自動以適當的高度分割成若干圖片了！',
             ]}
           />
-          <Collapse
+          <TipCollapse
             title='圖片自動壓縮及編號'
             textList={[
               '手機拍攝的圖片容量很大？數量多難以編號？',
@@ -49,7 +49,7 @@ export default function ModalTip() {
               '按下「另存圖片」按鈕，將整理、壓縮好的圖片匯出，就能得到有序又小巧的檔案！',
             ]}
           />
-          <Collapse
+          <TipCollapse
             title='預覽編輯圖片'
             textList={[
               '照片方向錯了？順序錯了？',
@@ -59,7 +59,7 @@ export default function ModalTip() {
               '「合併圖片」：可將兩個圖片結合，請注意此步驟無法復原',
             ]}
           />
-          <Collapse
+          <TipCollapse
             title='輸出不同排版'
             textList={[
               '不同案件，所需要的照片黏貼方向不同怎麼辦？',
@@ -68,49 +68,8 @@ export default function ModalTip() {
               '目前支援3種不同樣式，若您有其他建議，歡迎聯繫作者新增！',
             ]}
           />
-        </div>
+        </ModalBody>
       </Modal>
     </>
-  )
-}
-
-type Props = {
-  title: string,
-  textList?: Array<string>,
-  defaultChecked?: boolean,
-  children?: ReactNode | null,
-}
-
-/* 手風琴組件
-*  可傳入文字清單
-*  或傳入一個子組件，則會優先顯示
-*/
-function Collapse({title, textList = [], defaultChecked = false, children = null}: Props) {
-
-  const items = textList.map((text, index) => {
-    if (index === 0) {
-      return <li className="pb-2 text-xs opacity-60">{text}</li>
-    }
-    return (
-      <li className="list-row" key={index}>
-        <span className='mr-1'>{index}.</span>{text}
-      </li>
-    )
-  })
-
-  return (
-    <div className="collapse collapse-arrow bg-base-100 border border-base-300 mt-2">
-      <input type="radio" name="my-accordion-2" defaultChecked={defaultChecked}/>
-      <div className="collapse-title font-semibold text-start">{title}</div>
-      <div className="collapse-content text-sm text-start">
-        {children ?
-          children
-          :
-          <ul className="list">
-            {items}
-          </ul>
-        }
-      </div>
-    </div>
   )
 }
