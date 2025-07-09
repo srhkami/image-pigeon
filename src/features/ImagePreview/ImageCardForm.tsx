@@ -2,10 +2,11 @@ import {SubmitHandler, useForm} from "react-hook-form";
 import {MdDeleteForever} from "react-icons/md";
 import {FaCaretSquareUp, FaCaretSquareDown} from "react-icons/fa";
 import {FaArrowRotateRight, FaArrowRotateLeft} from "react-icons/fa6";
-import React from "react";
-import {CustomImage} from "../../utils/type.ts";
+import React, {useEffect} from "react";
+import {CustomImage} from "@/utils/type.ts";
 import toast from "react-hot-toast";
 import {MdOutlineCallMerge} from "react-icons/md";
+import {Button} from "@/component";
 
 type Props = {
   readonly img: CustomImage,
@@ -16,13 +17,16 @@ type Props = {
 
 export default function ImageCardForm({img, index, images, setImages}: Props) {
 
-  const {register,getValues } = useForm<CustomImage>({defaultValues: {remark: img.remark}});
+  const {register, getValues, setValue} = useForm<CustomImage>();
+
+  useEffect(() => {
+    setValue('remark', img.remark);
+  }, [images]);
 
   // 修改圖片備註
   const handleEditImage: SubmitHandler<CustomImage> = () => {
 
     const formData = getValues();
-    console.log(formData);
     setImages(prev => {
       // 篩選出這個項目進行修改
       return prev.map((imgItem, i) => {
@@ -32,7 +36,6 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
         return imgItem;
       });
     });
-    console.log(images);
     toast.success(`編號${index + 1} 備註已儲存`);
   };
 
@@ -121,30 +124,31 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
 
   return (
     <div className="card bg-base-100 border shadow-sm my-2 mx-auto p-1 md:w-2/3 lg:w-1/2 items-center justify-center">
-      {/*<div className='absolute top-0 left-0 bg-white text-black opacity-75 rounded-tl z-10'>*/}
-      {/*  <span className='text-sm mr-1'>編號</span>*/}
-      {/*  <span className='font-semibold'>{index + 1} </span>*/}
-      {/*</div>*/}
       <div className='absolute top-0 right-1 rounded-tr flex flex-col z-10'>
         <button type='button' className='btn btn-sm btn-soft btn-error mt-2 mb-1' onClick={handleRemoveImage}>
           <MdDeleteForever className='text-lg'/>
         </button>
         <div className='divider my-1'></div>
-        <button className='btn btn-sm btn-soft btn-info my-1' onClick={handleUp} title='上移'>
+        <Button color='info' size='sm' style='soft' className='my-1' title='上移'
+                onClick={handleUp}>
           <FaCaretSquareUp/>
-        </button>
-        <button className='btn btn-sm btn-soft btn-info my-1' onClick={handleDown} title='下移'>
+        </Button>
+        <Button color='info' size='sm' style='soft' className='my-1' title='下移'
+                onClick={handleDown}>
           <FaCaretSquareDown/>
-        </button>
-        <button className='btn btn-sm btn-soft btn-info my-1' onClick={() => handleRotate(90)} title='右旋'>
+        </Button>
+        <Button color='info' size='sm' style='soft' className='my-1' title='順時針旋轉'
+                onClick={() => handleRotate(90)}>
           <FaArrowRotateRight/>
-        </button>
-        <button className='btn btn-sm btn-soft btn-info my-1' onClick={() => handleRotate(-90)} title='右旋'>
+        </Button>
+        <Button color='info' size='sm' style='soft' className='my-1' title='逆時針旋轉'
+                onClick={() => handleRotate(-90)}>
           <FaArrowRotateLeft/>
-        </button>
-        <button className='btn btn-sm btn-soft btn-info my-1' onClick={handleCheckMerge} title='與上圖合併'>
+        </Button>
+        <Button color='info' size='sm' style='soft' className='my-1' title='與上圖合併'
+                onClick={handleCheckMerge}>
           <MdOutlineCallMerge className='text-xl'/>
-        </button>
+        </Button>
       </div>
       <figure className='relative aspect-video w-full max-w-xl overflow-hidden'>
         <div className="absolute inset-0 flex items-center justify-center"
@@ -161,7 +165,7 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
       </figure>
       <hr/>
       <div className='divider my-1'>
-        <span >編號</span>
+        <span>編號</span>
         <span className='font-semibold'>{index + 1} </span>
       </div>
       <div className="w-full p-2">
@@ -172,12 +176,12 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
             </textarea>
           </div>
           {/*<div className="card-actions justify-between mt-2">*/}
-            {/*<button type='button' className='btn btn-sm btn-soft btn-error' onClick={handleRemoveImage}>*/}
-            {/*  <MdDeleteForever className='text-lg'/>刪除*/}
-            {/*</button>*/}
-            {/*<button type='submit' className='btn btn-sm btn-soft btn-accent'>*/}
-            {/*  <FaRegEdit/>儲存修改*/}
-            {/*</button>*/}
+          {/*<button type='button' className='btn btn-sm btn-soft btn-error' onClick={handleRemoveImage}>*/}
+          {/*  <MdDeleteForever className='text-lg'/>刪除*/}
+          {/*</button>*/}
+          {/*<button type='submit' className='btn btn-sm btn-soft btn-accent'>*/}
+          {/*  <FaRegEdit/>儲存修改*/}
+          {/*</button>*/}
           {/*</div>*/}
         </form>
       </div>

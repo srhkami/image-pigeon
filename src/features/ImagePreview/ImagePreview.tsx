@@ -1,4 +1,4 @@
-import {CustomImage} from "../../utils/type.ts";
+import {CustomImage} from "@/utils/type.ts";
 import React, {ReactNode} from "react";
 import ImageCardForm from "./ImageCardForm.tsx";
 

@@ -19,7 +19,7 @@ export default function TipCollapse({title, textList}:Props) {
   })
 
   return (
-    <Collapse inputName='tip' className='my-1' icon='plus'>
+    <Collapse inputName='tip' className='my-2' icon='plus'>
       <CollapseTitle>
         {title}
       </CollapseTitle>

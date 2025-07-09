@@ -29,7 +29,7 @@ export default function ChangelogCollapse({obj}: Props) {
   })
 
   return (
-    <Collapse inputName='change_log' className='my-1' icon='plus'>
+    <Collapse inputName='change_log' className='my-2' icon='plus'>
       <CollapseTitle>
         {obj.version + '（' + obj.date + '）'}
       </CollapseTitle>
