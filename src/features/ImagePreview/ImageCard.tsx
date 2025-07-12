@@ -1,27 +1,41 @@
-import {SubmitHandler, useForm} from "react-hook-form";
-import {MdDeleteForever} from "react-icons/md";
-import {FaCaretSquareUp, FaCaretSquareDown} from "react-icons/fa";
-import {FaArrowRotateRight, FaArrowRotateLeft} from "react-icons/fa6";
-import React, {useEffect} from "react";
+import {useSortable} from "@dnd-kit/sortable";
+import {CSS} from "@dnd-kit/utilities";
 import {CustomImage} from "@/utils/type.ts";
-import toast from "react-hot-toast";
 import {MdOutlineCallMerge} from "react-icons/md";
 import {Button} from "@/component";
+import {FaArrowRotateLeft, FaArrowRotateRight, FaXmark} from "react-icons/fa6";
+import {SubmitHandler, useForm} from "react-hook-form";
+import toast from "react-hot-toast";
+import {twMerge} from "tailwind-merge";
+import clsx from "clsx";
+import { CgMenuGridR } from "react-icons/cg";
+import {Dispatch, SetStateAction} from "react";
 
 type Props = {
+  readonly id :string,
   readonly img: CustomImage,
   readonly index: number,
   readonly images: CustomImage[],
-  readonly setImages: React.Dispatch<React.SetStateAction<CustomImage[]>>
+  readonly setImages: Dispatch<SetStateAction<CustomImage[]>>
 }
 
-export default function ImageCardForm({img, index, images, setImages}: Props) {
+export default function ImageCard({id, img, index, images, setImages}: Props) {
 
-  const {register, getValues, setValue} = useForm<CustomImage>();
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({id})
 
-  useEffect(() => {
-    setValue('remark', img.remark);
-  }, [images]);
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition
+  }
+
+  const {register, getValues} = useForm<CustomImage>({defaultValues: {remark:img.remark}});
 
   // 修改圖片備註
   const handleEditImage: SubmitHandler<CustomImage> = () => {
@@ -49,24 +63,6 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
     });
   };
 
-  // 項目往上移
-  const handleUp = () => {
-    const updateList = [...images];
-    if (index !== 0) {
-      [updateList[index], updateList[index - 1]] = [updateList[index - 1], updateList[index]]
-    }
-    setImages(updateList);
-  }
-
-  // 項目往下移
-  const handleDown = () => {
-    const updateList = [...images];
-    if (index !== updateList.length - 1) {
-      [updateList[index], updateList[index + 1]] = [updateList[index + 1], updateList[index]]
-    }
-    setImages(updateList);
-  }
-
   // 旋轉照片角度
   const handleRotate = (value: 90 | -90) => {
     const newRotation = (img.rotation + value) % 360
@@ -82,6 +78,7 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
     });
   }
 
+  // 確認照片合併
   const handleCheckMerge = () => {
     toast(t => (
       <div>
@@ -122,30 +119,39 @@ export default function ImageCardForm({img, index, images, setImages}: Props) {
     toast.success('合併成功')
   }
 
+  const classes = twMerge(
+    'card bg-base-100 border shadow-sm my-2 mx-auto p-1 md:w-2/3 lg:w-1/2 items-center justify-center',
+    clsx({
+      'border-2 border-accent z-20 opacity-95 backdrop-blur-lg': isDragging,
+    })
+  )
+
   return (
-    <div className="card bg-base-100 border shadow-sm my-2 mx-auto p-1 md:w-2/3 lg:w-1/2 items-center justify-center">
-      <div className='absolute top-0 right-1 rounded-tr flex flex-col z-10'>
-        <button type='button' className='btn btn-sm btn-soft btn-error mt-2 mb-1' onClick={handleRemoveImage}>
-          <MdDeleteForever className='text-lg'/>
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      style={style}
+      className={classes}
+    >
+      <div className='absolute top-2 left-2 rounded-tr flex flex-col z-10'>
+        <button {...listeners} className="btn btn-accent btn-ghost btn-circle cursor-grab">
+          <CgMenuGridR className='text-lg'/>
         </button>
+      </div>
+      <div className='absolute top-2 right-2 rounded-tr flex flex-col z-10'>
+        <Button color='error' style='ghost' shape='circle' onClick={handleRemoveImage}>
+          <FaXmark className='text-lg'/>
+        </Button>
         <div className='divider my-1'></div>
-        <Button color='info' size='sm' style='soft' className='my-1' title='上移'
-                onClick={handleUp}>
-          <FaCaretSquareUp/>
-        </Button>
-        <Button color='info' size='sm' style='soft' className='my-1' title='下移'
-                onClick={handleDown}>
-          <FaCaretSquareDown/>
-        </Button>
-        <Button color='info' size='sm' style='soft' className='my-1' title='順時針旋轉'
+        <Button color='info' style='ghost' shape='circle' title='順時針旋轉'
                 onClick={() => handleRotate(90)}>
           <FaArrowRotateRight/>
         </Button>
-        <Button color='info' size='sm' style='soft' className='my-1' title='逆時針旋轉'
+        <Button color='info' style='ghost' shape='circle' title='逆時針旋轉'
                 onClick={() => handleRotate(-90)}>
           <FaArrowRotateLeft/>
         </Button>
-        <Button color='info' size='sm' style='soft' className='my-1' title='與上圖合併'
+        <Button color='info' style='ghost' shape='circle'  title='與上圖合併'
                 onClick={handleCheckMerge}>
           <MdOutlineCallMerge className='text-xl'/>
         </Button>

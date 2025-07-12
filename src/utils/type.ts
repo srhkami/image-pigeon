@@ -21,6 +21,7 @@ export type TSelectPath = {
 }
 
 export class CustomImage {
+  id: string
   file: File | null;
   preview: string;
   remark: string;
@@ -31,6 +32,7 @@ export class CustomImage {
   rotation: 0 | 90 | 180 | 270 = 0; // 預設角度為 0
 
   constructor(file: File | null, remark: string) {
+    this.id = crypto.randomUUID();
     this.file = file;
     this.preview = file ? URL.createObjectURL(file) : '';
     this.remark = remark;

@@ -2,6 +2,15 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '1.4.0',
+    date: '1140712',
+    logs: [
+      {color: "new", text: '圖片預覽現在支援拖拽排序'},
+      {color: "info", text: '調整圖片預覽按鈕樣式'},
+      {color: "info", text: '更換檢查更新的網址'},
+    ]
+  },
+  {
   version: '1.3.1',
   date: '1140709',
   logs: [

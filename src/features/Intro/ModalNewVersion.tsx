@@ -10,7 +10,7 @@ import {AppVersion} from "@/utils/log.ts";
 const handleCheckVersion = async () => {
   const res = await axios({
     method: 'GET',
-    url: 'https://api.trafficpigeon.com/api/app/image/latest/',
+    url: 'https://api.pigeonhand.tw/web/app/image/latest/',
   })
   return res.data as TVersionCheck
 }

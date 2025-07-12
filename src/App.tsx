@@ -13,7 +13,6 @@ function App() {
     <div>
       <Nav/>
       <div className='min-h-[84vh]'>
-
         {!images.length && <Intro/>}
         {/*圖片預覽*/}
         <ImagePreview images={images} setImages={setImages}/>
