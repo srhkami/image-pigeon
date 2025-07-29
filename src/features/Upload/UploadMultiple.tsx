@@ -2,6 +2,7 @@ import {SubmitHandler, useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
 import {CustomImage} from "../../utils/type.ts";
 import toast from "react-hot-toast";
+import {Button} from "@/component";
 
 type TFormValue = {
   image: FileList,
@@ -47,12 +48,14 @@ export default function UploadMultiple({setImages, defaultRemark, setIsModalShow
           <fieldset className="fieldset">
             <label htmlFor='id_image' className='fieldset-legend'>上傳多張圖片：</label>
             <input id='id_image' type="file"
-                   multiple accept=".jpg,.jpeg,.png,.jfif,.bmp" className="file-input file-input-sm"
+                   multiple accept=".jpg,.jpeg,.png,.jfif,.bmp" className="file-input"
                    {...register('image')}/>
           </fieldset>
         </div>
-        <div className='mx-auto'>
-          <button className='btn btn-primary btn-sm'>新增</button>
+        <div className='mx-auto mt-2'>
+          <Button color='primary'>
+            新增
+          </Button>
         </div>
       </div>
     </form>

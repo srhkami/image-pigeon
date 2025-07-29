@@ -16,10 +16,10 @@ export async function showToast<T>(
   option?: TOption | null,
 ) {
 
-  const baseText = option?.baseText ? option.baseText : '處理';
-  const loadingText = option?.loading ? option.loading : baseText + '中...';
-  const successText = option?.success ? option.success : null;
-  const errorText = option?.error ? option.error : baseText + '失敗，請重試';
+  const baseText = option?.baseText ?? '處理';
+  const loadingText = option?.loading ?? baseText + '中...';
+  const successText = option?.success ?? null;
+  const errorText = option?.error ?? baseText + '失敗，請重試';
 
   return await toast.promise(
     func,

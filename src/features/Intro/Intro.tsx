@@ -2,9 +2,8 @@ import {BsFillPersonLinesFill} from "react-icons/bs";
 import {MdNumbers} from "react-icons/md";
 import {AppVersion} from "@/utils/log.ts";
 import ModalTip from "./ModalTip.tsx";
-import {FaShareAlt} from "react-icons/fa";
 import ModalFeedback from "./ModalFeedback.tsx";
-import {Badge} from "@/component";
+import {Badge, Button, Col, Row} from "@/component";
 
 export default function Intro() {
   return (
@@ -67,13 +66,26 @@ export default function Intro() {
                 檢查新版
               </a>
             </div>
-            <div className='col-span-5 flex justify-start items-center mt-2'>
-              <FaShareAlt className='mr-2'/>
-              本軟體分享於
-              <a className='link link-info ml-1' href="https://trafficpigeon.com/"
-                 target='_blank'>交通鴿手</a>
-            </div>
+
+
           </div>
+          <div className='divider my-1 text-xs'>作者的網站</div>
+          <Row>
+            <Col xs={6} className='px-1'>
+              <Button style='outline' shape='block'
+              onClick={()=>window.open('https://pigeonhand.tw')}>
+                <img src='/Logo_PH.png' alt="" className='w-4 h-4'/>
+                鴿手
+              </Button>
+            </Col>
+            <Col xs={6} className='px-1'>
+              <Button style='outline' shape='block'
+                      onClick={()=>window.open('https://traffic.pigeonhand.tw')}>
+                <img src='/Logo_TP.png' alt="" className='w-5 h-5'/>
+                交通鴿手
+              </Button>
+            </Col>
+          </Row>
         </div>
       </div>
     </div>

@@ -6,8 +6,9 @@ from handle_image import CustomImage, crop_img
 from handle_doc import creat_docx, add_header
 from handle_request import OutputData, Response
 from handle_log import log
+from pprint import pprint
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 
 class Api:
@@ -74,6 +75,23 @@ class Api:
       log().exception(str(e), exc_info=True)
       return Response(500, '處理失敗，請回報作者').to_dict()
 
+  def save_json(self, request):
+    """
+    儲存JSON檔
+    :param request: 來自前端的圖片物件
+    :return:
+    """
+    data = OutputData(request)
+    log().info(f'【{data.title}】開始儲存JSON')
+    pprint(request)
+    try:
+      with open(data.path, 'w', encoding="utf-8") as file:
+        json.dump(request, file, ensure_ascii=False)
+      return Response(200, '儲存成功').to_dict()
+    except Exception as e:
+      log().exception(str(e), exc_info=True)
+      return Response(500,str(e)).to_dict()
+
   def select_path(self, data):
     """
     選擇路徑
@@ -88,18 +106,26 @@ class Api:
       path = webview.windows[0].create_file_dialog(
         webview.SAVE_DIALOG,
         save_filename=f'{title}.docx',
-        file_types=('Word 文件 (*.docx)',)
+        file_types=('WORD 文件 (*.docx)',)
       )
-      log().debug(f'存檔位置：{path}')
+    elif mode == 'json':
+      path = webview.windows[0].create_file_dialog(
+        webview.SAVE_DIALOG,
+        save_filename=f'{title}.json',
+        file_types=('JSON 文件 (*.json)',)
+      )
     else:
       folder = webview.windows[0].create_file_dialog(
         webview.FOLDER_DIALOG,
         allow_multiple=False
       )
       path = folder[0] if folder else None
-    log().info(f'選擇存檔位置：{path}')
+
     if not path:
-      return Response(400, '已取消儲存').to_dict()
+      error_text = '已取消儲存'
+      log().error(error_text)
+      return Response(400, error_text).to_dict()
+    log().info(f'選擇存檔位置：{path}')
     return Response(200, path).to_dict()
 
 

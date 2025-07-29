@@ -36,14 +36,13 @@ export default function ModalUpload({setImages}: Props) {
           <span>新增圖片</span>
         </ModalHeader>
         <ModalBody>
-            <form className='mt-2'>
+            <form className='mt-2 p-1'>
               <label className="floating-label">
                 <span>圖片預設說明</span>
-                <textarea id='remark' className="textarea textarea-sm w-full" placeholder="圖片預設說明"
+                <textarea id='remark' className="textarea w-full" placeholder="圖片預設說明"
                           {...register('remark')}></textarea>
               </label>
             </form>
-
           <div role="alert" className="alert mt-2">
             <IoMdAlert className='text-lg'/>
             <span>預設說明會套用在本次新增的每一張圖片上</span>
@@ -54,7 +53,7 @@ export default function ModalUpload({setImages}: Props) {
               <AlertLoading/>
               :
               <div className="tabs tabs-lift mx-auto">
-                <input type="radio" name="my_tabs_3" className="tab" aria-label="普通上  傳" defaultChecked/>
+                <input type="radio" name="my_tabs_3" className="tab" aria-label="普通上傳" defaultChecked/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadMultiple setImages={setImages} defaultRemark={remark}
                                   setIsModalShow={setIsShow} setIsLoading={setIsLoading}/>
@@ -67,12 +66,6 @@ export default function ModalUpload({setImages}: Props) {
               </div>
           }
         </ModalBody>
-
-        {/*<div className='flex justify-center items-center'>*/}
-        {/*  <MdOutlineUploadFile className='text-lg mr-2'/>*/}
-        {/*  <span className='text-lg font-bold'>新增圖片</span>*/}
-        {/*</div>*/}
-
       </Modal>
     </>
   )

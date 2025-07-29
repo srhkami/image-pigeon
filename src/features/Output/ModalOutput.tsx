@@ -1,14 +1,15 @@
 import {CustomImage, TOutputData} from "@/utils/type.ts";
 import {SubmitHandler, useForm} from "react-hook-form";
 import {BiSolidFileExport} from "react-icons/bi";
-import toast from "react-hot-toast";
 import {FaRegFileWord} from "react-icons/fa6";
 import {useState} from "react";
 import AlertLoading from "../../layout/AlertLoading.tsx";
 import {checkStatus} from "@/utils/handleError.ts";
 import {Modal} from "@/component/index.ts";
 import {Button, FormInputCol, ModalBody, Row} from "@/component";
-import { LuImageDown } from "react-icons/lu";
+import {LuImageDown} from "react-icons/lu";
+import {showToast} from "@/utils/handleToast.ts";
+import {useModal} from "@/hooks";
 
 type Props = {
   readonly images: CustomImage[],
@@ -16,7 +17,7 @@ type Props = {
 
 export default function ModalOutput({images}: Props) {
 
-  const [isShow, setIsShow] = useState<boolean>(false);
+  const {isShow, onShow, onHide} = useModal();
   const [isLoading, setIsLoading] = useState<boolean>(false); // 載中入狀態，要禁止按鈕
 
   const {
@@ -25,73 +26,76 @@ export default function ModalOutput({images}: Props) {
     formState: {errors}
   } = useForm<TOutputData>({defaultValues: {title: '照片黏貼表', min_size: 1000}});
 
-  // const handleModalHide = () => setIsModalShow(false);
-
   const handleSaveDocx: SubmitHandler<TOutputData> = (formData) => {
-    toast.promise(
+    setIsLoading(true);
+    showToast(
       async () => {
-        try {
-          const res1 = await window.pywebview.api.select_path({mode: 'word', title: formData.title});
-          checkStatus(res1);
-          setIsLoading(true);
-          const data = {
-            ...formData,
-            images: images,
-            path: res1.message
-          }
-          const res2 = await window.pywebview.api.save_docx(data);
-          checkStatus(res2);
-          setIsLoading(false);
-          setIsShow(false);
-        } catch (error) {
-          setIsLoading(false);
-          throw error;
+        const res1 = await window.pywebview.api.select_path({mode: 'word', title: formData.title});
+        checkStatus(res1);
+        const data = {
+          ...formData,
+          images: images,
+          path: res1.message
         }
+        const res2 = await window.pywebview.api.save_docx(data);
+        checkStatus(res2);
       },
-      {
-        loading: '儲存中...',
-        success: '儲存成功',
-        error: (err) => `${err.toString()}`,
-      })
+      {success: '儲存成功', error: (err => err.toString())}
+    )
+      .then(() => onHide())
+      .finally(() => setIsLoading(false))
   }
 
   const handleSaveImages: SubmitHandler<TOutputData> = (formData) => {
-    toast.promise(
+    setIsLoading(true);
+    showToast(
       async () => {
-        try {
-          const res1 = await window.pywebview.api.select_path({mode: 'images'});
-          checkStatus(res1);
-          setIsLoading(true);
-          const data = {
-            ...formData,
-            images: images,
-            path: res1.message
-          }
-          const res2 = await window.pywebview.api.save_images(data);
-          checkStatus(res2);
-          setIsLoading(false);
-          setIsShow(false);
-        } catch (error) {
-          setIsLoading(false);
-          throw error
+        const res1 = await window.pywebview.api.select_path({mode: 'images'});
+        checkStatus(res1);
+        const data = {
+          ...formData,
+          images: images,
+          path: res1.message
         }
-      }, {
-        loading: '儲存中...',
-        success: '儲存成功',
-        error: (err) => `${err.toString()}`,
-      }
+        const res2 = await window.pywebview.api.save_images(data);
+        checkStatus(res2);
+        setIsLoading(false);
+      },
+      {success: '儲存成功', error: err => err.toString()}
     )
+      .then(() => onHide())
+      .finally(() => setIsLoading(false))
   }
 
+  const onSaveJson: SubmitHandler<TOutputData> = (formData) => {
+    setIsLoading(true);
+    showToast(
+      async () => {
+        const res1 = await window.pywebview.api.select_path({mode: 'json'});
+        checkStatus(res1);
+        const data = {
+          ...formData,
+          images: images,
+          path: res1.message
+        }
+        const res2 = await window.pywebview.api.save_json(data);
+        checkStatus(res2);
+        setIsLoading(false);
+      },
+      {success: '儲存成功', error: err => err.toString()}
+    )
+      .then(() => onHide())
+      .finally(() => setIsLoading(false))
+  }
 
   return (
     <>
       <Button color='success' disabled={images.length === 0}
-              onClick={() => setIsShow(true)}>
+              onClick={onShow}>
         <BiSolidFileExport/>
         輸出檔案
       </Button>
-      <Modal isShow={isShow} onHide={() => setIsShow(false)} closeButton>
+      <Modal isShow={isShow} onHide={onHide} closeButton>
         <ModalBody>
           <div className='flex justify-center items-center'>
             <BiSolidFileExport className='text-lg mr-2'/>
@@ -149,9 +153,13 @@ export default function ModalOutput({images}: Props) {
             <AlertLoading/>
             :
             <div className='mt-4 flex'>
-              <Button color='accent' className='mr-auto'
+              <Button color='accent' className='mr-2'
                       onClick={handleSubmit(handleSaveImages)}>
-                <LuImageDown />另存圖片
+                <LuImageDown/>另存圖片
+              </Button>
+              <Button color='accent' className='mr-auto'
+                      onClick={handleSubmit(onSaveJson)}>
+                <LuImageDown/>儲存專用檔案
               </Button>
               {/*<button className='btn btn-success btn-sm btn-disabled'>*/}
               {/*  <FaRegFilePdf/>*/}

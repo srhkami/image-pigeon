@@ -10,6 +10,7 @@ declare global {
         save_docx(data: TOutputData): Promise<Response<null>>,
         crop_image(image: CustomImage): Promise<Response<Array<{ base64: string, width: number, height: number }>>>,
         save_images(data: TOutputData): Promise<Response<null>>,
+        save_json(data: TOutputData): Promise<Response<null>>,
         select_path(data: TSelectPath): Promise<Response<null>>,
       };
     }

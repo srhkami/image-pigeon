@@ -16,7 +16,7 @@ export type TOutputData = {
 }
 
 export type TSelectPath = {
-  mode: 'word' | 'images',
+  mode: 'word' | 'images' | 'json',
   title?: string,
 }
 

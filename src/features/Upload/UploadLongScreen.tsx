@@ -3,6 +3,7 @@ import {Dispatch, SetStateAction} from "react";
 import {CustomImage} from "../../utils/type.ts";
 import toast from "react-hot-toast";
 import {checkStatus} from "../../utils/handleError.ts";
+import {Button} from "@/component";
 
 type TFormValue = {
   image: FileList,
@@ -64,12 +65,14 @@ export default function UploadLongScreen({setImages, defaultRemark, setIsModalSh
         <div className='mx-auto'>
           <fieldset className="fieldset">
             <label htmlFor='id_image' className='fieldset-legend'>上傳長截圖：</label>
-            <input id='id_image' type="file" accept=".jpg,.jpeg,.png" className="file-input file-input-sm"
+            <input id='id_image' type="file" accept=".jpg,.jpeg,.png" className="file-input"
                    {...register('image')}/>
           </fieldset>
         </div>
-        <div className='mx-auto'>
-          <button className='btn btn-primary btn-sm'>新增</button>
+        <div className='mx-auto mt-2'>
+          <Button color='primary'>
+          新增
+        </Button>
         </div>
       </div>
     </form>
