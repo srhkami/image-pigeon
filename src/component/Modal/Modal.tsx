@@ -33,7 +33,7 @@ export default function Modal({
   if (!modalRoot || !isShow) return null
 
   const modalBoxClass = twMerge(
-    'modal-box max-h-screen flex flex-col overflow-hidden',
+    'modal-box  max-h-[94vh] flex flex-col overflow-hidden',
     className,
     clsx({
       'max-w-[18rem]': size === 'xs',

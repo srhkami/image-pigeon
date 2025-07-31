@@ -1,10 +1,29 @@
 import {Loading} from "@/component";
+import {useEffect, useState} from "react";
 
-export default function AlertLoading() {
+type Props = {
+  readonly count?: number,
+}
+
+export default function AlertLoading({count}: Props) {
+
+  const [progress, setProgress] = useState<number>(0);
+
+  useEffect(() => {
+    // 定義 Python 會調用的全域方法
+    window.pywebview.updateProgress = (progress) => {
+      console.log(`進度：${progress}%`);
+      setProgress(progress);
+    };
+  }, []);
+
   return (
-    <div className='alert mx-auto flex justify-center items-center text-error w-full'>
-      <Loading size='xl' style='bars'/>
-      <span className='text-lg'>處理中請稍後</span>
+    <div className='alert mx-auto flex flex-col justify-center items-center text-error w-full'>
+      <div className='flex items-center'>
+        <Loading size='xl' style='bars'/>
+        <span className='text-lg ml-4'>處理中請稍後</span>
+      </div>
+      {count && <progress className="progress progress-info w-full" value={progress} max={count}></progress>}
     </div>
   )
 }

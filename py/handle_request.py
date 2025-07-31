@@ -1,4 +1,6 @@
 from handle_image import CustomImage
+from handle_log import log
+import webview
 
 
 class OutputData:
@@ -17,15 +19,28 @@ class OutputData:
     self.font_size = int(data.get('font_size'))  # 字體大小
     self.path = data.get('path')  # 儲存路徑
 
-  def to_images(self):
+  def to_compressed_images(self) -> list[CustomImage]:
     """
-    :return: 轉換成自訂python圖片的清單
+    把所有圖片轉換成壓縮後的自訂圖片物件清單
+    :return: 轉換成自訂python圖片的清單，並於過程中壓縮
     """
     images = []  # python 圖片的清單
-    for file in self.files:
+    for index, file in enumerate(self.files):
       image = CustomImage(file, self.min_size, self.quality)  # 逐一轉化成python自訂物件
+      log().info(f'轉換圖片：{index + 1}/{self.file_count}')
+      webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({index})")
       images.append(image)
     return images
+
+  def to_compressed_image(self, index: int) -> CustomImage:
+    """
+    把單一圖片轉換成壓縮後的自訂圖片物件
+    :param index:
+    :return: 轉換成自訂python中自訂的圖片類型，並於過程中壓縮
+    """
+    image = CustomImage(self.files[index], self.min_size, self.quality)  # 逐一轉化成python自訂物件
+    log().info(f'轉換圖片：{index + 1}/{self.file_count} 完成')
+    return image
 
   def to_dict(self):
     return {

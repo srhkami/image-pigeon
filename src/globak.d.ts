@@ -12,7 +12,8 @@ declare global {
         save_images(data: TOutputData): Promise<Response<null>>,
         save_json(data: TOutputData): Promise<Response<null>>,
         select_path(data: TSelectPath): Promise<Response<null>>,
-      };
+      },
+      updateProgress: (progress: number) => void,
     }
   }
 }

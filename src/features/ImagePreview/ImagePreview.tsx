@@ -16,11 +16,11 @@ import {
   restrictToVerticalAxis,
   restrictToWindowEdges
 } from '@dnd-kit/modifiers'
-import ImageCard from "@/features/ImagePreview/ImageCard.tsx";
+import {ImageCard} from "@/features";
 
 type Props = {
-  images: CustomImage[],
-  setImages: Dispatch<SetStateAction<CustomImage[]>>
+  readonly images: CustomImage[],
+  readonly setImages: Dispatch<SetStateAction<CustomImage[]>>
 }
 
 export default function ImagePreview({images, setImages}: Props) {
@@ -41,6 +41,8 @@ export default function ImagePreview({images, setImages}: Props) {
     }
   }
 
+
+
   const imageList: ReactNode[] = images.map((img, index) => (
     <ImageCard key={img.id} id={img.id} img={img} index={index} images={images} setImages={setImages}/>
   ))
@@ -56,7 +58,7 @@ export default function ImagePreview({images, setImages}: Props) {
         items={images.map(item => item.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className='columns-1 px-3 py-5'>
+        <div className='columns-1 px-3 py-5 flex flex-col items-center'>
           {imageList}
         </div>
       </SortableContext>

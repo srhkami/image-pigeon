@@ -2,9 +2,9 @@ import {twMerge} from "tailwind-merge";
 import clsx from "clsx";
 
 type Props = {
-  style?:'spinner'|'dots'|'ring'|'ball'|'bars'|'infinity',
-  size?:'xs'|'sm'|'md'|'lg'|'xl',
-  className?:string,
+  readonly style?:'spinner'|'dots'|'ring'|'ball'|'bars'|'infinity',
+  readonly size?:'xs'|'sm'|'md'|'lg'|'xl',
+  readonly className?:string,
 }
 
 export default function Loading({style='spinner',size='md', className}: Props) {

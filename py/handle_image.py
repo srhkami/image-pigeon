@@ -19,7 +19,7 @@ class CustomImage:
 
 def base64_to_image(base64_str: str, rotation, min_size: int, quality: int) -> BytesIO:
   """
-  將base64圖片轉化成BytesIO
+  將base64圖片轉化成BytesIO，並壓縮
   :param base64_str: base64的字串
   :param rotation: 角度
   :param min_size: 最小尺寸

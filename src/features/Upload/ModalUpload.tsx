@@ -5,7 +5,7 @@ import {Dispatch, SetStateAction, useState} from "react";
 import {useForm} from "react-hook-form";
 import {IoMdAlert} from "react-icons/io";
 import AlertLoading from "../../layout/AlertLoading.tsx";
-import {Button, Modal, ModalBody, ModalHeader} from "@/component";
+import {Alert, Button, Modal, ModalBody, ModalHeader} from "@/component";
 import { LuImageUp } from "react-icons/lu";
 
 type Props = {
@@ -43,14 +43,17 @@ export default function ModalUpload({setImages}: Props) {
                           {...register('remark')}></textarea>
               </label>
             </form>
-          <div role="alert" className="alert mt-2">
+          <Alert color='info' className='mt-2'>
             <IoMdAlert className='text-lg'/>
             <span>預設說明會套用在本次新增的每一張圖片上</span>
-          </div>
+          </Alert>
+          {/*<div role="alert" className="alert mt-2">*/}
+
+          {/*</div>*/}
           <div className='divider'></div>
           {
             isLoading ?
-              <AlertLoading/>
+              <AlertLoading />
               :
               <div className="tabs tabs-lift mx-auto">
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="普通上傳" defaultChecked/>

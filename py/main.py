@@ -8,7 +8,7 @@ from handle_request import OutputData, Response
 from handle_log import log
 from pprint import pprint
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 
 class Api:
@@ -64,12 +64,15 @@ class Api:
     log().info(f'【{data.title}】開始壓縮圖片')
     log().info(json.dumps(data.to_dict(), ensure_ascii=False))
     try:
-      for index, image in enumerate(data.to_images()):
+      for index in range(data.file_count):
+        image = data.to_compressed_image(index)
         img = Image.open(image.stream)
         filename = f'{data.title}_{index + 1}.jpg'
         save_path = os.path.join(data.path, filename)
         img.save(save_path)
         log().info(f'{filename} 儲存成功')
+        # 主動呼叫前端增加數量
+        webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({index})")
       return Response(200, '儲存成功').to_dict()
     except Exception as e:
       log().exception(str(e), exc_info=True)
@@ -90,7 +93,7 @@ class Api:
       return Response(200, '儲存成功').to_dict()
     except Exception as e:
       log().exception(str(e), exc_info=True)
-      return Response(500,str(e)).to_dict()
+      return Response(500, str(e)).to_dict()
 
   def select_path(self, data):
     """

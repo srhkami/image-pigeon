@@ -2,6 +2,16 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '1.4.1',
+    date: '1140731',
+    logs: [
+      {color: "new", text: '在預覽圖片最下方加入「全部清除」按鈕'},
+      {color: "new", text: '儲存功能加入進度條介面'},
+      {color: "new", text: '首頁加入「作者的網站」'},
+      {color: "info", text: '改善輸出檔案對話框，區分儲存圖片及Word功能'},
+    ]
+  },
+  {
     version: '1.4.0',
     date: '1140712',
     logs: [

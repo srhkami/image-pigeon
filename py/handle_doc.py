@@ -8,6 +8,7 @@ from PIL import Image
 from handle_image import CustomImage
 from handle_request import OutputData
 from handle_log import log
+import webview
 
 
 def creat_docx(data: OutputData):
@@ -18,17 +19,21 @@ def creat_docx(data: OutputData):
   """
   doc = Document()
   doc = set_font(doc, data.font_size)
-  images = data.to_images()
+  images = data.to_compressed_images()
   match data.mode:
     case 1:
-      for index, image in enumerate(images):
-        doc = add_table_two_of_page_horizontal(doc, data.align_vertical, image, index + 1)
+      # for index, image in enumerate(images):
+      for i in range(0, data.file_count):
+        doc = add_table_two_of_page_horizontal(doc, data.align_vertical, images[i], i + 1)
+        webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
     case 2:
-      for i in range(0, len(images), 2):
+      for i in range(0, data.file_count, 2):
         doc = add_table_two_of_page_vertical(doc, data.align_vertical, images[i:i + 2], i + 1)
+        webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
     case 6:
-      for i in range(0, len(images), 3):
+      for i in range(0, data.file_count, 3):
         doc = add_table_six_of_page(doc, data.align_vertical, images[i:i + 3], i + 1)
+        webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
   return doc
 
 
@@ -117,6 +122,7 @@ def add_table_two_of_page_vertical(doc, align, images: list[CustomImage], index:
   """
   建立一頁2張圖片的表格(垂直圖片，左右排佈）
   :param doc: 傳入的doc文件
+  :param align: 對齊方式
   :param images: 傳入的圖片物件清單，最多會傳入兩張圖片
   :param index: 序號，已經轉換成從1開始
   :return: 回傳doc文件

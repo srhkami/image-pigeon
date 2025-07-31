@@ -81,8 +81,8 @@ export default function ImageCard({id, img, index, images, setImages}: Props) {
   // 確認照片合併
   const handleCheckMerge = () => {
     toast(t => (
-      <div>
-        <span className='font-bold'>是否將本張圖片與上張圖片合併？</span>
+      <div className='w-52'>
+        <div className='font-bold'>是否將本張圖片與上張圖片合併？</div>
         <div className='text-sm text-error text-start'>此操作無法復原</div>
         <div className='flex justify-end mt-2'>
           <button className='btn btn-sm btn-success' onClick={() => {
@@ -120,7 +120,7 @@ export default function ImageCard({id, img, index, images, setImages}: Props) {
   }
 
   const classes = twMerge(
-    'card bg-base-100 border shadow-sm my-2 mx-auto p-1 md:w-2/3 lg:w-1/2 items-center justify-center',
+    'card bg-base-100 border shadow-sm my-2 p-1 md:w-2/3 lg:w-1/2 items-center justify-center',
     clsx({
       'border-2 border-accent z-20 opacity-95 backdrop-blur-lg': isDragging,
     })

@@ -10,35 +10,42 @@ export default function Intro() {
     <div className='flex justify-center items-center'>
       <div className="card bg-neutral text-neutral-content w-96 my-10">
         <div className='card-body'>
-          <div className='grid grid-cols-4 gap-4'>
-            <Badge color='accent'>Step 1</Badge>
-            {/*<div className="badge badge-md badge-accent my-3">Step 1</div>*/}
-            <div className='col-span-3 text-lg font-bold flex items-center'>
+          <Row>
+            <Col xs={3} className='text-lg font-bold flex items-center my-2'>
+              <Badge color='accent'>Step 1</Badge>
+            </Col>
+            <Col xs={9} className='text-lg font-bold flex items-center my-2'>
               點擊左下角
               <button className='btn btn-sm btn-outline mx-2'>
                 新增圖片
               </button>
               按鈕
-            </div>
-            <Badge color='accent'>Step 2</Badge>
-            <div className='col-span-3 text-lg font-bold flex items-center'>
-              預覽、排序、編輯圖片
-            </div>
-            <Badge color='accent'>Step 3</Badge>
-            <div className='col-span-3 text-lg font-bold flex items-center'>
-              點擊右下角
-              <button className='btn btn-sm mx-2 btn-outline'>
-                輸出檔案
-              </button>
-              按鈕
-            </div>
-            <div className='col-span-4 text-lg font-bold my-2'>
+            </Col>
+            <Col xs={3} className='text-lg font-bold flex items-center my-2'>
+              <Badge color='accent'>Step 2</Badge>
+            </Col>
+            <Col xs={9} className='text-lg font-bold flex items-center my-2'>
+                預覽、排序、編輯圖片
+            </Col>
+            <Col xs={3} className='text-lg font-bold flex items-center my-2'>
+              <Badge color='accent'>Step 3</Badge>
+            </Col>
+            <Col xs={9} className='text-lg font-bold flex items-center my-2'>
+              <div className='col-span-3 text-lg font-bold flex items-center'>
+                點擊右下角
+                <button className='btn btn-sm mx-2 btn-outline'>
+                  輸出檔案
+                </button>
+                按鈕
+              </div>
+            </Col>
+            <Col xs={12} className='text-lg font-bold my-3'>
               恭喜您完成一份照片黏貼表！
-            </div>
-            <div className='col-span-4 flex justify-end'>
+            </Col>
+            <Col xs={12} className='text-lg font-bold flex justify-end'>
               <ModalTip/>
-            </div>
-          </div>
+            </Col>
+          </Row>
           <div className='divider my-1'></div>
           <div className='grid grid-cols-5 gap-2 font-bold text-gray-300'>
             <div className='flex justify-start items-center'>
@@ -66,8 +73,6 @@ export default function Intro() {
                 檢查新版
               </a>
             </div>
-
-
           </div>
           <div className='divider my-1 text-xs'>作者的網站</div>
           <Row>
