@@ -8,7 +8,7 @@ from handle_request import OutputData, Response
 from handle_log import log
 from pprint import pprint
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 
 class Api:

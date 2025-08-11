@@ -10,11 +10,12 @@ export default function AlertLoading({count}: Props) {
   const [progress, setProgress] = useState<number>(0);
 
   useEffect(() => {
-    // 定義 Python 會調用的全域方法
-    window.pywebview.updateProgress = (progress) => {
-      console.log(`進度：${progress}%`);
-      setProgress(progress);
-    };
+    if (count) {
+      // 定義 Python 會調用的全域方法
+      window.pywebview.updateProgress = (progress) => {
+        setProgress(progress);
+      };
+    }
   }, []);
 
   return (
