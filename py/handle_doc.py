@@ -6,12 +6,12 @@ from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor
 from PIL import Image
 from handle_image import CustomImage
-from handle_request import OutputData
+from handle_request import OutputWord
 from handle_log import log
 import webview
 
 
-def creat_docx(data: OutputData):
+def creat_docx(data: OutputWord):
   """
   一頁兩張的函數
   :param data:
@@ -262,7 +262,7 @@ def handle_table_write(image: CustomImage, align, index,
       # 圖片更長，設定高為表格上限
       image_cell.paragraphs[0].add_run().add_picture(image.stream, height=Cm(max_height))
 
-    # 設定圖片位置
+    # 設定圖片位置'1
     image_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
     image_cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     log().info(f'編號{index}圖片寫入完成')

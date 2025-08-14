@@ -2,6 +2,14 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '1.4.2',
+    date: '1140731',
+    logs: [
+      {color: "new", text: '上傳圖片新增將檔名作為備註的選項。'},
+      {color: "info", text: '長截圖現在會裁剪上下各3%的重複區域，以避免文字被意外截斷。'},
+    ]
+  },
+  {
     version: '1.4.1',
     date: '1140731',
     logs: [
@@ -21,14 +29,14 @@ export const CHANGELOG_LIST: Array<TVersionObject> = [
     ]
   },
   {
-  version: '1.3.1',
-  date: '1140709',
-  logs: [
-    {color: "fix", text: '修復圖片上下移動無法儲存對應備註的問題'},
-    {color: "info", text: '調整部分文字、按鈕、輸入框大小'},
-    {color: "info", text: '調整部分介面顏色'},
-  ]
-},
+    version: '1.3.1',
+    date: '1140709',
+    logs: [
+      {color: "fix", text: '修復圖片上下移動無法儲存對應備註的問題'},
+      {color: "info", text: '調整部分文字、按鈕、輸入框大小'},
+      {color: "info", text: '調整部分介面顏色'},
+    ]
+  },
   {
     version: '1.3.0',
     date: '1140531',

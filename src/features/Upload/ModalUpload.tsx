@@ -6,15 +6,21 @@ import {useForm} from "react-hook-form";
 import {IoMdAlert} from "react-icons/io";
 import AlertLoading from "../../layout/AlertLoading.tsx";
 import {Alert, Button, Modal, ModalBody, ModalHeader} from "@/component";
-import { LuImageUp } from "react-icons/lu";
+import {LuImageUp} from "react-icons/lu";
+import {useModal} from "@/hooks";
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
 }
 
+/**
+ *  上傳檔案的對話框
+ * @param setImages 設定圖片列表State的函數
+ * @constructor
+ */
 export default function ModalUpload({setImages}: Props) {
 
-  const [isShow, setIsShow] = useState<boolean>(false);
+  const {isShow, onShow, onHide} = useModal()
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const {register, watch} = useForm({
@@ -26,45 +32,42 @@ export default function ModalUpload({setImages}: Props) {
 
   return (
     <>
-      <Button color='primary' onClick={() => setIsShow(true)}>
-        <LuImageUp />
+      <Button color='primary' onClick={onShow}>
+        <LuImageUp/>
         新增圖片
       </Button>
-      <Modal isShow={isShow} onHide={() => setIsShow(false)} closeButton>
+      <Modal isShow={isShow} onHide={onHide} closeButton>
         <ModalHeader className='justify-center text-lg font-bold'>
           <LuImageUp className='mr-2'/>
           <span>新增圖片</span>
         </ModalHeader>
         <ModalBody>
-            <form className='mt-2 p-1'>
-              <label className="floating-label">
-                <span>圖片預設說明</span>
-                <textarea id='remark' className="textarea w-full" placeholder="圖片預設說明"
-                          {...register('remark')}></textarea>
-              </label>
-            </form>
+          <form className='mt-2 p-1'>
+            <label className="floating-label">
+              <span>圖片預設備註</span>
+              <textarea id='remark' className="textarea w-full" placeholder="圖片預設說明"
+                        {...register('remark')}></textarea>
+            </label>
+          </form>
           <Alert color='info' className='mt-2'>
             <IoMdAlert className='text-lg'/>
-            <span>預設說明會套用在本次新增的每一張圖片上</span>
+            <span>預設備註會套用在本次新增的每一張圖片上</span>
           </Alert>
-          {/*<div role="alert" className="alert mt-2">*/}
-
-          {/*</div>*/}
           <div className='divider'></div>
           {
             isLoading ?
-              <AlertLoading />
+              <AlertLoading count={100}/>
               :
               <div className="tabs tabs-lift mx-auto">
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="普通上傳" defaultChecked/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadMultiple setImages={setImages} defaultRemark={remark}
-                                  setIsModalShow={setIsShow} setIsLoading={setIsLoading}/>
+                                  onHide={onHide} setIsLoading={setIsLoading}/>
                 </div>
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="長截圖分割"/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadLongScreen setImages={setImages} defaultRemark={remark}
-                                    setIsModalShow={setIsShow} setIsLoading={setIsLoading}/>
+                                    onHide={onHide} setIsLoading={setIsLoading}/>
                 </div>
               </div>
           }

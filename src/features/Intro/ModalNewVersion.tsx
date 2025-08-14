@@ -5,6 +5,7 @@ import {Modal, ModalBody} from "@/component";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {AppVersion} from "@/utils/log.ts";
+import {useModal} from "@/hooks";
 
 /* 檢查新版本 */
 const handleCheckVersion = async () => {
@@ -20,7 +21,7 @@ const handleCheckVersion = async () => {
  */
 export default function ModalNewVersion() {
 
-  const [isShow, setIsShow] = useState<boolean>(false);
+  const {isShow, onShow, onHide} = useModal()
   const [data, setData] = useState<TVersionCheck | null>(null); // 更新資料
 
   // 檢查新版本
@@ -29,13 +30,13 @@ export default function ModalNewVersion() {
       .then(data => {
         if (data.version !== AppVersion) {
           setData(data);
-          setIsShow(true);
+          onShow();
         }
       })
   }, []);
 
   return (
-    <Modal isShow={isShow} onHide={()=>setIsShow(false)} closeButton>
+    <Modal isShow={isShow} onHide={onHide} closeButton>
       <ModalBody>
         <div className='text-lg font-bold mt-1 mb-4'>有新版本可供下載！</div>
         <div className='grid grid-cols-4'>
@@ -50,7 +51,7 @@ export default function ModalNewVersion() {
             <HiOutlineClipboardList className='mr-2'/>
             更新內容
           </div>
-          <div className='col-span-3 flex justify-start items-center text-start'>
+          <div className='col-span-3 flex justify-start items-center text-start whitespace-pre-wrap'>
             {data?.changelog}
           </div>
         </div>

@@ -64,11 +64,15 @@ def crop_img(image: CustomImage):
     if w / h <= 9 / 21:
       # 如果圖片寬高比小於手機螢幕尺寸，判斷是長截圖
       nh = w * 2  # 以寬為基礎，每2倍的寬分割一次，
+      reserve_h = nh * 0.03  # 預留的上下空間，以避免文字被意外裁切
       blocks = math.ceil(h / nh)  # 應分割區塊數
       log().info(f'分割數：{blocks}')
       return_images = []
       for i in range(0, blocks):
-        cropped = img.crop((0, i * nh, w, (i + 1) * nh))  # (原點x, 原點y, 終點x, 終點-y)
+        if i == 0:
+          cropped = img.crop((0, i * nh, w, (i + 1) * nh + (reserve_h * 2)))  # (原點x, 原點y, 終點x, 終點-y)
+        else:
+          cropped = img.crop((0, i * nh - reserve_h, w, (i + 1) * nh + reserve_h))  # (原點x, 原點y, 終點x, 終點-y)
         return_images.append(pil_image_to_base64(cropped))
       return return_images
     else:

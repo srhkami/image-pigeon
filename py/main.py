@@ -2,9 +2,9 @@ import json
 from PIL import Image
 import webview
 import os.path
-from handle_image import CustomImage, crop_img
+from handle_image import CustomImage, crop_img, pil_image_to_base64
 from handle_doc import creat_docx, add_header
-from handle_request import OutputData, Response
+from handle_request import Response, UploadImages, OutputWord,
 from handle_log import log
 from pprint import pprint
 
@@ -12,13 +12,25 @@ DEBUG_MODE = True
 
 
 class Api:
+
+  def upload_image(self, request):
+    """
+    將單張的上傳圖片壓縮後再傳回前端
+    :param request:
+    :return:
+    """
+    # pprint(request)
+    data = UploadImages(request)
+    base64_images = data.to_base64_image()
+    return Response(status=200, data=base64_images).to_dict()
+
   def save_docx(self, request):
     """
     儲存圖片成docx檔
     :param request: 情求的資料
     :return:
     """
-    data = OutputData(request)
+    data = OutputWord(request)
     log().info(f'【{data.title}】儲存Word開始執行')
     log().info(json.dumps(data.to_dict(), ensure_ascii=False))
 
@@ -46,8 +58,8 @@ class Api:
       image = CustomImage(file)
       images = crop_img(image)
       if not len(images):
-        log().error('此圖片非屬於長截圖')
-        return Response(400, '此圖片非屬於長截圖').to_dict()
+        log().error('此圖片不是長截圖')
+        return Response(400, '此圖片不是長截圖').to_dict()
       log().info('分割成功，執行完畢')
       return Response(200, '新增成功', images).to_dict()
     except Exception as e:
@@ -64,15 +76,15 @@ class Api:
     log().info(f'【{data.title}】開始壓縮圖片')
     log().info(json.dumps(data.to_dict(), ensure_ascii=False))
     try:
-      for index in range(data.file_count):
-        image = data.to_compressed_image(index)
+      for i in range(data.file_count):
+        image = data.to_compressed_image(i)
         img = Image.open(image.stream)
-        filename = f'{data.title}_{index + 1}.jpg'
+        filename = f'{data.title}_{i + 1}.jpg'
         save_path = os.path.join(data.path, filename)
         img.save(save_path)
         log().info(f'{filename} 儲存成功')
         # 主動呼叫前端增加數量
-        webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({index})")
+        webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
       return Response(200, '儲存成功').to_dict()
     except Exception as e:
       log().exception(str(e), exc_info=True)

@@ -4,6 +4,29 @@ export type Response<T> = {
   data: T,
 }
 
+export type UploadImages = {
+  files: Array<CustomImage>;
+  min_size: number, // 最小尺寸
+  quality: '100' | '90' | '80' | '70', // 壓縮率
+}
+
+export interface OutputData {
+  title: string,
+  images: Array<CustomImage>,
+  path: string,
+}
+
+export interface OutputWord extends OutputData {
+  mode: '1' | '2' | '6',
+  align_vertical: 'top' | 'center',
+  font_size: '10' | '11' | '12' | '13' | '14',
+}
+
+export interface OutputImages extends OutputData {
+  min_size: number,
+  quality: '100' | '90' | '80' | '70',
+}
+
 export type TOutputData = {
   title: string,
   images: Array<CustomImage>,
@@ -135,4 +158,10 @@ export type TVersionObject = {
   version: string,
   date: string,
   logs: Array<{ color: 'new' | 'info' | 'fix', text: string }>,
+}
+
+export type base64Image = {
+  base64: string,
+  width: number,
+  height: number,
 }

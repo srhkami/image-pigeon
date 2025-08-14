@@ -56,7 +56,13 @@ export default function SaveImages({images}: Props) {
       <FormInputCol xs={12} label='檔案名稱' error={errors.title?.message}>
         <input type='text' className="input w-full"
                {...register('title', {required: "此填寫此欄位"})}/>
+        <label className="label mt-2 text-sm">
+          <input type="checkbox" className="checkbox"
+                 {...register('isFileNameMode')}/>
+          將每張圖片的備註當作檔名儲存
+        </label>
       </FormInputCol>
+
       <FormInputCol xs={6} label='圖片壓縮率' error={errors.quality?.message}>
         <select className="select w-full" id='quality' defaultValue='80' {...register('quality')}>
           <option value='90'>低（90%）</option>
