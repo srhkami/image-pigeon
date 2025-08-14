@@ -55,15 +55,14 @@ export default function ModalOutput({images}: Props) {
             <div className="tab-content bg-base-100 border-base-300 p-6">
               <SaveImages images={images}/>
             </div>
-            <input type="radio" name="output_tabs" className="tab" aria-label="直接列印"/>
-            <div className="tab-content bg-base-100 border-base-300 p-6">
-              <Print images={images}/>
-            </div>
+            {/*<input type="radio" name="output_tabs" className="tab" aria-label="直接列印"/>*/}
+            {/*<div className="tab-content bg-base-100 border-base-300 p-6">*/}
+            {/*  <Print images={images}/>*/}
+            {/*</div>*/}
             <input type="radio" name="output_tabs" className="tab" aria-label="儲存WORD"/>
             <div className="tab-content bg-base-100 border-base-300 p-6">
               <SaveWord images={images}/>
             </div>
-
           </div>
         </ModalBody>
       </Modal>

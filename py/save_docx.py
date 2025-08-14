@@ -4,11 +4,84 @@ from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor
+
 from PIL import Image
-from handle_image import CustomImage
-from handle_request import OutputWord
 from handle_log import log
 import webview
+from handle_request import OutputBaseData
+from save_images import SaveImage
+
+
+# class SaveImage:
+#   def __init__(self, image):
+#     self.name = image.get('name')
+#     self.remark = image.get('remark')  # 圖片說明
+#     self.rotation = image.get('rotation') * -1  # 旋轉角度，前端傳入及Pillow的角度相反
+#     self.stream = self.base64_to_BytesIO(image.get('base64'))  # 文件流
+#
+#   def base64_to_BytesIO(self, base64_str: str) -> BytesIO:
+#     """
+#     將base64圖片轉化成BytesIO，並壓縮
+#     :param base64_str: base64的字串
+#     :return: BytesIO
+#     """
+#     try:
+#       # 1）解析 data URL ，去掉 "data:image/xxx;base64,"
+#       if "," in base64_str:
+#         header, encoded = base64_str.split(",", 1)
+#       else:
+#         header, encoded = "", base64_str
+#
+#       # 2）解析base64資料，使用PIL開啟圖片
+#       raw = base64.b64decode(encoded)
+#       pil_image = Image.open(BytesIO(raw))
+#
+#       # 3）旋轉圖片（正角度為逆時針）
+#       pil_image = pil_image.rotate(self.rotation, expand=True)
+#
+#       # 4) 建立BytesIO格式
+#       out_buf = BytesIO()
+#
+#       # 5) 輸出到記憶體
+#       pil_image.save(out_buf, format="JPEG")
+#       out_buf.seek(0)
+#
+#       return out_buf
+#
+#     except Exception as e:
+#       log().error(f'處理圖片錯誤：{str(e)}', exc_info=True)
+
+
+class OutputWord(OutputBaseData):
+  """
+  輸出成word的資料
+  """
+
+  def __init__(self, request):
+    super().__init__(request)
+    self.mode = int(request.get('mode', 1))  # 模式
+    self.align_vertical = request.get('align_vertical')  # 垂直對齊
+    self.font_size = int(request.get('font_size'))  # 字體大小
+
+  def to_compressed_images(self) -> list[SaveImage]:
+    """
+    把所有圖片轉換成壓縮後的自訂圖片物件清單
+    :return: 轉換成自訂python圖片的清單，並於過程中壓縮
+    """
+    images = []  # python 圖片的清單
+    for index, file in enumerate(self.files):
+      image = SaveImage(file)  # 逐一轉化成python自訂物件
+      log().info(f'處理圖片：{index + 1}/{self.file_count}')
+      webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({index})")
+      images.append(image)
+    return images
+
+  def to_dict(self):
+    return {
+      '標題': self.title,
+      '檔案數': self.file_count,
+      '模式': self.mode,
+    }
 
 
 def creat_docx(data: OutputWord):
@@ -78,7 +151,7 @@ def handle_number(no: int) -> str:
   return f'編號0{no}' if no < 10 else f'編號{no}'
 
 
-def add_table_two_of_page_horizontal(doc, align, image: CustomImage, index: int):
+def add_table_two_of_page_horizontal(doc, align, image: SaveImage, index: int):
   """
   建立一頁2張圖片的表格(水平圖片，上下排佈）
   :param doc: 傳入的doc文件
@@ -118,7 +191,7 @@ def add_table_two_of_page_horizontal(doc, align, image: CustomImage, index: int)
     log().exception(str(e))
 
 
-def add_table_two_of_page_vertical(doc, align, images: list[CustomImage], index: int):
+def add_table_two_of_page_vertical(doc, align, images: list[SaveImage], index: int):
   """
   建立一頁2張圖片的表格(垂直圖片，左右排佈）
   :param doc: 傳入的doc文件
@@ -167,10 +240,11 @@ def add_table_two_of_page_vertical(doc, align, images: list[CustomImage], index:
     log().exception(str(e))
 
 
-def add_table_six_of_page(doc, align, images: list[CustomImage], index):
+def add_table_six_of_page(doc, align, images: list[SaveImage], index):
   """
   建立一頁6張圖片的表格
   :param doc: 傳入的doc文件
+  :param align: 對齊
   :param images: 傳入的圖片物件清單，最多會傳入三張圖片
   :param index: 序號，已經轉換成從1開始
   :return: 回傳doc文件
@@ -226,12 +300,13 @@ def add_table_six_of_page(doc, align, images: list[CustomImage], index):
     log().exception(str(e))
 
 
-def handle_table_write(image: CustomImage, align, index,
+def handle_table_write(image: SaveImage, align, index,
                        image_cell, number_cell, remark_cell,
                        max_height: int | float, max_width: int | float):
   """
   寫入單一表格的資訊
   :param image: 圖片物件
+  :param align: 對齊
   :param index: 編號
   :param image_cell: 圖片的表格
   :param number_cell: 編號的表格

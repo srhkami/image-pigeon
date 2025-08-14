@@ -10,33 +10,33 @@ export type UploadImages = {
   quality: '100' | '90' | '80' | '70', // 壓縮率
 }
 
-export interface OutputData {
+export interface OutputBaseData {
   title: string,
   images: Array<CustomImage>,
   path: string,
 }
 
-export interface OutputWord extends OutputData {
+
+export interface OutputWord extends OutputBaseData {
   mode: '1' | '2' | '6',
   align_vertical: 'top' | 'center',
   font_size: '10' | '11' | '12' | '13' | '14',
 }
 
-export interface OutputImages extends OutputData {
-  min_size: number,
-  quality: '100' | '90' | '80' | '70',
+export interface SaveAsImages extends OutputBaseData {
+  is_remark_mode: boolean,
 }
 
-export type TOutputData = {
-  title: string,
-  images: Array<CustomImage>,
-  min_size: number,
-  mode: string,
-  quality: '100' | '90' | '80' | '70',
-  align_vertical: 'top' | 'center',
-  font_size: '10' | '11' | '12' | '13' | '14',
-  path: string,
-}
+// export type TOutputData = {
+//   title: string,
+//   images: Array<CustomImage>,
+//   min_size: number,
+//   mode: string,
+//   quality: '100' | '90' | '80' | '70',
+//   align_vertical: 'top' | 'center',
+//   font_size: '10' | '11' | '12' | '13' | '14',
+//   path: string,
+
 
 export type TSelectPath = {
   mode: 'word' | 'images' | 'json',

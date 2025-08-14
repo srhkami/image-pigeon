@@ -11,6 +11,7 @@ type Props = {
   readonly defaultRemark: string,
   readonly onHide: () => void,
   readonly setIsLoading: (value: boolean) => void,
+  readonly setCount: Dispatch<SetStateAction<number>>,
 }
 
 export type FromValues = {
@@ -21,7 +22,7 @@ export type FromValues = {
 }
 
 /* 新增多張圖片 */
-export default function UploadMultiple({setImages, defaultRemark, onHide, setIsLoading}: Props) {
+export default function UploadMultiple({setImages, defaultRemark, onHide, setIsLoading, setCount}: Props) {
 
   const {register, handleSubmit, reset, formState: {errors}}
     = useForm<FromValues>({defaultValues: {min_size: 1000}});
@@ -31,10 +32,11 @@ export default function UploadMultiple({setImages, defaultRemark, onHide, setIsL
       async () => {
         setIsLoading(true);
         const files = Array.from(formData.files);
+        setCount(files.length);
         const filesNames = files.map(file => file.name)
         // 將每個檔案轉換成 CustomImage
         const imageInstances = files.map(file => {
-          const remark = formData.isFileNameMode ? file.name : defaultRemark;
+          const remark = file.name;
           return new CustomImage(file, remark)
         });
         // 逐一等待 base64 等欄位初始化完成
@@ -69,10 +71,7 @@ export default function UploadMultiple({setImages, defaultRemark, onHide, setIsL
                  {...register('files', {required: '請上傳圖片'})}/>
           <div className='flex items-center opacity-60'>
             <IoAlertCircleOutline className='text-lg mr-2'/>
-            <span className='text-sm'>
-                  從後往前選取能保證圖片順序正確
-                </span>
-
+            <span className='text-sm'>從後往前選取能保證順序正確</span>
           </div>
         </FormInputCol>
         <FormInputCol xs={6} label='圖片壓縮率' error={errors.quality?.message}>
@@ -94,7 +93,7 @@ export default function UploadMultiple({setImages, defaultRemark, onHide, setIsL
           <label className="label">
             <input type="checkbox" className="checkbox"
                    {...register('isFileNameMode')}/>
-            使用檔名當作每張圖片的備註，不套用預設備註
+            使用檔名作為每張圖片的備註，不套用預設備註
           </label>
         </Col>
         <Col xs={12} className='mt-4'>

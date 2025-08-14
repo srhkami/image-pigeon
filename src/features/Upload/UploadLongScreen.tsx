@@ -1,9 +1,8 @@
 import {useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
-import {base64Image, CustomImage} from "../../utils/type.ts";
-import toast from "react-hot-toast";
-import {checkStatus} from "../../utils/handleError.ts";
-import {Button} from "@/component";
+import {base64Image, CustomImage} from "@/utils/type.ts";
+import {checkStatus} from "@/utils/handleError.ts";
+import {Button, Col, FormInputCol, Row} from "@/component";
 import {showToast} from "@/utils/handleToast.ts";
 
 type TFormValue = {
@@ -20,7 +19,7 @@ type Props = {
 /* 新增長截圖，並傳至後端自動分割，之後提供預覽 */
 export default function UploadLongScreen({setImages, defaultRemark, onHide, setIsLoading}: Props) {
 
-  const {register, handleSubmit, reset} = useForm<TFormValue>();
+  const {register, handleSubmit, reset, formState:{errors}} = useForm<TFormValue>();
 
   const omSubmit = async (formData: TFormValue) => {
     showToast(
@@ -55,20 +54,17 @@ export default function UploadLongScreen({setImages, defaultRemark, onHide, setI
 
   return (
     <form onSubmit={handleSubmit(omSubmit)}>
-      <div className='flex flex-col'>
-        <div className='mx-auto'>
-          <fieldset className="fieldset">
-            <label htmlFor='id_image' className='fieldset-legend'>上傳長截圖：</label>
-            <input id='id_image' type="file" accept=".jpg,.jpeg,.png" className="file-input"
-                   {...register('image')}/>
-          </fieldset>
-        </div>
-        <div className='mx-auto mt-3'>
-          <Button color='primary'>
+      <Row>
+        <FormInputCol xs={12} label='上傳多張截圖' error={errors.image?.message}>
+          <input id='id_image' type="file" accept=".jpg,.jpeg,.png" className="file-input w-full"
+                 {...register('image',{required:'請上傳圖片'})}/>
+        </FormInputCol>
+        <Col xs={12} className='mt-6'>
+          <Button color='primary' shape='block'>
             新增
           </Button>
-        </div>
-      </div>
+        </Col>
+      </Row>
     </form>
   )
 }

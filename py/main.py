@@ -1,12 +1,13 @@
 import json
-from PIL import Image
 import webview
 import os.path
-from handle_image import CustomImage, crop_img, pil_image_to_base64
-from handle_doc import creat_docx, add_header
-from handle_request import Response, UploadImages, OutputWord,
+from save_docx import creat_docx, add_header, OutputWord
+from handle_request import Response
 from handle_log import log
 from pprint import pprint
+from upload_imags import UploadImages
+from crop_image import LongScreenImage, crop_to_images
+from save_images import SaveAsImages, save
 
 DEBUG_MODE = True
 
@@ -19,10 +20,27 @@ class Api:
     :param request:
     :return:
     """
-    # pprint(request)
     data = UploadImages(request)
-    base64_images = data.to_base64_image()
+    base64_images = data.to_base64_images()
     return Response(status=200, data=base64_images).to_dict()
+
+  def crop_image(self, file):
+    """
+    切割長截圖
+    :param file
+    :return:
+    """
+    try:
+      image = LongScreenImage(file)
+      images = crop_to_images(image)
+      if not len(images):
+        log().error('此圖片不是長截圖')
+        return Response(400, '此圖片不是長截圖').to_dict()
+      log().info('分割成功，執行完畢')
+      return Response(200, '新增成功', images).to_dict()
+    except Exception as e:
+      log().exception(str(e), exc_info=True)
+      return Response(500, '處理失敗，請回報作者').to_dict()
 
   def save_docx(self, request):
     """
@@ -48,64 +66,38 @@ class Api:
       log().exception(str(e), exc_info=True)
       return Response(500, '處理失敗，請回報作者').to_dict()
 
-  def crop_image(self, file):
-    """
-    切割長截圖
-    :param file
-    :return:
-    """
-    try:
-      image = CustomImage(file)
-      images = crop_img(image)
-      if not len(images):
-        log().error('此圖片不是長截圖')
-        return Response(400, '此圖片不是長截圖').to_dict()
-      log().info('分割成功，執行完畢')
-      return Response(200, '新增成功', images).to_dict()
-    except Exception as e:
-      log().exception(str(e), exc_info=True)
-      return Response(500, '處理失敗，請回報作者').to_dict()
-
   def save_images(self, request):
     """
     直接儲存壓縮後的圖片
     :param request:
     :return:
     """
-    data = OutputData(request)
+    data = SaveAsImages(request)
     log().info(f'【{data.title}】開始壓縮圖片')
     log().info(json.dumps(data.to_dict(), ensure_ascii=False))
     try:
-      for i in range(data.file_count):
-        image = data.to_compressed_image(i)
-        img = Image.open(image.stream)
-        filename = f'{data.title}_{i + 1}.jpg'
-        save_path = os.path.join(data.path, filename)
-        img.save(save_path)
-        log().info(f'{filename} 儲存成功')
-        # 主動呼叫前端增加數量
-        webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
+      save(data)
       return Response(200, '儲存成功').to_dict()
     except Exception as e:
       log().exception(str(e), exc_info=True)
       return Response(500, '處理失敗，請回報作者').to_dict()
 
-  def save_json(self, request):
-    """
-    儲存JSON檔
-    :param request: 來自前端的圖片物件
-    :return:
-    """
-    data = OutputData(request)
-    log().info(f'【{data.title}】開始儲存JSON')
-    pprint(request)
-    try:
-      with open(data.path, 'w', encoding="utf-8") as file:
-        json.dump(request, file, ensure_ascii=False)
-      return Response(200, '儲存成功').to_dict()
-    except Exception as e:
-      log().exception(str(e), exc_info=True)
-      return Response(500, str(e)).to_dict()
+  # def save_json(self, request):
+  #   """
+  #   儲存JSON檔
+  #   :param request: 來自前端的圖片物件
+  #   :return:
+  #   """
+  #   data = OutputData(request)
+  #   log().info(f'【{data.title}】開始儲存JSON')
+  #   pprint(request)
+  #   try:
+  #     with open(data.path, 'w', encoding="utf-8") as file:
+  #       json.dump(request, file, ensure_ascii=False)
+  #     return Response(200, '儲存成功').to_dict()
+  #   except Exception as e:
+  #     log().exception(str(e), exc_info=True)
+  #     return Response(500, str(e)).to_dict()
 
   def select_path(self, data):
     """

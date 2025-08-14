@@ -3,52 +3,48 @@ from io import BytesIO
 from PIL import Image
 from handle_log import log
 import math
+import webview
 
 
-class CustomImage:
+class LongScreenImage:
   """
   自訂的圖片類型
   """
 
-  def __init__(self, image, min_size=1000, quality=80):
-    self.name = image.get('name')
-    self.remark = image.get('remark')  # 圖片說明
-    self.rotation = image.get('rotation') * -1  # 旋轉角度，前端傳入及Pillow的角度相反
-    self.stream = base64_to_image(image.get('base64'), self.rotation, min_size, quality)  # 文件流
+  def __init__(self, file):
+    self.stream = self.base64_to_BytesIO(file.get('base64'))  # 文件流
+
+  def base64_to_BytesIO(self, base64_str: str, ) -> BytesIO:
+    """
+    將base64圖片轉化成BytesIO
+    :param base64_str: base64的字串
+    :return: BytesIO
+    """
+    try:
+      # 1）解析 data URL ，去掉 "data:image/xxx;base64,"
+      if "," in base64_str:
+        header, encoded = base64_str.split(",", 1)
+      else:
+        header, encoded = "", base64_str
+
+      # 2）解析base64資料，使用PIL開啟圖片
+      raw = base64.b64decode(encoded)
+      pil_image = Image.open(BytesIO(raw))
+
+      # 3) 建立BytesIO格式
+      out_buf = BytesIO()
+
+      # 6) 輸出到記憶體
+      pil_image.save(out_buf, format="WEBP")
+      out_buf.seek(0)
+
+      return out_buf
+
+    except Exception as e:
+      log().error(f'處理圖片錯誤：{str(e)}', exc_info=True)
 
 
-def base64_to_image(base64_str: str, rotation, min_size: int, quality: int) -> BytesIO:
-  """
-  將base64圖片轉化成BytesIO，並壓縮
-  :param base64_str: base64的字串
-  :param rotation: 角度
-  :param min_size: 最小尺寸
-  :param quality: 壓縮率
-  :return: BytesIO
-  """
-  try:
-    __, encoded = base64_str.split(",", 1)  # 去掉 "data:image/xxx;base64,"
-    img_data = base64.b64decode(encoded)
-    # 使用PIL開啟圖片
-    img = Image.open(BytesIO(img_data))
-    # 🔄 旋轉圖片（正角度為逆時針）
-    new_img = img.rotate(rotation, expand=True)
-    # 如果小於設定尺寸，長寬都減至50%
-    width, height = new_img.size
-    if int(width) >= min_size * 2 or int(height) >= min_size * 2:
-      new_img = new_img.resize((width // 2, height // 2))
-
-    # 存成 BytesIO 給 docx 用
-    output = BytesIO()
-    # 壓縮
-    new_img.save(output, format="PNG", quality=quality)
-    output.seek(0)
-    return output
-  except Exception as e:
-    log().error(f'轉換圖片錯誤：{str(e)}', exc_info=True)
-
-
-def crop_img(image: CustomImage):
+def crop_to_images(image: LongScreenImage):
   """
   切割圖片，並返回base64的圖片列表
   如果返回空，則代表圖片不符合長截圖要件
@@ -85,6 +81,7 @@ def crop_img(image: CustomImage):
 def pil_image_to_base64(img: Image.Image) -> dict:
   """
   將Pillow的圖片物件轉化為要傳回前端的字典
+  包含：base64資料、寬、高
   :param img:
   :return:
   """

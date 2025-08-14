@@ -22,6 +22,7 @@ export default function ModalUpload({setImages}: Props) {
 
   const {isShow, onShow, onHide} = useModal()
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [count, setCount] = useState<number>(1);
 
   const {register, watch} = useForm({
     defaultValues: {
@@ -56,13 +57,13 @@ export default function ModalUpload({setImages}: Props) {
           <div className='divider'></div>
           {
             isLoading ?
-              <AlertLoading count={100}/>
+              <AlertLoading count={count}/>
               :
               <div className="tabs tabs-lift mx-auto">
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="普通上傳" defaultChecked/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadMultiple setImages={setImages} defaultRemark={remark}
-                                  onHide={onHide} setIsLoading={setIsLoading}/>
+                                  onHide={onHide} setIsLoading={setIsLoading} setCount={setCount}/>
                 </div>
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="長截圖分割"/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
