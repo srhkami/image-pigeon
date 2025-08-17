@@ -7,7 +7,7 @@ export type Response<T> = {
 export type UploadImages = {
   files: Array<CustomImage>;
   min_size: number, // 最小尺寸
-  quality: '100' | '90' | '80' | '70', // 壓縮率
+  quality: '90' | '75' | '50', // 壓縮率
 }
 
 export interface OutputBaseData {

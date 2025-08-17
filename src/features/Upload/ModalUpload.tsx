@@ -8,6 +8,7 @@ import AlertLoading from "../../layout/AlertLoading.tsx";
 import {Alert, Button, Modal, ModalBody, ModalHeader} from "@/component";
 import {LuImageUp} from "react-icons/lu";
 import {useModal} from "@/hooks";
+import ReadJson from "@/features/Upload/ReadJson.tsx";
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
@@ -69,6 +70,10 @@ export default function ModalUpload({setImages}: Props) {
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadLongScreen setImages={setImages} defaultRemark={remark}
                                     onHide={onHide} setIsLoading={setIsLoading}/>
+                </div>
+                <input type="radio" name="my_tabs_3" className="tab" aria-label="讀取舊檔"/>
+                <div className="tab-content bg-base-100 border-base-300 p-6">
+                  <ReadJson setImages={setImages} onHide={onHide} setIsLoading={setIsLoading}/>
                 </div>
               </div>
           }

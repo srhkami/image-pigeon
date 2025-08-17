@@ -38,7 +38,6 @@ class UploadImages:
     :param quality:
     :return:
     """
-    print(base64_str)
     try:
       # 1）解析 data URL ，去掉 "data:image/xxx;base64,"
       if "," in base64_str:
@@ -65,10 +64,7 @@ class UploadImages:
       out_buf = BytesIO()
 
       # 6) 輸出到記憶體
-      if quality == 100:
-        pil_image.save(out_buf, format="WEBP")
-      else:
-        pil_image.save(out_buf, format="WEBP", quality=quality, method=6)
+      pil_image.save(out_buf, format="WEBP", quality=quality, method=6)
 
       out_buf.seek(0)
 

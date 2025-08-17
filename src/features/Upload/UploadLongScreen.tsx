@@ -55,7 +55,7 @@ export default function UploadLongScreen({setImages, defaultRemark, onHide, setI
   return (
     <form onSubmit={handleSubmit(omSubmit)}>
       <Row>
-        <FormInputCol xs={12} label='上傳多張截圖' error={errors.image?.message}>
+        <FormInputCol xs={12} label='上傳長截圖' error={errors.image?.message}>
           <input id='id_image' type="file" accept=".jpg,.jpeg,.png" className="file-input w-full"
                  {...register('image',{required:'請上傳圖片'})}/>
         </FormInputCol>

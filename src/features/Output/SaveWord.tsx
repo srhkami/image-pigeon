@@ -1,6 +1,6 @@
 import {Alert, Button, Col, FormInputCol, Row} from "@/component";
 import {SubmitHandler, useForm} from "react-hook-form";
-import {CustomImage, TOutputData} from "@/utils/type.ts";
+import {CustomImage, OutputWord} from "@/utils/type.ts";
 import {showToast} from "@/utils/handleToast.ts";
 import {checkStatus} from "@/utils/handleError.ts";
 import {useState} from "react";
@@ -20,20 +20,18 @@ export default function SaveWord({images}: Props) {
     register,
     handleSubmit,
     formState: {errors}
-  } = useForm<TOutputData>({defaultValues: {title: '照片黏貼表', min_size: 1000}});
+  } = useForm<OutputWord>({defaultValues: {title: '照片黏貼表'}});
 
-  const onSave: SubmitHandler<TOutputData> = (formData) => {
+  const onSave: SubmitHandler<OutputWord> = (formData) => {
     setIsLoading(true);
     showToast(
       async () => {
         const res1 = await window.pywebview.api.select_path({mode: 'word', title: formData.title});
         checkStatus(res1);
-        const data: TOutputData = {
+        const data: OutputWord = {
           ...formData,
           images: images,
           path: res1.message,
-          quality: '100',
-          min_size: 1000,
         }
         const res2 = await window.pywebview.api.save_docx(data);
         checkStatus(res2);
@@ -49,7 +47,7 @@ export default function SaveWord({images}: Props) {
       <Col xs={12}>
         <Alert color='info'>
           <IoMdAlert className='text-lg'/>
-          此功能可儲存WORD文件，便於使用者自行保存、編輯；本功能不會壓縮圖片，請自行使用WORD內建壓縮功能節省空間。
+          此功能可儲存WORD文件，便於使用者保存、分享及編輯。
         </Alert>
       </Col>
       <FormInputCol xs={12} label='文件標題 / 檔案名稱' error={errors.title?.message}>

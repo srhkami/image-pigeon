@@ -2,11 +2,13 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
-    version: '1.4.2',
-    date: '1140731',
+    version: '1.5.0',
+    date: '1140817',
     logs: [
-      {color: "new", text: '上傳圖片新增將檔名作為備註的選項。'},
-      {color: "info", text: '長截圖現在會裁剪上下各3%的重複區域，以避免文字被意外截斷。'},
+      {color: "new", text: '新增讀取及儲存專用檔案的功能。'},
+      {color: "new", text: '新增圖片加入「使用檔名作為備註」的選項。'},
+      {color: "new", text: '另存圖片加入「使用備註作為檔名」的選項。'},
+      {color: "info", text: '壓縮圖片的功能移至新增圖片時處理。'},
     ]
   },
   {

@@ -2,7 +2,7 @@ import json
 import webview
 import os.path
 from save_docx import creat_docx, add_header, OutputWord
-from handle_request import Response
+from handle_request import OutputBaseData, Response
 from handle_log import log
 from pprint import pprint
 from upload_imags import UploadImages
@@ -82,22 +82,21 @@ class Api:
       log().exception(str(e), exc_info=True)
       return Response(500, '處理失敗，請回報作者').to_dict()
 
-  # def save_json(self, request):
-  #   """
-  #   儲存JSON檔
-  #   :param request: 來自前端的圖片物件
-  #   :return:
-  #   """
-  #   data = OutputData(request)
-  #   log().info(f'【{data.title}】開始儲存JSON')
-  #   pprint(request)
-  #   try:
-  #     with open(data.path, 'w', encoding="utf-8") as file:
-  #       json.dump(request, file, ensure_ascii=False)
-  #     return Response(200, '儲存成功').to_dict()
-  #   except Exception as e:
-  #     log().exception(str(e), exc_info=True)
-  #     return Response(500, str(e)).to_dict()
+  def save_json(self, request):
+    """
+    儲存JSON檔
+    :param request: 來自前端的圖片物件
+    :return:
+    """
+    data = OutputBaseData(request)
+    log().info(f'【{data.title}】開始儲存JSON')
+    try:
+      with open(data.path, 'w', encoding="utf-8") as file:
+        json.dump({'images': data.files}, file, ensure_ascii=False)
+      return Response(200, '儲存成功').to_dict()
+    except Exception as e:
+      log().exception(str(e), exc_info=True)
+      return Response(500, str(e)).to_dict()
 
   def select_path(self, data):
     """

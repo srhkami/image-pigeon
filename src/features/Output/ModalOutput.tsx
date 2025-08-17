@@ -5,7 +5,7 @@ import {Button, ModalBody, ModalHeader} from "@/component";
 import {useModal} from "@/hooks";
 import SaveImages from "@/features/Output/SaveImages.tsx";
 import SaveWord from "@/features/Output/SaveWord.tsx";
-import Print from "@/features/Output/Print.tsx";
+import SaveJson from "@/features/Output/SaveJson.tsx";
 
 type Props = {
   readonly images: CustomImage[],
@@ -51,7 +51,11 @@ export default function ModalOutput({images}: Props) {
         </ModalHeader>
         <ModalBody>
           <div className="tabs tabs-lift">
-            <input type="radio" name="output_tabs" className="tab" aria-label="另存圖片" defaultChecked/>
+            <input type="radio" name="output_tabs" className="tab" aria-label="儲存專用檔案" defaultChecked/>
+            <div className="tab-content bg-base-100 border-base-300 p-6">
+              <SaveJson images={images}/>
+            </div>
+            <input type="radio" name="output_tabs" className="tab" aria-label="另存圖片" />
             <div className="tab-content bg-base-100 border-base-300 p-6">
               <SaveImages images={images}/>
             </div>
