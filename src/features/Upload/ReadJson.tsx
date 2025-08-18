@@ -1,6 +1,6 @@
 import {useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
-import {CustomImage} from "@/utils/type.ts";
+import {base64Image, CustomImage} from "@/utils/type.ts";
 import {Button, Col, FormInputCol, Row} from "@/component";
 import {showToast} from "@/utils/handleToast.ts";
 
@@ -31,12 +31,17 @@ export default function ReadJson({setImages, onHide, setIsLoading}: Props) {
 
         const json = await file.text().then(JSON.parse);
         console.log("JSON內容：", json);
-        const images = json.images as Array<CustomImage>;
+        const images = json.images as Array<base64Image>;
+
+
+        const imageObjs = await Promise.all(
+          images.map((item) => CustomImage.fromBase64(item))
+        );
         if (!images) {
           throw Error('沒有找到圖片')
         }
         // 更新圖片狀態
-        setImages(prev => [...prev, ...images]);
+        setImages(prev => [...prev, ...imageObjs]);
         setIsLoading(false);
         onHide();
       },

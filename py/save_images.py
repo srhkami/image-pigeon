@@ -11,6 +11,7 @@ class SaveImage:
   """
   用來儲存的圖片物件，同時作為輸出Word圖片使用
   """
+
   def __init__(self, image):
     self.name = image.get('name')
     self.remark = image.get('remark')  # 圖片說明
@@ -80,7 +81,8 @@ def save(data: SaveAsImages):
   for i in range(data.file_count):
     image = data.to_compressed_image(i)
     img = Image.open(image.stream)
-    filename = f'{image.remark}.jpg' if data.is_remark_mode else f'{data.title}_{i + 1}.jpg'
+    remark = image.remark.replace('\n', '_')
+    filename = f'{remark}.jpg' if data.is_remark_mode else f'{data.title}_{i + 1}.jpg'
     save_path = os.path.join(data.path, filename)
     img.save(save_path)
     log().info(f'{filename} 儲存成功')

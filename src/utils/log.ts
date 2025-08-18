@@ -9,6 +9,7 @@ export const CHANGELOG_LIST: Array<TVersionObject> = [
       {color: "new", text: '新增圖片加入「使用檔名作為備註」的選項。'},
       {color: "new", text: '另存圖片加入「使用備註作為檔名」的選項。'},
       {color: "info", text: '壓縮圖片的功能移至新增圖片時處理。'},
+      {color: "info", text: '長截圖分割現在會預留上下空間，以避免文字被意外裁切。'},
     ]
   },
   {

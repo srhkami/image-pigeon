@@ -61,7 +61,7 @@ export default function ModalUpload({setImages}: Props) {
               <AlertLoading count={count}/>
               :
               <div className="tabs tabs-lift mx-auto">
-                <input type="radio" name="my_tabs_3" className="tab" aria-label="普通上傳" defaultChecked/>
+                <input type="radio" name="my_tabs_3" className="tab" aria-label="多檔上傳" defaultChecked/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadMultiple setImages={setImages} defaultRemark={remark}
                                   onHide={onHide} setIsLoading={setIsLoading} setCount={setCount}/>

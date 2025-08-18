@@ -1,6 +1,6 @@
 import {SubmitHandler, useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
-import {base64Image, CustomImage} from "@/utils/type.ts";
+import {CustomImage} from "@/utils/type.ts";
 import {Button, Col, FormInputCol, Row} from "@/component";
 import {showToast} from "@/utils/handleToast.ts";
 import {checkStatus} from "@/utils/handleError.ts";
@@ -52,8 +52,13 @@ export default function UploadMultiple({setImages, defaultRemark, onHide, setIsL
           });
           checkStatus(res);
           readyImages = await Promise.all(
-            res.data.map((imgData: base64Image, index) => CustomImage.fromBase64(imgData, formData.isFileNameMode ? filesNames[index] : defaultRemark))
-          );
+            res.data.map((item, index) =>
+              CustomImage.fromBase64({
+                ...item,
+                remark: formData.isFileNameMode ? filesNames[index] : defaultRemark
+              })
+            )
+          )
         }
         // 更新圖片狀態
         setImages(prev => [...prev, ...readyImages]);

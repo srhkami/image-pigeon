@@ -46,7 +46,7 @@ export type TSelectPath = {
 export class CustomImage {
   id: string
   file: File | null;
-  preview: string;
+  preview: string; //預覽
   remark: string;
 
   base64: string | null = null; // 新增的欄位
@@ -84,12 +84,8 @@ export class CustomImage {
   }
 
   /* 從base64轉換 */
-  static async fromBase64(data: {
-    base64: string,
-    width: number,
-    height: number,
-  }, remark: string): Promise<CustomImage> {
-    const customImage = new CustomImage(null, remark);
+  static async fromBase64(data: base64Image): Promise<CustomImage> {
+    const customImage = new CustomImage(null, data.remark);
     customImage.preview = data.base64;
     customImage.base64 = data.base64;
     customImage.width = data.width;
@@ -122,9 +118,10 @@ export class CustomImage {
 
     return await CustomImage.fromBase64({
       base64: mergedBase64,
-      width,
-      height,
-    }, img1.remark);
+      width: width,
+      height: height,
+      remark: img1.remark
+    });
   }
 
   /* 工具方法：將 base64 轉成 HTMLImageElement */
@@ -148,10 +145,10 @@ export class CustomImage {
   }
 }
 
-export type TVersionCheck = {
-  version: string,
-  changelog: string,
-  url: string,
+export type VersionCheckData = {
+  app_version: string,
+  whats_new: string,
+  download_link: string,
 }
 
 export type TVersionObject = {
@@ -164,4 +161,6 @@ export type base64Image = {
   base64: string,
   width: number,
   height: number,
+  remark: string,
+  rotation?: 0 | 90 | 180 | 270,
 }

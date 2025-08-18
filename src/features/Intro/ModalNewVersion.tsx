@@ -1,6 +1,6 @@
 import {MdNumbers} from "react-icons/md"
 import {HiOutlineClipboardList} from "react-icons/hi";
-import {TVersionCheck} from "@/utils/type.ts";
+import {VersionCheckData} from "@/utils/type.ts";
 import {Modal, ModalBody} from "@/component";
 import {useEffect, useState} from "react";
 import axios from "axios";
@@ -11,9 +11,9 @@ import {useModal} from "@/hooks";
 const handleCheckVersion = async () => {
   const res = await axios({
     method: 'GET',
-    url: 'https://api.pigeonhand.tw/web/app/image/latest/',
+    url: 'https://api.pigeonhand.tw/web/apps/1/',
   })
-  return res.data as TVersionCheck
+  return res.data as VersionCheckData
 }
 
 /**
@@ -22,13 +22,13 @@ const handleCheckVersion = async () => {
 export default function ModalNewVersion() {
 
   const {isShow, onShow, onHide} = useModal()
-  const [data, setData] = useState<TVersionCheck | null>(null); // 更新資料
+  const [data, setData] = useState<VersionCheckData | null>(null); // 更新資料
 
   // 檢查新版本
   useEffect(() => {
     handleCheckVersion()
       .then(data => {
-        if (data.version !== AppVersion) {
+        if (data.app_version !== AppVersion) {
           setData(data);
           onShow();
         }
@@ -45,18 +45,18 @@ export default function ModalNewVersion() {
             最新版本
           </div>
           <div className='col-span-3 flex justify-start items-center'>
-            {data?.version}
+            {data?.app_version}
           </div>
           <div className='flex justify-start items-center my-3'>
             <HiOutlineClipboardList className='mr-2'/>
             更新內容
           </div>
           <div className='col-span-3 flex justify-start items-center text-start whitespace-pre-wrap'>
-            {data?.changelog}
+            {data?.whats_new}
           </div>
         </div>
         <div className='flex justify-end'>
-          <a className='btn btn-sm btn-soft btn-info' href={data?.url} target='_blank'>
+          <a className='btn btn-sm btn-soft btn-info' href={data?.download_link} target='_blank'>
             立即更新
           </a>
         </div>

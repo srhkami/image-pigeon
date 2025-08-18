@@ -38,7 +38,7 @@ export default function ImageCard({id, img, index, images, setImages}: Props) {
   const {register, getValues} = useForm<CustomImage>({defaultValues: {remark:img.remark}});
 
   // 修改圖片備註
-  const handleEditImage: SubmitHandler<CustomImage> = () => {
+  const onRemarkEdit: SubmitHandler<CustomImage> = () => {
 
     const formData = getValues();
     setImages(prev => {
@@ -178,7 +178,7 @@ export default function ImageCard({id, img, index, images, setImages}: Props) {
         <form>
           <div>
             <textarea id='remark' className="textarea textarea-sm w-full"
-                      placeholder="可輸入多行" {...register('remark', {onBlur: handleEditImage})}>
+                      placeholder="可輸入多行" {...register('remark', {onBlur: onRemarkEdit})}>
             </textarea>
           </div>
         </form>

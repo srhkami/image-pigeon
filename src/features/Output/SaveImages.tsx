@@ -62,11 +62,11 @@ export default function SaveImages({images}: Props) {
         </label>
         {isRemarkMode &&
           <Alert color='warning'>
-            請注意備註不得重複否則將無法順利儲存
+            <IoMdAlert className='text-lg'/>
+            請注意備註不得重複否則將無法順利儲存、換行會以「底線 _ 」取代
           </Alert>
         }
       </FormInputCol>
-
       <Col xs={12} className='mt-6'>
         {isLoading ?
           <AlertLoading count={images.length}/>

@@ -9,7 +9,7 @@ from upload_imags import UploadImages
 from crop_image import LongScreenImage, crop_to_images
 from save_images import SaveAsImages, save
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 
 class Api:
@@ -90,9 +90,18 @@ class Api:
     """
     data = OutputBaseData(request)
     log().info(f'【{data.title}】開始儲存JSON')
+    new_files = []
+    for file in data.files:
+      new_files.append({
+        'base64': file.get('base64'),
+        'remark': file.get('remark'),
+        'width': file.get('width'),
+        'height': file.get('height'),
+        'rotation': file.get('rotation'),
+      })
     try:
       with open(data.path, 'w', encoding="utf-8") as file:
-        json.dump({'images': data.files}, file, ensure_ascii=False)
+        json.dump({'images': new_files}, file, ensure_ascii=False)
       return Response(200, '儲存成功').to_dict()
     except Exception as e:
       log().exception(str(e), exc_info=True)

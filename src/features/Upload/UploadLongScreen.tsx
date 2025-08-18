@@ -1,6 +1,6 @@
 import {useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
-import {base64Image, CustomImage} from "@/utils/type.ts";
+import {CustomImage} from "@/utils/type.ts";
 import {checkStatus} from "@/utils/handleError.ts";
 import {Button, Col, FormInputCol, Row} from "@/component";
 import {showToast} from "@/utils/handleToast.ts";
@@ -19,7 +19,7 @@ type Props = {
 /* 新增長截圖，並傳至後端自動分割，之後提供預覽 */
 export default function UploadLongScreen({setImages, defaultRemark, onHide, setIsLoading}: Props) {
 
-  const {register, handleSubmit, reset, formState:{errors}} = useForm<TFormValue>();
+  const {register, handleSubmit, reset, formState: {errors}} = useForm<TFormValue>();
 
   const omSubmit = async (formData: TFormValue) => {
     showToast(
@@ -34,8 +34,8 @@ export default function UploadLongScreen({setImages, defaultRemark, onHide, setI
         // 後端處理完成，將base64列表重新轉化為自訂物件
         checkStatus(res);
         const imageObjs = await Promise.all(
-          res.data.map((imgData: base64Image) => CustomImage.fromBase64(imgData, defaultRemark))
-        );
+          res.data.map(item => CustomImage.fromBase64(item))
+        )
         // 更新圖片狀態
         setImages(prev => [...prev, ...imageObjs]);
         setIsLoading(false);
@@ -57,7 +57,7 @@ export default function UploadLongScreen({setImages, defaultRemark, onHide, setI
       <Row>
         <FormInputCol xs={12} label='上傳長截圖' error={errors.image?.message}>
           <input id='id_image' type="file" accept=".jpg,.jpeg,.png" className="file-input w-full"
-                 {...register('image',{required:'請上傳圖片'})}/>
+                 {...register('image', {required: '請上傳圖片'})}/>
         </FormInputCol>
         <Col xs={12} className='mt-6'>
           <Button color='primary' shape='block'>
