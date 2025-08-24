@@ -2,8 +2,15 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '1.5.1',
+    date: '1140821',
+    logs: [
+      {color: "fix", text: '修正合併圖片輸出Word會變成空白的問題。'},
+    ]
+  },
+  {
     version: '1.5.0',
-    date: '1140817',
+    date: '1140818',
     logs: [
       {color: "new", text: '新增讀取及儲存專用檔案的功能。'},
       {color: "new", text: '新增圖片加入「使用檔名作為備註」的選項。'},

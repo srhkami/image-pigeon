@@ -75,7 +75,7 @@ export class CustomImage {
         const ctx = canvas.getContext('2d');
         if (ctx) {
           ctx.drawImage(img, 0, 0);
-          this.base64 = canvas.toDataURL(this.file?.type);
+          this.base64 = canvas.toDataURL("image/png");
         }
         resolve(this);
       };

@@ -42,7 +42,7 @@ class SaveImage:
       out_buf = BytesIO()
 
       # 5) 輸出到記憶體
-      pil_image.save(out_buf, format="JPEG")
+      pil_image.save(out_buf, format="PNG")
       out_buf.seek(0)
 
       return out_buf
