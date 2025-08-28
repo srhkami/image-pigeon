@@ -4,8 +4,8 @@ export type Response<T> = {
   data: T,
 }
 
-export type UploadImages = {
-  files: Array<CustomImage>;
+export type UploadImage = {
+  file: string;
   min_size: number, // 最小尺寸
   quality: '90' | '75' | '50', // 壓縮率
 }
@@ -16,7 +16,6 @@ export interface OutputBaseData {
   path: string,
 }
 
-
 export interface OutputWord extends OutputBaseData {
   mode: '1' | '2' | '6',
   align_vertical: 'top' | 'center',
@@ -26,17 +25,6 @@ export interface OutputWord extends OutputBaseData {
 export interface SaveAsImages extends OutputBaseData {
   is_remark_mode: boolean,
 }
-
-// export type TOutputData = {
-//   title: string,
-//   images: Array<CustomImage>,
-//   min_size: number,
-//   mode: string,
-//   quality: '100' | '90' | '80' | '70',
-//   align_vertical: 'top' | 'center',
-//   font_size: '10' | '11' | '12' | '13' | '14',
-//   path: string,
-
 
 export type TSelectPath = {
   mode: 'word' | 'images' | 'json',

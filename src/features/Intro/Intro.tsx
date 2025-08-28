@@ -17,7 +17,7 @@ export default function Intro() {
             <Col xs={9} className='text-lg font-bold flex items-center my-2'>
               點擊左下角
               <button className='btn btn-sm btn-outline mx-2'>
-                新增圖片
+                導入圖片
               </button>
               按鈕
             </Col>

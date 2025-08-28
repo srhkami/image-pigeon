@@ -2,6 +2,16 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '1.6.0',
+    date: '1140828',
+    logs: [
+      {color: "new", text: '新增「排序模式」，提高拖曳排序圖片的易用性。'},
+      {color: "info", text: '調整底端欄佈局。'},
+      {color: "info", text: '大幅提高導入圖片時的速度。'},
+      {color: "fix", text: '修復圖片過大時無法正確導入的問題。'},
+    ]
+  },
+  {
     version: '1.5.1',
     date: '1140821',
     logs: [
@@ -13,9 +23,9 @@ export const CHANGELOG_LIST: Array<TVersionObject> = [
     date: '1140818',
     logs: [
       {color: "new", text: '新增讀取及儲存專用檔案的功能。'},
-      {color: "new", text: '新增圖片加入「使用檔名作為備註」的選項。'},
-      {color: "new", text: '另存圖片加入「使用備註作為檔名」的選項。'},
-      {color: "info", text: '壓縮圖片的功能移至新增圖片時處理。'},
+      {color: "new", text: '導入圖片新增「使用檔名作為備註」的選項。'},
+      {color: "new", text: '另存圖片新增「使用備註作為檔名」的選項。'},
+      {color: "info", text: '壓縮圖片的功能移至導入圖片時處理。'},
       {color: "info", text: '長截圖分割現在會預留上下空間，以避免文字被意外裁切。'},
     ]
   },

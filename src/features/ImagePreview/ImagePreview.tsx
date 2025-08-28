@@ -17,13 +17,15 @@ import {
   restrictToWindowEdges
 } from '@dnd-kit/modifiers'
 import {ImageCard} from "@/features";
+import ImageCardForMove from "@/features/ImagePreview/ImageCardForMove.tsx";
 
 type Props = {
   readonly images: CustomImage[],
-  readonly setImages: Dispatch<SetStateAction<CustomImage[]>>
+  readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
+  readonly isMoveMode: boolean,
 }
 
-export default function ImagePreview({images, setImages}: Props) {
+export default function ImagePreview({images, setImages,isMoveMode}: Props) {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {activationConstraint: {distance: 5}})
@@ -41,11 +43,13 @@ export default function ImagePreview({images, setImages}: Props) {
     }
   }
 
-
-
-  const imageList: ReactNode[] = images.map((img, index) => (
-    <ImageCard key={img.id} id={img.id} img={img} index={index} images={images} setImages={setImages}/>
-  ))
+  const imageList: ReactNode[] = images.map((img, index) => {
+      if (isMoveMode) {
+        return <ImageCardForMove key={img.id} id={img.id} img={img} index={index} setImages={setImages}/>
+      }
+      return <ImageCard key={img.id} id={img.id} img={img} index={index} images={images} setImages={setImages}/>
+    }
+  )
 
   return (
     <DndContext

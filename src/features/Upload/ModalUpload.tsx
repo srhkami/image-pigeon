@@ -34,14 +34,14 @@ export default function ModalUpload({setImages}: Props) {
 
   return (
     <>
-      <Button color='primary' onClick={onShow}>
+      <Button color='primary' onClick={onShow} className='fixed bottom-3 left-3'>
         <LuImageUp/>
-        新增圖片
+        導入圖片
       </Button>
       <Modal isShow={isShow} onHide={onHide} closeButton>
         <ModalHeader className='justify-center text-lg font-bold'>
           <LuImageUp className='mr-2'/>
-          <span>新增圖片</span>
+          <span>導入圖片</span>
         </ModalHeader>
         <ModalBody>
           <form className='mt-2 p-1'>

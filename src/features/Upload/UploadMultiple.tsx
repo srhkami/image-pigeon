@@ -16,52 +16,63 @@ type Props = {
 export type FromValues = {
   files: Array<File>,
   isFileNameMode: boolean,  // 將檔案名當作備註的模式
-  isNotCompress: boolean,  // 不壓縮
   min_size: number, // 最小尺寸
   quality: '90' | '75' | '50', // 壓縮率
+}
+
+/**
+ * 將檔案轉成base64
+ * @param file 檔案
+ */
+async function fileToBase64(file: File): Promise<string> {
+  const buf = await file.arrayBuffer()
+  // 將 ArrayBuffer → base64（節省 dataURL 頭）
+  let binary = ''
+  const bytes = new Uint8Array(buf)
+  const len = bytes.byteLength
+  for (let i = 0; i < len; i++) binary += String.fromCharCode(bytes[i])
+  return btoa(binary)
 }
 
 /* 新增多張圖片 */
 export default function UploadMultiple({setImages, defaultRemark, onHide, setIsLoading, setCount}: Props) {
 
-  const {register, handleSubmit, reset, watch, formState: {errors}}
+  const {register, handleSubmit, reset, formState: {errors}}
     = useForm<FromValues>({defaultValues: {min_size: 1000}});
 
-  const isNotCompress = watch('isNotCompress')
-
   const omSubmit: SubmitHandler<FromValues> = (formData) => {
+
     showToast(
       async () => {
         setIsLoading(true);
-        const files = Array.from(formData.files);
+        const files = Array.from(formData.files); //檔案列表
+        const filesNames = files.map(file => file.name)  // 檔名列表
         setCount(files.length);
-        const filesNames = files.map(file => file.name)
-        // 將每個檔案轉換成 CustomImage
-        const imageInstances = files.map(file => {
-          const remark = formData.isFileNameMode ? file.name : defaultRemark;
-          return new CustomImage(file, remark)
-        });
-        // 逐一等待 base64 等欄位初始化完成
-        let readyImages = await Promise.all(imageInstances.map(img => img.init()));
-        if (!isNotCompress) {
-          // 將初始化完成的圖片傳給後端
-          const res = await window.pywebview.api.upload_image({
-            files: readyImages,
-            min_size: formData.min_size,
-            quality: formData.quality,
-          });
-          checkStatus(res);
-          readyImages = await Promise.all(
-            res.data.map((item, index) =>
-              CustomImage.fromBase64({
-                ...item,
-                remark: formData.isFileNameMode ? filesNames[index] : defaultRemark
-              })
-            )
-          )
-        }
+        let done = 0  // 已完成數量
+        const newImages = await Promise.all(
+          files.map(async (file, index) => {
+            // 轉換成base64檔，並傳到後端處理
+            const base64 = await fileToBase64(file);
+            const res = await window.pywebview.api.upload_image({
+              file: base64,
+              min_size: formData.min_size,
+              quality: formData.quality,
+            })
+            checkStatus(res);
+            // 將後端傳回的檔案轉換成自訂圖片物件
+            const readyImage = await CustomImage.fromBase64({
+              ...res.data,
+              remark: formData.isFileNameMode ? filesNames[index] : defaultRemark
+            })
+            // 增加進度條
+            done++;
+            window.pywebview.updateProgress(done)
+            return readyImage
+          })
+        )
         // 更新圖片狀態
-        setImages(prev => [...prev, ...readyImages]);
+        setImages(prev => [...prev, ...newImages])
+        // 重置
         setIsLoading(false);
         reset();
         onHide();
@@ -82,7 +93,7 @@ export default function UploadMultiple({setImages, defaultRemark, onHide, setIsL
         <Col xs={12} className='divider mt-3 mb-1'>
         </Col>
         <FormInputCol xs={6} label='圖片壓縮品質' error={errors.quality?.message}>
-          <select className="select w-full" id='quality' defaultValue='75' disabled={isNotCompress}
+          <select className="select w-full" id='quality' defaultValue='75'
                   {...register('quality')}>
             <option value='50'>較低</option>
             <option value='75'>預設</option>
@@ -90,19 +101,12 @@ export default function UploadMultiple({setImages, defaultRemark, onHide, setIsL
           </select>
         </FormInputCol>
         <FormInputCol xs={6} label='壓縮最小尺寸' error={errors.min_size?.message}>
-          <input type='number' id='min_size' className="input w-full" disabled={isNotCompress}
+          <input type='number' id='min_size' className="input w-full"
                  {...register('min_size', {
                    required: '此填寫此欄位',
                    min: {value: 500, message: '不得低於500'},
                  })}/>
         </FormInputCol>
-        <Col xs={12} className='mt-3 px-1'>
-          <label className="label">
-            <input type="checkbox" className="checkbox"
-                   {...register('isNotCompress')}/>
-            不壓縮圖片（能更快匯入，但無法節省空間）
-          </label>
-        </Col>
         <Col xs={12} className='mt-3 px-1'>
           <label className="label">
             <input type="checkbox" className="checkbox"

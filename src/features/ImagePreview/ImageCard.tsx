@@ -8,11 +8,11 @@ import {SubmitHandler, useForm} from "react-hook-form";
 import toast from "react-hot-toast";
 import {twMerge} from "tailwind-merge";
 import clsx from "clsx";
-import { CgMenuGridR } from "react-icons/cg";
+import {CgMenuGridR} from "react-icons/cg";
 import {Dispatch, SetStateAction} from "react";
 
 type Props = {
-  readonly id :string,
+  readonly id: string,
   readonly img: CustomImage,
   readonly index: number,
   readonly images: CustomImage[],
@@ -35,7 +35,7 @@ export default function ImageCard({id, img, index, images, setImages}: Props) {
     transition
   }
 
-  const {register, getValues} = useForm<CustomImage>({defaultValues: {remark:img.remark}});
+  const {register, getValues} = useForm<CustomImage>({defaultValues: {remark: img.remark}});
 
   // 修改圖片備註
   const onRemarkEdit: SubmitHandler<CustomImage> = () => {
@@ -151,7 +151,7 @@ export default function ImageCard({id, img, index, images, setImages}: Props) {
                 onClick={() => handleRotate(-90)}>
           <FaArrowRotateLeft/>
         </Button>
-        <Button color='info' style='ghost' shape='circle'  title='與上圖合併'
+        <Button color='info' style='ghost' shape='circle' title='與上圖合併'
                 onClick={handleCheckMerge}>
           <MdOutlineCallMerge className='text-xl'/>
         </Button>

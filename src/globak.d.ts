@@ -3,7 +3,7 @@ import {
   Response,
   TSelectPath,
   OutputBaseData,
-  UploadImages,
+  UploadImage,
   OutputWord,
   SaveAsImages, base64Image
 } from "./utils/type.ts";
@@ -15,7 +15,7 @@ declare global {
   interface Window {
     pywebview: {
       api: {
-        upload_image(data: UploadImages): Promise<Response<Array<base64Image>>>
+        upload_image(data: UploadImage): Promise<Response<base64Image>>
         crop_image(image: CustomImage): Promise<Response<Array<base64Image>>>,
         save_docx(data: OutputWord): Promise<Response<null>>,
         save_images(data: SaveAsImages): Promise<Response<null>>,

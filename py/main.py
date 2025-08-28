@@ -5,7 +5,7 @@ from save_docx import creat_docx, add_header, OutputWord
 from handle_request import OutputBaseData, Response
 from handle_log import log
 from pprint import pprint
-from upload_imags import UploadImages
+from upload_imags import UploadImages, UploadImage
 from crop_image import LongScreenImage, crop_to_images
 from save_images import SaveAsImages, save
 
@@ -20,9 +20,12 @@ class Api:
     :param request:
     :return:
     """
-    data = UploadImages(request)
-    base64_images = data.to_base64_images()
-    return Response(status=200, data=base64_images).to_dict()
+    data = UploadImage(request)
+    try:
+      base64_image = data.compress_image()
+      return Response(status=200, data=base64_image).to_dict()
+    except Exception as e:
+      return Response(status=500, data=str(e)).to_dict()
 
   def crop_image(self, file):
     """
