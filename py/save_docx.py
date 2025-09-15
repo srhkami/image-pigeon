@@ -12,46 +12,6 @@ from handle_request import OutputBaseData
 from save_images import SaveImage
 
 
-# class SaveImage:
-#   def __init__(self, image):
-#     self.name = image.get('name')
-#     self.remark = image.get('remark')  # 圖片說明
-#     self.rotation = image.get('rotation') * -1  # 旋轉角度，前端傳入及Pillow的角度相反
-#     self.stream = self.base64_to_BytesIO(image.get('base64'))  # 文件流
-#
-#   def base64_to_BytesIO(self, base64_str: str) -> BytesIO:
-#     """
-#     將base64圖片轉化成BytesIO，並壓縮
-#     :param base64_str: base64的字串
-#     :return: BytesIO
-#     """
-#     try:
-#       # 1）解析 data URL ，去掉 "data:image/xxx;base64,"
-#       if "," in base64_str:
-#         header, encoded = base64_str.split(",", 1)
-#       else:
-#         header, encoded = "", base64_str
-#
-#       # 2）解析base64資料，使用PIL開啟圖片
-#       raw = base64.b64decode(encoded)
-#       pil_image = Image.open(BytesIO(raw))
-#
-#       # 3）旋轉圖片（正角度為逆時針）
-#       pil_image = pil_image.rotate(self.rotation, expand=True)
-#
-#       # 4) 建立BytesIO格式
-#       out_buf = BytesIO()
-#
-#       # 5) 輸出到記憶體
-#       pil_image.save(out_buf, format="JPEG")
-#       out_buf.seek(0)
-#
-#       return out_buf
-#
-#     except Exception as e:
-#       log().error(f'處理圖片錯誤：{str(e)}', exc_info=True)
-
-
 class OutputWord(OutputBaseData):
   """
   輸出成word的資料
@@ -320,7 +280,7 @@ def handle_table_write(image: SaveImage, align, index,
     number_cell.text = handle_number(index)  # 寫入編號
     number_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # 表格文字垂直置中
     number_cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # 文字水平置中
-    remark_cell.text = image.remark  # 寫入說明
+    remark_cell.text = image.remark if image.remark else '無'  # 寫入說明
     if align == 'top':
       remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.TOP  # 表格文字垂直置頂
     elif align == 'center':

@@ -34,7 +34,7 @@ export default function UploadLongScreen({setImages, defaultRemark, onHide, setI
         // 後端處理完成，將base64列表重新轉化為自訂物件
         checkStatus(res);
         const imageObjs = await Promise.all(
-          res.data.map(item => CustomImage.fromBase64(item))
+          res.data.map(item => CustomImage.fromBase64({...item, remark: defaultRemark}))
         )
         // 更新圖片狀態
         setImages(prev => [...prev, ...imageObjs]);

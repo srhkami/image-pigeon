@@ -2,6 +2,14 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '1.6.1',
+    date: '1140915',
+    logs: [
+      {color: "fix", text: '修復導入長截圖無法帶入預設備註的問題。'},
+      {color: "fix", text: '修復備註空白時導致圖片無法正常匯出Word檔的問題。'},
+    ]
+  },
+  {
     version: '1.6.0',
     date: '1140828',
     logs: [
