@@ -4,6 +4,7 @@ import {CustomImage} from "@/utils/type.ts";
 import {Button, Col, FormInputCol, Row} from "@/component";
 import {showToast} from "@/utils/handleToast.ts";
 import {checkStatus} from "@/utils/handleError.ts";
+import {fileToBase64} from "@/features/Upload/base64.ts";
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
@@ -20,20 +21,6 @@ export type FromValues = {
   quality: '90' | '75' | '50', // 壓縮率
 }
 
-/**
- * 將檔案轉成base64
- * @param file 檔案
- */
-async function fileToBase64(file: File): Promise<string> {
-  const buf = await file.arrayBuffer()
-  // 將 ArrayBuffer → base64（節省 dataURL 頭）
-  let binary = ''
-  const bytes = new Uint8Array(buf)
-  const len = bytes.byteLength
-  for (let i = 0; i < len; i++) binary += String.fromCharCode(bytes[i])
-  return btoa(binary)
-}
-
 /* 新增多張圖片 */
 export default function UploadMultiple({setImages, defaultRemark, onHide, setIsLoading, setCount}: Props) {
 
@@ -41,7 +28,6 @@ export default function UploadMultiple({setImages, defaultRemark, onHide, setIsL
     = useForm<FromValues>({defaultValues: {min_size: 1000}});
 
   const omSubmit: SubmitHandler<FromValues> = (formData) => {
-
     showToast(
       async () => {
         setIsLoading(true);
@@ -85,7 +71,7 @@ export default function UploadMultiple({setImages, defaultRemark, onHide, setIsL
   return (
     <form onSubmit={handleSubmit(omSubmit)}>
       <Row>
-        <FormInputCol xs={12} label='上傳多張圖片' error={errors.files?.message}>
+        <FormInputCol xs={12} label='請選擇要導入的圖片（可多選）' error={errors.files?.message}>
           <input id='files' type="file"
                  multiple accept=".jpg,.jpeg,.png,.jfif,.bmp" className="file-input w-full"
                  {...register('files', {required: '請上傳圖片'})}/>

@@ -1,12 +1,13 @@
 import {useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
-import {CustomImage} from "@/utils/type.ts";
+import {base64Image, CustomImage} from "@/utils/type.ts";
 import {checkStatus} from "@/utils/handleError.ts";
 import {Button, Col, FormInputCol, Row} from "@/component";
 import {showToast} from "@/utils/handleToast.ts";
+import {fileToBase64} from "@/features/Upload/base64.ts";
 
 type TFormValue = {
-  image: FileList,
+  files: FileList,
 }
 
 type Props = {
@@ -14,10 +15,11 @@ type Props = {
   readonly defaultRemark: string,
   readonly onHide: () => void,
   readonly setIsLoading: (value: boolean) => void,
+  readonly setCount: Dispatch<SetStateAction<number>>,
 }
 
 /* 新增長截圖，並傳至後端自動分割，之後提供預覽 */
-export default function UploadLongScreen({setImages, defaultRemark, onHide, setIsLoading}: Props) {
+export default function UploadLongScreen({setImages, defaultRemark, onHide, setIsLoading, setCount}: Props) {
 
   const {register, handleSubmit, reset, formState: {errors}} = useForm<TFormValue>();
 
@@ -25,19 +27,37 @@ export default function UploadLongScreen({setImages, defaultRemark, onHide, setI
     showToast(
       async () => {
         setIsLoading(true);
-        // 將圖片轉化為CustomImage
-        const image = new CustomImage(formData.image[0], defaultRemark)
-        // 等待 base64 等欄位初始化完成
-        const readyImage = await image.init();
-        // 將初始化完成的圖片傳給後端
-        const res = await window.pywebview.api.crop_image(readyImage);
-        // 後端處理完成，將base64列表重新轉化為自訂物件
-        checkStatus(res);
-        const imageObjs = await Promise.all(
-          res.data.map(item => CustomImage.fromBase64({...item, remark: defaultRemark}))
+        const files = Array.from(formData.files); //檔案列表
+        setCount(files.length); // 設定檔案總數
+        let done = 0  // 已完成數量
+
+        const resData = await Promise.all(
+          files.map(async (file) => {
+            // 轉換成base64檔，並傳到後端處理
+            const base64 = await fileToBase64(file);
+            const res = await window.pywebview.api.crop_image({
+              file: base64,
+              min_size: 1000,
+              quality: "75",
+            })
+            checkStatus(res);
+            // 增加進度條
+            done++;
+            window.pywebview.updateProgress(done)
+            return res.data
+          })
         )
-        // 更新圖片狀態
-        setImages(prev => [...prev, ...imageObjs]);
+        // 將base64圖片的雙重清單解開
+        let baseImages: Array<base64Image> = []
+        resData.forEach(item => {
+          baseImages = [...baseImages, ...item]
+        })
+        // 將base64圖片清單轉化為自訂圖片清單
+        const readyImages = await Promise.all(
+          baseImages.map(item => CustomImage.fromBase64({...item, remark: defaultRemark}))
+        )
+        // 加入預覽列表
+        setImages(prev => [...prev, ...readyImages]);
         setIsLoading(false);
         reset();
         onHide();
@@ -55,9 +75,9 @@ export default function UploadLongScreen({setImages, defaultRemark, onHide, setI
   return (
     <form onSubmit={handleSubmit(omSubmit)}>
       <Row>
-        <FormInputCol xs={12} label='上傳長截圖' error={errors.image?.message}>
-          <input id='id_image' type="file" accept=".jpg,.jpeg,.png" className="file-input w-full"
-                 {...register('image', {required: '請上傳圖片'})}/>
+        <FormInputCol xs={12} label='請選擇要導入的長截圖（可多選）' error={errors.files?.message}>
+          <input id='id_image' type="file" accept=".jpg,.jpeg,.png" className="file-input w-full" multiple
+                 {...register('files', {required: '請上傳圖片'})}/>
         </FormInputCol>
         <Col xs={12} className='mt-6'>
           <Button color='primary' shape='block'>

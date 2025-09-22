@@ -11,8 +11,9 @@ class LongScreenImage:
   自訂的圖片類型
   """
 
-  def __init__(self, file):
-    self.stream = self.base64_to_BytesIO(file.get('base64'))  # 文件流
+  def __init__(self, request):
+    # self.file = request.get('file')
+    self.stream = self.base64_to_BytesIO(request.get('file'))  # 文件流
 
   def base64_to_BytesIO(self, base64_str: str, ) -> BytesIO:
     """

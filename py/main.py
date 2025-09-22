@@ -5,7 +5,7 @@ from save_docx import creat_docx, add_header, OutputWord
 from handle_request import OutputBaseData, Response
 from handle_log import log
 from pprint import pprint
-from upload_imags import UploadImages, UploadImage
+from upload_imags import UploadImage
 from crop_image import LongScreenImage, crop_to_images
 from save_images import SaveAsImages, save
 
@@ -27,14 +27,14 @@ class Api:
     except Exception as e:
       return Response(status=500, data=str(e)).to_dict()
 
-  def crop_image(self, file):
+  def crop_image(self, request):
     """
     切割長截圖
-    :param file
+    :param request
     :return:
     """
     try:
-      image = LongScreenImage(file)
+      image = LongScreenImage(request)
       images = crop_to_images(image)
       if not len(images):
         log().error('此圖片不是長截圖')

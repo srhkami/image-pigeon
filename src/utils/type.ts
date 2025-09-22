@@ -5,10 +5,11 @@ export type Response<T> = {
 }
 
 export type UploadImage = {
-  file: string;
+  file: string; // 為base64字串
   min_size: number, // 最小尺寸
   quality: '90' | '75' | '50', // 壓縮率
 }
+
 
 export interface OutputBaseData {
   title: string,

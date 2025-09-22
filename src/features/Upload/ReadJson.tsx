@@ -58,7 +58,7 @@ export default function ReadJson({setImages, onHide, setIsLoading}: Props) {
   return (
     <form onSubmit={handleSubmit(omSubmit)}>
       <Row>
-        <FormInputCol xs={12} label='上傳專用檔案' error={errors.files?.message}>
+        <FormInputCol xs={12} label='請選擇貼圖小鴿手專用存檔' error={errors.files?.message}>
           <input id='files' type="file" accept=".json" className="file-input w-full"
                  {...register('files', {required: '請上傳檔案'})}/>
         </FormInputCol>
