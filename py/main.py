@@ -4,7 +4,6 @@ import os.path
 from save_docx import creat_docx, add_header, OutputWord
 from handle_request import OutputBaseData, Response
 from handle_log import log
-from pprint import pprint
 from upload_imags import UploadImage
 from crop_image import LongScreenImage, crop_to_images
 from save_images import SaveAsImages, save
@@ -118,33 +117,34 @@ class Api:
     """
     mode = data.get('mode')
     title = data.get('title', '照片黏貼表')
-    if not mode:
-      return Response(400, message='參數錯誤').to_dict()
-    if mode == 'word':
-      path = webview.windows[0].create_file_dialog(
-        webview.SAVE_DIALOG,
-        save_filename=f'{title}.docx',
-        file_types=('WORD 文件 (*.docx)',)
-      )
-    elif mode == 'json':
-      path = webview.windows[0].create_file_dialog(
-        webview.SAVE_DIALOG,
-        save_filename=f'{title}.json',
-        file_types=('JSON 文件 (*.json)',)
-      )
-    else:
-      folder = webview.windows[0].create_file_dialog(
-        webview.FOLDER_DIALOG,
-        allow_multiple=False
-      )
-      path = folder[0] if folder else None
-
-    if not path:
+    match mode:
+      case 'word':
+        path: list = webview.windows[0].create_file_dialog(
+          webview.FileDialog.SAVE,
+          save_filename=f'{title}.docx',
+          file_types=('WORD 文件 (*.docx)',)
+        )
+      case 'json':
+        path: list = webview.windows[0].create_file_dialog(
+          webview.FileDialog.SAVE,
+          save_filename=f'{title}.json',
+          file_types=('JSON 文件 (*.json)',)
+        )
+      case 'images':
+        path: list = webview.windows[0].create_file_dialog(
+          webview.FileDialog.FOLDER,
+          allow_multiple=False
+        )
+      case _:
+        return Response(400, message='參數錯誤').to_dict()
+    # 返回的path均為一個清單，因此需要取得第一筆資料
+    file_path = path[0] if path else None
+    if not file_path:
       error_text = '已取消儲存'
       log().error(error_text)
       return Response(400, error_text).to_dict()
-    log().info(f'選擇存檔位置：{path}')
-    return Response(200, path).to_dict()
+    log().info(f'選擇存檔位置：{file_path}')
+    return Response(200, file_path).to_dict()
 
 
 if __name__ == '__main__':
@@ -159,6 +159,7 @@ if __name__ == '__main__':
     js_api=api,
     min_size=(800, 500),
     maximized=True,
+    confirm_close=True,
   )
   log().debug('程式開啟成功')
   webview.start(debug=DEBUG_MODE)

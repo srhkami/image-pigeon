@@ -1,5 +1,4 @@
 import {
-  CustomImage,
   Response,
   TSelectPath,
   OutputBaseData,

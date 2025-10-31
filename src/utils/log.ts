@@ -2,6 +2,15 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '1.6.3',
+    date: '1141031',
+    logs: [
+      {color: "new", text: '加入關閉視窗的再次確認。'},
+      {color: "info", text: '升級pywebview版本至6.x。'},
+      {color: "fix", text: '修復長截圖過長導致出錯的問題。'},
+    ]
+  },
+  {
     version: '1.6.2',
     date: '1140922',
     logs: [

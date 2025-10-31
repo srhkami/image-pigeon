@@ -30,19 +30,22 @@ class LongScreenImage:
 
       # 2）解析base64資料，使用PIL開啟圖片
       raw = base64.b64decode(encoded)
-      pil_image = Image.open(BytesIO(raw))
+      # pil_image = Image.open(BytesIO(raw))
 
       # 3) 建立BytesIO格式
-      out_buf = BytesIO()
-
+      # out_buf = BytesIO()
+      #
+      #
+      # pil_image.save(out_buf, format="WEBP")
       # 6) 輸出到記憶體
-      pil_image.save(out_buf, format="WEBP")
+      out_buf = BytesIO(raw)
       out_buf.seek(0)
 
       return out_buf
 
     except Exception as e:
       log().error(f'處理圖片錯誤：{str(e)}', exc_info=True)
+      raise
 
 
 def crop_to_images(image: LongScreenImage):

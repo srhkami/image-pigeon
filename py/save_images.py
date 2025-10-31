@@ -49,6 +49,8 @@ class SaveImage:
 
     except Exception as e:
       log().error(f'處理圖片錯誤：{str(e)}', exc_info=True)
+      # 關鍵：將異常重新拋出，防止 self.stream 變成 None
+      raise
 
 
 class SaveAsImages(OutputBaseData):
