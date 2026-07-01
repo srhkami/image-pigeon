@@ -2,30 +2,52 @@ import './App.css'
 import {Toaster} from "react-hot-toast";
 import {useState} from "react";
 import {CustomImage} from "./utils/type.ts";
+import {clearProjectItems, createEmptyProject, getOrderedItemViewModels} from "./state/projectState.ts";
 import {Footer, Nav} from "@/layout";
 import {ImagePreview, Intro, ModalNewVersion} from "@/features";
 import ModalUpload from "@/features/Upload/ModalUpload.tsx";
 
 function App() {
 
-  const [images, setImages] = useState<Array<CustomImage>>([]);
+  const [, setImages] = useState<Array<CustomImage>>([]);
   const [isMoveMode, setIsMoveMode] = useState<boolean>(false); // 排序模式
+  const [project, setProject] = useState(createEmptyProject());
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
+  const previewItems = getOrderedItemViewModels(project, sessionId ?? "")
+  const projectItemCount = previewItems.length
 
   return (
     <div>
       <Nav/>
       <div className='min-h-[84vh]'>
-        {!images.length && <Intro/>}
+        {!projectItemCount && <Intro/>}
         {/*圖片預覽*/}
-        <ImagePreview images={images} setImages={setImages} isMoveMode={isMoveMode}/>
+        <ImagePreview
+          project={project}
+          setProject={setProject}
+          sessionId={sessionId}
+          setImages={setImages}
+          isMoveMode={isMoveMode}
+        />
       </div>
       {/*底端欄*/}
-      <ModalUpload setImages={setImages}/>
-      <Footer
-        images={images}
+      <ModalUpload
         setImages={setImages}
-        isMoveMode = {isMoveMode}
-        setIsMoveMode = {setIsMoveMode}
+        project={project}
+        setProject={setProject}
+        sessionId={sessionId}
+        setSessionId={setSessionId}
+      />
+      <Footer
+        setImages={setImages}
+        itemCount={projectItemCount}
+        project={project}
+        setProject={setProject}
+        sessionId={sessionId}
+        onClearProject={() => setProject(clearProjectItems)}
+        isMoveMode={isMoveMode}
+        setIsMoveMode={setIsMoveMode}
       />
       {/*對話框*/}
       <ModalNewVersion/>

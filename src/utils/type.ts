@@ -28,7 +28,7 @@ export interface SaveAsImages extends OutputBaseData {
 }
 
 export type TSelectPath = {
-  mode: 'word' | 'images' | 'json',
+  mode: 'word' | 'images' | 'json' | 'project-save' | 'project-open',
   title?: string,
 }
 

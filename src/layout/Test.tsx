@@ -1,5 +1,6 @@
 import {
   DndContext,
+  DragEndEvent,
   closestCenter,
   PointerSensor,
   useSensor,
@@ -38,8 +39,9 @@ export default function Test() {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   )
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
+    if (!over) return
     if (active.id !== over.id) {
       const oldIndex = items.findIndex(item => item.id === active.id)
       const newIndex = items.findIndex(item => item.id === over.id)

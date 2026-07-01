@@ -1,18 +1,22 @@
 import {Alert, Button, Col, FormInputCol, Row} from "@/component";
 import {SubmitHandler, useForm} from "react-hook-form";
-import {CustomImage, OutputWord} from "@/utils/type.ts";
+import {OutputWord} from "@/utils/type.ts";
 import {showToast} from "@/utils/handleToast.ts";
 import {checkStatus} from "@/utils/handleError.ts";
 import {useState} from "react";
 import {AlertLoading} from "@/layout";
 import {FaRegFileWord} from "react-icons/fa6";
 import {IoMdAlert} from "react-icons/io";
+import {ProjectV2} from '@/types/project.ts'
+import {buildLegacyOutputImages} from '@/state/projectOutputAdapter.ts'
 
 type Props = {
-  readonly images: Array<CustomImage>;
+  readonly project: ProjectV2;
+  readonly sessionId: string | null;
+  readonly itemCount: number;
 }
 
-export default function SaveWord({images}: Props) {
+export default function SaveWord({project, sessionId, itemCount}: Props) {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -26,17 +30,23 @@ export default function SaveWord({images}: Props) {
     setIsLoading(true);
     showToast(
       async () => {
+        if (!sessionId) {
+          throw new Error('尚未建立圖片 session，請先重新匯入圖片')
+        }
+
+        const outputImages = await buildLegacyOutputImages(project, sessionId)
+
         const res1 = await window.pywebview.api.select_path({mode: 'word', title: formData.title});
         checkStatus(res1);
         const data: OutputWord = {
           ...formData,
-          images: images,
+          images: outputImages,
           path: res1.message,
         }
         const res2 = await window.pywebview.api.save_docx(data);
         checkStatus(res2);
       },
-      {success: '儲存成功', error: (err => err.toString())}
+      {success: '儲存成功', error: (err => String(err))}
     )
       .finally(() => setIsLoading(false))
   }
@@ -82,11 +92,11 @@ export default function SaveWord({images}: Props) {
         </select>
       </FormInputCol>
       <Col xs={12} className='mt-6'>
-        {isLoading ?
-          <AlertLoading count={images.length}/>
-          :
-          <Button color='success' shape='block'
-                  onClick={handleSubmit(onSave)}>
+      {isLoading ?
+           <AlertLoading count={itemCount}/>
+           :
+           <Button color='success' shape='block'
+                   onClick={handleSubmit(onSave)}>
             <FaRegFileWord/>
             儲存Word
           </Button>

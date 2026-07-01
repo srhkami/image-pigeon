@@ -1,7 +1,6 @@
 import {useSortable} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
-import {CustomImage} from "@/utils/type.ts";
-import {MdOutlineCallMerge} from "react-icons/md";
+import {CustomImage,} from "@/utils/type.ts";
 import {Button} from "@/component";
 import {FaArrowRotateLeft, FaArrowRotateRight, FaXmark} from "react-icons/fa6";
 import {SubmitHandler, useForm} from "react-hook-form";
@@ -10,16 +9,21 @@ import {twMerge} from "tailwind-merge";
 import clsx from "clsx";
 import {CgMenuGridR} from "react-icons/cg";
 import {Dispatch, SetStateAction} from "react";
+import {ProjectItemViewModel, ProjectV2} from "@/types/project.ts";
+import {removeItem, updateItemRemark, updateItemRotation} from "@/state/projectState.ts";
 
 type Props = {
-  readonly id: string,
-  readonly img: CustomImage,
+  readonly viewModel: ProjectItemViewModel,
+  readonly setProject: Dispatch<SetStateAction<ProjectV2>>,
   readonly index: number,
-  readonly images: CustomImage[],
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>
 }
 
-export default function ImageCard({id, img, index, images, setImages}: Props) {
+type RemarkForm = {
+  remark: string
+}
+
+export default function ImageCard({viewModel, setProject, index, setImages}: Props) {
 
   const {
     attributes,
@@ -28,95 +32,44 @@ export default function ImageCard({id, img, index, images, setImages}: Props) {
     transform,
     transition,
     isDragging
-  } = useSortable({id})
+  } = useSortable({id: viewModel.itemId})
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition
   }
 
-  const {register, getValues} = useForm<CustomImage>({defaultValues: {remark: img.remark}});
+  const {register, getValues} = useForm<RemarkForm>({defaultValues: {remark: viewModel.remark}});
 
   // 修改圖片備註
-  const onRemarkEdit: SubmitHandler<CustomImage> = () => {
-
-    const formData = getValues();
-    setImages(prev => {
-      // 篩選出這個項目進行修改
-      return prev.map((imgItem, i) => {
-        if (i === index) {
-          imgItem.editRemark(formData.remark);
-        }
-        return imgItem;
-      });
-    });
+  const onRemarkEdit: SubmitHandler<RemarkForm> = () => {
+    const {remark} = getValues();
+    setProject((prev) => updateItemRemark(prev, viewModel.itemId, remark))
+    setImages(prev => prev.map((imgItem) => {
+      if (imgItem.id === viewModel.itemId) {
+        imgItem.editRemark(remark)
+      }
+      return imgItem
+    }))
     toast.success(`編號${index + 1} 備註已儲存`);
   };
 
   // 移除圖片
   const handleRemoveImage = () => {
-    setImages(prev => {
-      // 釋放 memory
-      URL.revokeObjectURL(prev[index].preview);
-      // 移除該圖
-      return prev.filter((_, i) => i !== index);
-    });
+    setProject((prev) => removeItem(prev, viewModel.itemId))
+    setImages(prev => prev.filter((item) => item.id !== viewModel.itemId));
   };
 
   // 旋轉照片角度
   const handleRotate = (value: 90 | -90) => {
-    const newRotation = (img.rotation + value) % 360
-    img.setRotation(newRotation as 0 | 90 | 180 | 270);
-    setImages(prev => {
-      // 篩選出這個項目進行修改
-      return prev.map((imgItem, i) => {
-        if (i === index) {
-          imgItem.setRotation(newRotation as 0 | 90 | 180 | 270);
-        }
-        return imgItem;
-      });
-    });
-  }
-
-  // 確認照片合併
-  const handleCheckMerge = () => {
-    toast(t => (
-      <div className='w-52'>
-        <div className='font-bold'>是否將本張圖片與上張圖片合併？</div>
-        <div className='text-sm text-error text-start'>此操作無法復原</div>
-        <div className='flex justify-end mt-2'>
-          <button className='btn btn-sm btn-success' onClick={() => {
-            toast.dismiss(t.id);
-            handleMerge();
-          }}>
-            確定
-          </button>
-          <button className='btn btn-sm ml-2' onClick={() => toast.dismiss(t.id)}>取消
-          </button>
-        </div>
-      </div>
-    ))
-  }
-
-  // 照片合併
-  const handleMerge = async () => {
-    if (index === 0) {
-      toast.error('沒有上一張圖')
-      return
-    }
-    // 初始化上一張圖片
-    const imgA = await images[index - 1].init();
-    // 初始化本張圖片
-    const imgB = await img.init();
-    const mergedImage = await CustomImage.mergeSideBySide(imgA, imgB);
-    // 將圖片插入，並移除舊有圖片
-    const updatedImages = [
-      ...images.slice(0, index - 1),
-      mergedImage,
-      ...images.slice(index + 1),
-    ];
-    setImages(updatedImages);
-    toast.success('合併成功')
+    const nextRotation = ((viewModel.rotation + value) % 360 + 360) % 360 as 0 | 90 | 180 | 270
+    setProject((prev) => updateItemRotation(prev, viewModel.itemId, nextRotation))
+    setImages(prev => prev.map((imgItem) => {
+      if (imgItem.id === viewModel.itemId) {
+        imgItem.setRotation(nextRotation)
+      }
+      return imgItem
+    }))
   }
 
   const classes = twMerge(
@@ -151,20 +104,16 @@ export default function ImageCard({id, img, index, images, setImages}: Props) {
                 onClick={() => handleRotate(-90)}>
           <FaArrowRotateLeft/>
         </Button>
-        <Button color='info' style='ghost' shape='circle' title='與上圖合併'
-                onClick={handleCheckMerge}>
-          <MdOutlineCallMerge className='text-xl'/>
-        </Button>
       </div>
       <figure className='relative aspect-video w-full max-w-xl overflow-hidden'>
         <div className="absolute inset-0 flex items-center justify-center"
              style={{
-               transform: `rotate(${img.rotation}deg)`,
+               transform: `rotate(${viewModel.rotation}deg)`,
                transformOrigin: 'center',
              }}>
           <img
-            src={img.preview}
-            alt={img.remark}
+            src={viewModel.previewUrl}
+            alt={viewModel.remark}
             className="object-contain max-w-full max-h-full"
           />
         </div>

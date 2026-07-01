@@ -4,7 +4,7 @@ type TOption = {
   baseText?: string,
   loading?: string,
   success?: string,
-  error?: ValueOrFunction<Renderable, any>,
+  error?: ValueOrFunction<Renderable, unknown>,
 }
 
 /* 自定義封裝toast Promise組件

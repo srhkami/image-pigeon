@@ -5,6 +5,19 @@ from handle_log import log
 import webview
 from handle_request import OutputBaseData
 import os
+import sys
+import subprocess
+
+
+def open_folder(path: str) -> None:
+    startfile = getattr(os, 'startfile', None)
+    if startfile:
+        startfile(path)
+        return
+    if sys.platform == 'darwin':
+        subprocess.Popen(['open', path])
+        return
+    subprocess.Popen(['xdg-open', path])
 
 
 class SaveImage:
@@ -90,4 +103,4 @@ def save(data: SaveAsImages):
         log().info(f'{filename} 儲存成功')
         # 主動呼叫前端增加數量
         webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
-    os.startfile(data.path)
+    open_folder(data.path)

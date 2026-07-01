@@ -7,23 +7,17 @@ import {twMerge} from "tailwind-merge";
 import clsx from "clsx";
 import {CgMenuGridR} from "react-icons/cg";
 import {Dispatch, SetStateAction} from "react";
+import {ProjectItemViewModel, ProjectV2} from "@/types/project.ts";
+import {removeItem} from "@/state/projectState.ts";
 
 type Props = {
-  readonly id: string,
-  readonly img: CustomImage,
+  readonly viewModel: ProjectItemViewModel,
+  readonly setProject: Dispatch<SetStateAction<ProjectV2>>,
   readonly index: number,
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>
 }
 
-/**
- * 專門用來提供排序用的圖卡
- * @param id
- * @param img
- * @param index
- * @param setImages
- * @constructor
- */
-export default function ImageCardForMove({id, img, index, setImages}: Props) {
+export default function ImageCardForMove({viewModel, setProject, index, setImages}: Props) {
 
   const {
     attributes,
@@ -32,7 +26,7 @@ export default function ImageCardForMove({id, img, index, setImages}: Props) {
     transform,
     transition,
     isDragging
-  } = useSortable({id})
+  } = useSortable({id: viewModel.itemId})
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -41,12 +35,8 @@ export default function ImageCardForMove({id, img, index, setImages}: Props) {
 
   // 移除圖片
   const handleRemoveImage = () => {
-    setImages(prev => {
-      // 釋放 memory
-      URL.revokeObjectURL(prev[index].preview);
-      // 移除該圖
-      return prev.filter((_, i) => i !== index);
-    });
+    setProject((prev) => removeItem(prev, viewModel.itemId))
+    setImages(prev => prev.filter((item) => item.id !== viewModel.itemId));
   };
 
   const classes = twMerge(
@@ -75,12 +65,12 @@ export default function ImageCardForMove({id, img, index, setImages}: Props) {
       <figure className=' aspect-video h-32 max-w-xl overflow-hidden'>
         <div className="inset-0 flex items-center justify-center"
              style={{
-               transform: `rotate(${img.rotation}deg)`,
+               transform: `rotate(${viewModel.rotation}deg)`,
                transformOrigin: 'center',
              }}>
           <img
-            src={img.preview}
-            alt={img.remark}
+            src={viewModel.previewUrl}
+            alt={viewModel.remark}
             className="object-contain max-w-full max-h-full"
           />
         </div>

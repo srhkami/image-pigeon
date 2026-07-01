@@ -33,7 +33,7 @@ export default function ModalNewVersion() {
           onShow();
         }
       })
-  }, []);
+  }, [onShow]);
 
   return (
     <Modal isShow={isShow} onHide={onHide} closeButton>

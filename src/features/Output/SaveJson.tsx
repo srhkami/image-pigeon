@@ -15,6 +15,7 @@ type Props = {
 export default function SaveJson({images}: Props) {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const hasLegacyBase64 = images.length > 0 && images.every((image) => Boolean(image.base64));
 
   const {
     register,
@@ -36,7 +37,7 @@ export default function SaveJson({images}: Props) {
         const res2 = await window.pywebview.api.save_json(data);
         checkStatus(res2);
       },
-      {success: '儲存成功', error: (err => err.toString())}
+      {success: '儲存成功', error: (err => String(err))}
     )
       .finally(() => setIsLoading(false))
   }
@@ -44,12 +45,18 @@ export default function SaveJson({images}: Props) {
 
   return (
     <Row>
-      <Col xs={12}>
-        <Alert color='info'>
-          <IoMdAlert className='text-lg'/>
-          此功能可另存成「貼圖小鴿手」專用的檔案，儲存所有匯入、處理過的圖片，在任何時候重新讀取編輯。
-        </Alert>
-      </Col>
+        <Col xs={12}>
+          <Alert color='info'>
+            <IoMdAlert className='text-lg'/>
+            此功能僅提供舊版 JSON 匯出（legacy），不等同於 Phase 6 的新版專案儲存，僅保留舊版相容行為。
+          </Alert>
+          {!hasLegacyBase64 &&
+            <Alert color='warning' className='mt-2'>
+              <IoMdAlert className='text-lg'/>
+              新版匯入圖片不再保存 base64，舊版 JSON 匯出暫不支援；請改用另存圖片 / Word，或等待 Phase 6 新版專案儲存。
+            </Alert>
+          }
+        </Col>
       <FormInputCol xs={12} label='檔案名稱' error={errors.title?.message}>
         <input type='text' className="input w-full"
                {...register('title', {required: "此填寫此欄位"})}/>
@@ -59,6 +66,7 @@ export default function SaveJson({images}: Props) {
           <AlertLoading/>
           :
           <Button color='success' shape='block'
+                  disabled={!hasLegacyBase64}
                   onClick={handleSubmit(onSave)}>
             <FaRegFileWord/>
             儲存檔案

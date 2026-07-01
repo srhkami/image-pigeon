@@ -9,9 +9,15 @@ import {Alert, Button, Modal, ModalBody, ModalHeader} from "@/component";
 import {LuImageUp} from "react-icons/lu";
 import {useModal} from "@/hooks";
 import ReadJson from "@/features/Upload/ReadJson.tsx";
+import {ProjectV2} from "@/types/project.ts";
+import OpenProject from "./OpenProject.tsx";
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
+  readonly project: ProjectV2,
+  readonly setProject: Dispatch<SetStateAction<ProjectV2>>,
+  readonly sessionId: string | null,
+  readonly setSessionId: Dispatch<SetStateAction<string | null>>,
 }
 
 /**
@@ -19,7 +25,7 @@ type Props = {
  * @param setImages 設定圖片列表State的函數
  * @constructor
  */
-export default function ModalUpload({setImages}: Props) {
+export default function ModalUpload({setImages, project, setProject, sessionId, setSessionId}: Props) {
 
   const {isShow, onShow, onHide} = useModal()
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -33,8 +39,14 @@ export default function ModalUpload({setImages}: Props) {
   const [remark] = watch(['remark']);
 
   return (
-    <>
-      <Button color='primary' onClick={onShow} className='fixed bottom-3 left-3'>
+    <div className='flex flex-col gap-2 fixed bottom-3 left-3'>
+      <OpenProject
+        setProject={setProject}
+        setSessionId={setSessionId}
+        setImages={setImages}
+        itemCount={project.items.length}
+      />
+      <Button color='primary' onClick={onShow}>
         <LuImageUp/>
         導入圖片
       </Button>
@@ -64,12 +76,16 @@ export default function ModalUpload({setImages}: Props) {
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="一般圖片" defaultChecked/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadMultiple setImages={setImages} defaultRemark={remark}
-                                  onHide={onHide} setIsLoading={setIsLoading} setCount={setCount}/>
+                                  onHide={onHide} setIsLoading={setIsLoading} setCount={setCount}
+                                  project={project} setProject={setProject}
+                                  sessionId={sessionId} setSessionId={setSessionId}/>
                 </div>
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="長截圖分割"/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadLongScreen setImages={setImages} defaultRemark={remark}
-                                    onHide={onHide} setIsLoading={setIsLoading} setCount={setCount}/>
+                                    onHide={onHide} setIsLoading={setIsLoading} setCount={setCount}
+                                    project={project} setProject={setProject}
+                                    sessionId={sessionId} setSessionId={setSessionId}/>
                 </div>
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="讀取舊檔"/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
@@ -79,6 +95,6 @@ export default function ModalUpload({setImages}: Props) {
           }
         </ModalBody>
       </Modal>
-    </>
+    </div>
   )
 }

@@ -2,6 +2,9 @@ import json
 import sys
 import webview
 import os.path
+import threading
+import subprocess
+from app.api import create_app
 from save_docx import creat_docx, add_header, OutputWord
 from handle_request import OutputBaseData, Response
 from handle_log import log
@@ -9,7 +12,10 @@ from upload_imags import UploadImage
 from crop_image import LongScreenImage, crop_to_images
 from save_images import SaveAsImages, save
 
-DEBUG_MODE = False
+DEBUG_MODE = os.environ.get('IMAGE_PIGEON_DEBUG') == '1'
+FASTAPI_HOST = '127.0.0.1'
+FASTAPI_PORT = 18765
+VITE_DEV_URL = 'http://localhost:5175'
 
 
 def get_root_path():
@@ -19,6 +25,72 @@ def get_root_path():
     # 如果是開發環境的 .py
     else:
         return os.path.dirname(os.path.abspath(__file__))
+
+
+def get_project_root_path():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def get_static_dir():
+    project_root = get_project_root_path()
+    dist_dir = os.path.join(project_root, 'dist')
+    if os.path.exists(os.path.join(dist_dir, 'index.html')):
+        return dist_dir
+    return os.path.join(project_root, 'html')
+
+
+def get_frontend_url():
+    if DEBUG_MODE:
+        return VITE_DEV_URL
+    return f'http://{FASTAPI_HOST}:{FASTAPI_PORT}'
+
+
+def start_fastapi_server():
+    import uvicorn
+
+    app = create_app(static_dir=get_static_dir())
+    config = uvicorn.Config(
+        app,
+        host=FASTAPI_HOST,
+        port=FASTAPI_PORT,
+        log_level='warning',
+        access_log=False,
+    )
+    server = uvicorn.Server(config)
+    thread = threading.Thread(target=server.run, daemon=True, name='fastapi-server')
+    thread.start()
+    return thread
+
+
+def build_project_save_path(parent_path: str, title: str = '照片黏貼表') -> str:
+    safe_title = str(title or '照片黏貼表').strip() or '照片黏貼表'
+    for separator in {os.sep, os.altsep, '/', '\\'}:
+        if separator:
+            safe_title = safe_title.replace(separator, '_')
+    if not safe_title.endswith('.ipigeon'):
+        safe_title = f'{safe_title}.ipigeon'
+    return os.path.join(parent_path, safe_title)
+
+
+def normalize_dialog_path(selected_path):
+    if not selected_path:
+        return None
+    if isinstance(selected_path, str):
+        return selected_path
+    return selected_path[0] if len(selected_path) else None
+
+
+def open_file(path: str) -> None:
+    startfile = getattr(os, 'startfile', None)
+    if startfile:
+        startfile(path)
+        return
+    if sys.platform == 'darwin':
+        subprocess.Popen(['open', path])
+        return
+    subprocess.Popen(['xdg-open', path])
 
 
 # 瀏覽器緩存路徑 (如果你還是想讓 localStorage 生效)
@@ -74,7 +146,7 @@ class Api:
         try:
             doc.save(data.path)
             log().info('儲存成功，執行完畢')
-            os.startfile(data.path)
+            open_file(data.path)
             return Response(200, '儲存成功').to_dict()
         except PermissionError:
             log().exception('有相同檔名未關閉', exc_info=True)
@@ -132,30 +204,51 @@ class Api:
         """
         mode = data.get('mode')
         title = data.get('title', '照片黏貼表')
+        selected_path = None
         match mode:
             case 'word':
-                path: list = webview.windows[0].create_file_dialog(
+                selected_path = webview.windows[0].create_file_dialog(
                     webview.FileDialog.SAVE,
                     save_filename=f'{title}.docx',
                     file_types=('WORD 文件 (*.docx)',)
                 )
             case 'json':
-                path: list = webview.windows[0].create_file_dialog(
+                selected_path = webview.windows[0].create_file_dialog(
                     webview.FileDialog.SAVE,
                     save_filename=f'{title}.json',
                     file_types=('JSON 文件 (*.json)',)
                 )
             case 'images':
-                path: list = webview.windows[0].create_file_dialog(
+                selected_path = webview.windows[0].create_file_dialog(
+                    webview.FileDialog.FOLDER,
+                    allow_multiple=False
+                )
+            case 'project-save':
+                selected_path = webview.windows[0].create_file_dialog(
+                    webview.FileDialog.FOLDER,
+                    allow_multiple=False
+                )
+            case 'project-open':
+                selected_path = webview.windows[0].create_file_dialog(
                     webview.FileDialog.FOLDER,
                     allow_multiple=False
                 )
             case _:
                 return Response(400, message='參數錯誤').to_dict()
-        # 返回的path均為一個清單，因此需要取得第一筆資料
-        file_path = path[0] if path else None
+
+        # pywebview 在不同平台/版本可能回傳字串或路徑序列。
+        file_path = normalize_dialog_path(selected_path)
+
+        if file_path and mode == 'project-save':
+            file_path = build_project_save_path(file_path, title)
+
         if not file_path:
-            error_text = '已取消儲存'
+            if mode == 'project-open':
+                error_text = '已取消開啟專案'
+            elif mode == 'project-save':
+                error_text = '已取消儲存專案'
+            else:
+                error_text = '已取消儲存'
             log().error(error_text)
             return Response(400, error_text).to_dict()
         log().info(f'選擇存檔位置：{file_path}')
@@ -166,8 +259,9 @@ if __name__ == '__main__':
     if DEBUG_MODE:
         log().error('注意！！DEBUG模式已開啟！！')
     log().info('請耐心等待程式開啟......')
+    start_fastapi_server()
     api = Api()
-    url = os.path.join(os.getcwd(), './html/index.html') if not DEBUG_MODE else 'http://localhost:5173'
+    url = get_frontend_url()
     window = webview.create_window(
         title='貼圖小鴿手',
         url=url,

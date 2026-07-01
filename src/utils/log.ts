@@ -2,6 +2,18 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '1.7.0',
+    date: '1150701',
+    logs: [
+      {color: "new", text: '新版專案格式改為 .ipigeon 資料夾，保存 project.json 與圖片檔案。'},
+      {color: "new", text: '新增「儲存專案」與「開啟專案」，可保留圖片排序、備註與旋轉狀態。'},
+      {color: "new", text: '輸出檔案新增「儲存專案」分頁，可自訂專案名稱。'},
+      {color: "info", text: '圖片匯入改用本機 FastAPI session 暫存，不再長期保存 base64。'},
+      {color: "info", text: '一般圖片與長截圖分割已限制可選副檔名，讀取舊檔限制為 JSON。'},
+      {color: "info", text: '開啟專案前會提示將清除目前預覽圖片，避免誤覆蓋目前工作。'},
+    ]
+  },
+  {
     version: '1.6.4',
     date: '1150129',
     logs: [

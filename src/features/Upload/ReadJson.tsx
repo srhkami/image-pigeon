@@ -3,6 +3,7 @@ import {Dispatch, SetStateAction} from "react";
 import {base64Image, CustomImage} from "@/utils/type.ts";
 import {Button, Col, FormInputCol, Row} from "@/component";
 import {showToast} from "@/utils/handleToast.ts";
+import {LEGACY_JSON_FILE_ACCEPT} from "@/features/Upload/fileAccept.ts";
 
 type TFormValue = {
   files: FileList,
@@ -47,7 +48,7 @@ export default function ReadJson({setImages, onHide, setIsLoading}: Props) {
       },
       {
         success: '讀取成功',
-        error: (err) => err.toString(),
+        error: (err) => String(err),
       }
     ).catch(err => {
       console.log(err);
@@ -58,8 +59,8 @@ export default function ReadJson({setImages, onHide, setIsLoading}: Props) {
   return (
     <form onSubmit={handleSubmit(omSubmit)}>
       <Row>
-        <FormInputCol xs={12} label='請選擇貼圖小鴿手專用存檔' error={errors.files?.message}>
-          <input id='files' type="file" accept=".json" className="file-input w-full"
+        <FormInputCol xs={12} label='支援 1.X 版本之貼圖小鴿手專用存檔' error={errors.files?.message}>
+          <input id='files' type="file" accept={LEGACY_JSON_FILE_ACCEPT} className="file-input w-full"
                  {...register('files', {required: '請上傳檔案'})}/>
         </FormInputCol>
         <Col xs={12} className='mt-6'>
