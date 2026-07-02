@@ -1,6 +1,12 @@
 import {CustomImage} from '@/utils/type.ts'
 import {ProjectV2} from '@/types/project.ts'
 import {getOrderedItemViewModels} from '@/state/projectState.ts'
+import {AutoCollagePage, buildAutoCollageLayout} from '@/features/ImagePreview/autoCollageLayout.ts'
+
+export type AutoCollageWordPayloadParts = {
+  images: CustomImage[],
+  pages: AutoCollagePage[],
+}
 
 const blobToDataUrl = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -51,4 +57,15 @@ export async function buildLegacyOutputImages(project: ProjectV2, sessionId: str
   }
 
   return result
+}
+
+export async function buildAutoCollageWordPayloadParts(project: ProjectV2, sessionId: string): Promise<AutoCollageWordPayloadParts> {
+  const viewModels = getOrderedItemViewModels(project, sessionId)
+  const pages = buildAutoCollageLayout(viewModels)
+  const images = await buildLegacyOutputImages(project, sessionId)
+
+  return {
+    images,
+    pages,
+  }
 }

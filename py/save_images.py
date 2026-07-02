@@ -26,6 +26,7 @@ class SaveImage:
     """
 
     def __init__(self, image):
+        self.id = image.get('id')
         self.name = image.get('name')
         self.remark = image.get('remark')  # 圖片說明
         self.rotation = image.get('rotation') * -1  # 旋轉角度，前端傳入及Pillow的角度相反

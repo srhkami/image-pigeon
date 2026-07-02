@@ -20,7 +20,17 @@ class OutputWord(OutputBaseData):
 
     def __init__(self, request):
         super().__init__(request)
-        self.mode = int(request.get('mode', 1))  # 模式
+        self.layout_mode = request.get('layoutMode')
+        raw_pages = request.get('pages', [])
+        self.pages = raw_pages if isinstance(raw_pages, list) else []
+
+        mode = request.get('mode', 1)
+        try:
+            parsed_mode = int(mode)
+        except (TypeError, ValueError):
+            parsed_mode = 1
+        self.mode = parsed_mode if parsed_mode in {1, 2, 4, 6} else 1
+
         self.align_vertical = request.get('align_vertical')  # 垂直對齊
         self.font_size = int(request.get('font_size'))  # 字體大小
 
@@ -33,37 +43,369 @@ class OutputWord(OutputBaseData):
         for index, file in enumerate(self.files):
             image = SaveImage(file)  # 逐一轉化成python自訂物件
             log().info(f'處理圖片：{index + 1}/{self.file_count}')
-            webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({index})")
+            _safe_update_progress(index)
             images.append(image)
         return images
 
     def to_dict(self):
-        return {
+        payload = {
             '標題': self.title,
             '檔案數': self.file_count,
             '模式': self.mode,
         }
+        if self.layout_mode:
+            payload['版型'] = self.layout_mode
+        if self.pages is not None:
+            payload['頁數'] = len(self.pages)
+        return payload
 
 
-def creat_docx(data: OutputWord):
-    """
-    一頁兩張的函數
-    :param data:
-    :return: 創建後的DOC檔
-    """
-    doc = Document()
-    doc = set_font(doc, data.font_size)
-    images = data.to_compressed_images()
+def _safe_update_progress(value: int):
+    if not getattr(webview, 'windows', None):
+        return
+    try:
+        webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({value})")
+    except Exception:
+        log().debug('更新進度失敗，繼續輸出', exc_info=True)
+
+
+def _normalize_slot_list(page: dict, expected_template: str) -> list[dict]:
+    if not isinstance(page, dict) or page.get('template') != expected_template:
+        return []
+
+    slots = page.get('slots', [])
+    return [slot for slot in slots if isinstance(slot, dict)]
+
+
+def _build_image_map(images: list[SaveImage]) -> dict[str, SaveImage]:
+    return {getattr(image, 'id', ''): image for image in images if getattr(image, 'id', None)}
+
+
+def _resolve_slot_image(images_by_id: dict[str, SaveImage], slot: dict | None) -> SaveImage | None:
+    if not slot:
+        return None
+
+    item_id = slot.get('itemId')
+    if not isinstance(item_id, str):
+        return None
+
+    return images_by_id.get(item_id)
+
+
+def _write_auto_slot(
+    align,
+    image: SaveImage | None,
+    image_cell,
+    number_cell,
+    remark_cell,
+    image_index: int,
+    max_height: int | float,
+    max_width: int | float,
+) -> int:
+    if image is None:
+        number_cell.text = ''
+        number_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+        number_cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        remark_cell.text = ''
+        if align == 'top':
+            remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.TOP
+        elif align == 'center':
+            remark_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+        return image_index
+
+    handle_table_write(
+        image=image,
+        align=align,
+        index=image_index,
+        image_cell=image_cell,
+        number_cell=number_cell,
+        remark_cell=remark_cell,
+        max_height=max_height,
+        max_width=max_width,
+    )
+
+    return image_index + 1
+
+
+def _append_landscape_2_table(
+    doc,
+    align,
+    images_by_id: dict[str, SaveImage],
+    slots: list[dict],
+    image_index: int,
+) -> int:
+    table = doc.add_table(rows=4, cols=2, style='Table Grid')
+    table.rows[0].height = Cm(9)
+    table.rows[1].height = Cm(2)
+    table.rows[2].height = Cm(9)
+    table.rows[3].height = Cm(2)
+
+    for col in range(2):
+        for cell in table.columns[col].cells:
+            cell.width = Cm(8.5)
+
+    table.cell(0, 0).merge(table.cell(0, 1))
+    table.cell(2, 0).merge(table.cell(2, 1))
+
+    first_image = _resolve_slot_image(images_by_id, slots[0] if len(slots) > 0 else None)
+    image_index = _write_auto_slot(
+        align,
+        image=first_image,
+        image_cell=table.cell(0, 0),
+        number_cell=table.cell(1, 0),
+        remark_cell=table.cell(1, 1),
+        image_index=image_index,
+        max_height=9,
+        max_width=15,
+    )
+
+    second_image = _resolve_slot_image(images_by_id, slots[1] if len(slots) > 1 else None)
+    image_index = _write_auto_slot(
+        align,
+        image=second_image,
+        image_cell=table.cell(2, 0),
+        number_cell=table.cell(3, 0),
+        remark_cell=table.cell(3, 1),
+        image_index=image_index,
+        max_height=9,
+        max_width=15,
+    )
+    return image_index
+
+
+def _append_portrait_large_2_table(
+    doc,
+    align,
+    images_by_id: dict[str, SaveImage],
+    slots: list[dict],
+    image_index: int,
+) -> int:
+    table = doc.add_table(rows=3, cols=2, style='Table Grid')
+    table.rows[0].height = Cm(18.2)
+    table.rows[1].height = Cm(0.8)
+    table.rows[2].height = Cm(3.5)
+
+    for cell in table.columns[0].cells:
+        cell.width = Cm(7.8)
+    for cell in table.columns[1].cells:
+        cell.width = Cm(7.8)
+
+    left = _resolve_slot_image(images_by_id, slots[0] if len(slots) > 0 else None)
+    image_index = _write_auto_slot(
+        align,
+        image=left,
+        image_cell=table.cell(0, 0),
+        number_cell=table.cell(1, 0),
+        remark_cell=table.cell(2, 0),
+        image_index=image_index,
+        max_height=18,
+        max_width=7.6,
+    )
+
+    right = _resolve_slot_image(images_by_id, slots[1] if len(slots) > 1 else None)
+    image_index = _write_auto_slot(
+        align,
+        image=right,
+        image_cell=table.cell(0, 1),
+        number_cell=table.cell(1, 1),
+        remark_cell=table.cell(2, 1),
+        image_index=image_index,
+        max_height=18,
+        max_width=7.6,
+    )
+    return image_index
+
+
+def _append_portrait_small_6_table(
+    doc,
+    align,
+    images_by_id: dict[str, SaveImage],
+    slots: list[dict],
+    image_index: int,
+) -> int:
+    table = doc.add_table(rows=6, cols=3, style='Table Grid')
+    table.rows[0].height = Cm(10)
+    table.rows[1].height = Cm(1)
+    table.rows[2].height = Cm(2.2)
+    table.rows[3].height = Cm(10)
+    table.rows[4].height = Cm(1)
+    table.rows[5].height = Cm(2.2)
+
+    for col in range(3):
+        for cell in table.columns[col].cells:
+            cell.width = Cm(5.2)
+
+    for slot_index in range(6):
+        slot = slots[slot_index] if slot_index < len(slots) else None
+        image = _resolve_slot_image(images_by_id, slot)
+        block_base = 0 if slot_index < 3 else 3
+        col = slot_index % 3
+
+        image_index = _write_auto_slot(
+            align,
+            image=image,
+            image_cell=table.cell(block_base, col),
+            number_cell=table.cell(block_base + 1, col),
+            remark_cell=table.cell(block_base + 2, col),
+            image_index=image_index,
+            max_height=9,
+            max_width=5,
+        )
+    return image_index
+
+
+def _append_mixed_landscape1_small3_table(
+    doc,
+    align,
+    images_by_id: dict[str, SaveImage],
+    slots: list[dict],
+    image_index: int,
+) -> int:
+    table = doc.add_table(rows=6, cols=3, style='Table Grid')
+    table.rows[0].height = Cm(10)
+    table.rows[1].height = Cm(1)
+    table.rows[2].height = Cm(1.8)
+    table.rows[3].height = Cm(10)
+    table.rows[4].height = Cm(1)
+    table.rows[5].height = Cm(2.2)
+
+    for col in range(3):
+        for cell in table.columns[col].cells:
+            cell.width = Cm(5.2)
+
+    table.cell(0, 0).merge(table.cell(0, 1)).merge(table.cell(0, 2))
+
+    landscape = _resolve_slot_image(images_by_id, slots[0] if len(slots) > 0 else None)
+    image_index = _write_auto_slot(
+        align,
+        image=landscape,
+        image_cell=table.cell(0, 0),
+        number_cell=table.cell(1, 0),
+        remark_cell=table.cell(1, 1),
+        image_index=image_index,
+        max_height=9,
+        max_width=15,
+    )
+
+    for index in range(3):
+        slot = slots[index + 1] if len(slots) > index + 1 else None
+        image = _resolve_slot_image(images_by_id, slot)
+        image_index = _write_auto_slot(
+            align,
+            image=image,
+            image_cell=table.cell(3, index),
+            number_cell=table.cell(4, index),
+            remark_cell=table.cell(5, index),
+            image_index=image_index,
+            max_height=6,
+            max_width=5.2,
+        )
+    return image_index
+
+
+def _append_mixed_small3_landscape1_table(
+    doc,
+    align,
+    images_by_id: dict[str, SaveImage],
+    slots: list[dict],
+    image_index: int,
+) -> int:
+    table = doc.add_table(rows=6, cols=3, style='Table Grid')
+    table.rows[0].height = Cm(10)
+    table.rows[1].height = Cm(1)
+    table.rows[2].height = Cm(1.8)
+    table.rows[3].height = Cm(10)
+    table.rows[4].height = Cm(1)
+    table.rows[5].height = Cm(2.2)
+
+    for col in range(3):
+        for cell in table.columns[col].cells:
+            cell.width = Cm(5.2)
+
+    for index in range(3):
+        slot = slots[index] if len(slots) > index else None
+        image = _resolve_slot_image(images_by_id, slot)
+        image_index = _write_auto_slot(
+            align,
+            image=image,
+            image_cell=table.cell(0, index),
+            number_cell=table.cell(1, index),
+            remark_cell=table.cell(2, index),
+            image_index=image_index,
+            max_height=6,
+            max_width=5.2,
+        )
+
+    table.cell(3, 0).merge(table.cell(3, 1)).merge(table.cell(3, 2))
+    landscape = _resolve_slot_image(images_by_id, slots[3] if len(slots) > 3 else None)
+    image_index = _write_auto_slot(
+        align,
+        image=landscape,
+        image_cell=table.cell(3, 0),
+        number_cell=table.cell(4, 0),
+        remark_cell=table.cell(5, 0),
+        image_index=image_index,
+        max_height=9,
+        max_width=15,
+    )
+    return image_index
+
+
+def _render_auto_collage_pages(data: OutputWord, images: list[SaveImage], doc):
+    images_by_id = _build_image_map(images)
+    image_count = len(images)
+    rendered_page_count = 0
+    image_index = 1
+
+    for page in data.pages:
+        if not isinstance(page, dict):
+            continue
+
+        template = page.get('template')
+
+        rendered = False
+
+        if template == 'landscape-2':
+            image_index = _append_landscape_2_table(doc, data.align_vertical, images_by_id, _normalize_slot_list(page, 'landscape-2'), image_index)
+            rendered = True
+        elif template == 'portrait-large-2':
+            image_index = _append_portrait_large_2_table(doc, data.align_vertical, images_by_id, _normalize_slot_list(page, 'portrait-large-2'), image_index)
+            rendered = True
+        elif template == 'portrait-small-6':
+            image_index = _append_portrait_small_6_table(doc, data.align_vertical, images_by_id, _normalize_slot_list(page, 'portrait-small-6'), image_index)
+            rendered = True
+        elif template == 'mixed-landscape1-small3':
+            image_index = _append_mixed_landscape1_small3_table(doc, data.align_vertical, images_by_id, _normalize_slot_list(page, 'mixed-landscape1-small3'), image_index)
+            rendered = True
+        elif template == 'mixed-small3-landscape1':
+            image_index = _append_mixed_small3_landscape1_table(doc, data.align_vertical, images_by_id, _normalize_slot_list(page, 'mixed-small3-landscape1'), image_index)
+            rendered = True
+        else:
+            log().warning(f'不支援的版型：{template}')
+
+        if rendered:
+            rendered_page_count += 1
+            if image_count:
+                _safe_update_progress(image_count)
+
+    if rendered_page_count == 0:
+        log().warning('layoutMode 已設定為 auto-collage-v1，但沒有可識別頁面，改用舊版版式')
+        return _build_legacy_layout(doc, data, images)
+
+    return doc
+
+
+def _build_legacy_layout(doc, data: OutputWord, images: list[SaveImage]):
     match data.mode:
         case 1:
             # for index, image in enumerate(images):
             for i in range(0, data.file_count):
                 doc = add_table_two_of_page_horizontal(doc, data.align_vertical, images[i], i + 1)
-                webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
+                _safe_update_progress(i)
         case 2:
             for i in range(0, data.file_count, 2):
                 doc = add_table_two_of_page_vertical(doc, data.align_vertical, images[i:i + 2], i + 1)
-                webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
+                _safe_update_progress(i)
         case 4:
             section = doc.sections[-1]
             # 1. 取得原本的寬與高
@@ -76,12 +418,28 @@ def creat_docx(data: OutputWord):
             section.page_height = current_width
             for i in range(0, data.file_count, 4):
                 doc = add_table_four_of_page(doc, data.align_vertical, images[i:i + 4], i + 1)
-                webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
+                _safe_update_progress(i)
         case 6:
             for i in range(0, data.file_count, 3):
                 doc = add_table_six_of_page(doc, data.align_vertical, images[i:i + 3], i + 1)
-                webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
+                _safe_update_progress(i)
     return doc
+
+
+def creat_docx(data: OutputWord):
+    """
+    一頁兩張的函數
+    :param data:
+    :return: 創建後的DOC檔
+    """
+    doc = Document()
+    doc = set_font(doc, data.font_size)
+    images = data.to_compressed_images()
+
+    if data.layout_mode == 'auto-collage-v1' and data.pages:
+        return _render_auto_collage_pages(data, images, doc)
+
+    return _build_legacy_layout(doc, data, images)
 
 
 def add_header(doc, title_text):
