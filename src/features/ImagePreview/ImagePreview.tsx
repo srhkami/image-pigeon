@@ -1,5 +1,5 @@
 import {arrayMove} from '@dnd-kit/sortable'
-import {Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState} from 'react';
+import {Dispatch, SetStateAction, useEffect, useMemo, useState} from 'react'
 import {
   DndContext,
   closestCenter,
@@ -16,12 +16,11 @@ import {
   restrictToVerticalAxis,
   restrictToWindowEdges
 } from '@dnd-kit/modifiers'
-import {CustomImage} from "@/utils/type.ts";
-import ImageCard from "@/features/ImagePreview/ImageCard.tsx";
-import ImageCardForMove from "@/features/ImagePreview/ImageCardForMove.tsx";
-import {ProjectItemViewModel} from "@/types/project.ts";
-import {getOrderedItemViewModels, reorderItem} from "@/state/projectState.ts";
-import {ProjectV2} from "@/types/project.ts";
+import {CustomImage} from '@/utils/type.ts'
+import FocusImageEditor from '@/features/ImagePreview/FocusImageEditor.tsx'
+import ImageCardForMove from '@/features/ImagePreview/ImageCardForMove.tsx'
+import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
+import {getOrderedItemViewModels, reorderItem} from '@/state/projectState.ts'
 import CollagePagePreviewRail from '@/features/ImagePreview/CollagePagePreviewRail.tsx'
 import {buildAutoCollageLayout, findPageIndexByItemId} from '@/features/ImagePreview/autoCollageLayout.ts'
 
@@ -78,45 +77,63 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
     })
   }
 
-  const imageList: ReactNode[] = viewModels.map((viewModel, index) => {
-    const commonProps = {
-      viewModel,
-      setProject,
-      index,
-      setImages,
-    }
-    if (isMoveMode) {
-      return <ImageCardForMove key={viewModel.itemId} {...commonProps} />
-    }
-    return <ImageCard key={viewModel.itemId} {...commonProps} />
-  })
-
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-      modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
-    >
+  if (isMoveMode) {
+    return (
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+        modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+      >
         <SortableContext
           items={viewModels.map(item => item.itemId)}
           strategy={verticalListSortingStrategy}
         >
-        <div className='px-3 py-5 flex flex-col lg:flex-row gap-3'>
-          <div className='w-full lg:w-[68%]'>
-            <div className='columns-1 flex flex-col items-center'>
-              {imageList}
+          <div className='px-3 py-5 flex flex-col lg:flex-row gap-3'>
+            <div className='w-full lg:w-[68%]'>
+              <div className='columns-1 flex flex-col items-center'>
+                {viewModels.map((viewModel, index) => (
+                  <ImageCardForMove
+                    key={viewModel.itemId}
+                    viewModel={viewModel}
+                    setProject={setProject}
+                    index={index}
+                    setImages={setImages}
+                  />
+                ))}
+              </div>
             </div>
+            <CollagePagePreviewRail
+              pages={collageLayout}
+              viewModels={viewModels}
+              activeItemId={activeItemId}
+              activePageIndex={activePageIndex}
+              setActiveItemId={setActiveItemId}
+            />
           </div>
-          <CollagePagePreviewRail
-            pages={collageLayout}
-            viewModels={viewModels}
-            activeItemId={activeItemId}
-            activePageIndex={activePageIndex}
-            setActiveItemId={setActiveItemId}
-          />
-        </div>
-      </SortableContext>
-    </DndContext>
+        </SortableContext>
+      </DndContext>
+    )
+  }
+
+  return (
+    <div className='px-3 py-5 flex flex-col lg:flex-row gap-3'>
+      <div className='w-full lg:w-[68%]'>
+        <FocusImageEditor
+          viewModels={viewModels}
+          activeItemId={activeItemId}
+          setActiveItemId={setActiveItemId}
+          setProject={setProject}
+          setImages={setImages}
+        />
+      </div>
+      <CollagePagePreviewRail
+        pages={collageLayout}
+        viewModels={viewModels}
+        activeItemId={activeItemId}
+        activePageIndex={activePageIndex}
+        setActiveItemId={setActiveItemId}
+      />
+    </div>
   )
 }

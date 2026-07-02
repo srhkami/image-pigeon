@@ -1,16 +1,11 @@
-import {useSortable} from "@dnd-kit/sortable";
-import {CSS} from "@dnd-kit/utilities";
-import {CustomImage,} from "@/utils/type.ts";
-import {Button} from "@/component";
-import {FaArrowRotateLeft, FaArrowRotateRight, FaXmark} from "react-icons/fa6";
-import {SubmitHandler, useForm} from "react-hook-form";
-import toast from "react-hot-toast";
-import {twMerge} from "tailwind-merge";
-import clsx from "clsx";
-import {CgMenuGridR} from "react-icons/cg";
-import {Dispatch, SetStateAction} from "react";
-import {ProjectItemViewModel, ProjectV2} from "@/types/project.ts";
-import {removeItem, updateItemRemark, updateItemRotation} from "@/state/projectState.ts";
+import {CustomImage} from '@/utils/type.ts'
+import {Button} from '@/component'
+import {FaArrowRotateLeft, FaArrowRotateRight, FaXmark} from 'react-icons/fa6'
+import {SubmitHandler, useForm} from 'react-hook-form'
+import toast from 'react-hot-toast'
+import {Dispatch, SetStateAction} from 'react'
+import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
+import {removeItem, updateItemRemark, updateItemRotation} from '@/state/projectState.ts'
 
 type Props = {
   readonly viewModel: ProjectItemViewModel,
@@ -24,26 +19,11 @@ type RemarkForm = {
 }
 
 export default function ImageCard({viewModel, setProject, index, setImages}: Props) {
-
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({id: viewModel.itemId})
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition
-  }
-
-  const {register, getValues} = useForm<RemarkForm>({defaultValues: {remark: viewModel.remark}});
+  const {register, getValues} = useForm<RemarkForm>({defaultValues: {remark: viewModel.remark}})
 
   // 修改圖片備註
   const onRemarkEdit: SubmitHandler<RemarkForm> = () => {
-    const {remark} = getValues();
+    const {remark} = getValues()
     setProject((prev) => updateItemRemark(prev, viewModel.itemId, remark))
     setImages(prev => prev.map((imgItem) => {
       if (imgItem.id === viewModel.itemId) {
@@ -51,14 +31,14 @@ export default function ImageCard({viewModel, setProject, index, setImages}: Pro
       }
       return imgItem
     }))
-    toast.success(`編號${index + 1} 備註已儲存`);
-  };
+    toast.success(`編號${index + 1} 備註已儲存`)
+  }
 
   // 移除圖片
   const handleRemoveImage = () => {
     setProject((prev) => removeItem(prev, viewModel.itemId))
-    setImages(prev => prev.filter((item) => item.id !== viewModel.itemId));
-  };
+    setImages(prev => prev.filter((item) => item.id !== viewModel.itemId))
+  }
 
   // 旋轉照片角度
   const handleRotate = (value: 90 | -90) => {
@@ -72,25 +52,11 @@ export default function ImageCard({viewModel, setProject, index, setImages}: Pro
     }))
   }
 
-  const classes = twMerge(
-    'card bg-base-100 border shadow-sm my-2 p-1 md:w-2/3 lg:w-1/2 items-center justify-center',
-    clsx({
-      'border-2 border-accent z-20 opacity-95 backdrop-blur-lg': isDragging,
-    })
-  )
+  const classes =
+    'card bg-base-100 border shadow-sm my-2 p-1 md:w-2/3 lg:w-1/2 items-center justify-center w-full'
 
   return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      style={style}
-      className={classes}
-    >
-      <div className='absolute top-2 left-2 rounded-tr flex flex-col z-10'>
-        <button {...listeners} className="btn btn-accent btn-ghost btn-circle cursor-grab">
-          <CgMenuGridR className='text-lg'/>
-        </button>
-      </div>
+    <div className={classes}>
       <div className='absolute top-2 right-2 rounded-tr flex flex-col z-10'>
         <Button color='error' style='ghost' shape='circle' onClick={handleRemoveImage}>
           <FaXmark className='text-lg'/>
