@@ -1,5 +1,5 @@
 import {arrayMove} from '@dnd-kit/sortable'
-import {Dispatch, ReactNode, SetStateAction} from "react";
+import {Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState} from 'react';
 import {
   DndContext,
   closestCenter,
@@ -22,6 +22,8 @@ import ImageCardForMove from "@/features/ImagePreview/ImageCardForMove.tsx";
 import {ProjectItemViewModel} from "@/types/project.ts";
 import {getOrderedItemViewModels, reorderItem} from "@/state/projectState.ts";
 import {ProjectV2} from "@/types/project.ts";
+import CollagePagePreviewRail from '@/features/ImagePreview/CollagePagePreviewRail.tsx'
+import {buildAutoCollageLayout, findPageIndexByItemId} from '@/features/ImagePreview/autoCollageLayout.ts'
 
 type Props = {
   readonly project: ProjectV2,
@@ -34,10 +36,29 @@ type Props = {
 export default function ImagePreview({project, setProject, sessionId, setImages, isMoveMode}: Props) {
 
   const viewModels: ProjectItemViewModel[] = getOrderedItemViewModels(project, sessionId ?? "")
+  const [activeItemId, setActiveItemId] = useState<string | null>(null)
+  const collageLayout = useMemo(() => buildAutoCollageLayout(viewModels), [viewModels])
+  const activePageIndex = useMemo(() => {
+    if (!activeItemId) return -1
+    return findPageIndexByItemId(collageLayout, activeItemId)
+  }, [collageLayout, activeItemId])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {activationConstraint: {distance: 5}})
   )
+
+  useEffect(() => {
+    if (!viewModels.length) {
+      setActiveItemId(null)
+      return
+    }
+
+    if (activeItemId && viewModels.some((item) => item.itemId === activeItemId)) {
+      return
+    }
+
+    setActiveItemId(viewModels[0]?.itemId ?? null)
+  }, [viewModels, activeItemId])
 
   const handleDragEnd = (event: DragEndEvent) => {
     const {active, over} = event
@@ -47,6 +68,7 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
     const overId = String(over.id)
 
     setProject(prev => reorderItem(prev, activeId, overId))
+    setActiveItemId(activeId)
 
     setImages((prev) => {
       const oldIndex = prev.findIndex(item => item.id === activeId)
@@ -76,12 +98,23 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
       onDragEnd={handleDragEnd}
       modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
     >
-      <SortableContext
-        items={viewModels.map(item => item.itemId)}
-        strategy={verticalListSortingStrategy}
-      >
-        <div className='columns-1 px-3 py-5 flex flex-col items-center'>
-          {imageList}
+        <SortableContext
+          items={viewModels.map(item => item.itemId)}
+          strategy={verticalListSortingStrategy}
+        >
+        <div className='px-3 py-5 flex flex-col lg:flex-row gap-3'>
+          <div className='w-full lg:w-[68%]'>
+            <div className='columns-1 flex flex-col items-center'>
+              {imageList}
+            </div>
+          </div>
+          <CollagePagePreviewRail
+            pages={collageLayout}
+            viewModels={viewModels}
+            activeItemId={activeItemId}
+            activePageIndex={activePageIndex}
+            setActiveItemId={setActiveItemId}
+          />
         </div>
       </SortableContext>
     </DndContext>
