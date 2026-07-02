@@ -47,7 +47,7 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
     useSensor(PointerSensor, {activationConstraint: {distance: 8}})
   )
 
-  const previewLayoutClassName = 'flex h-full min-h-0 flex-col gap-3 overflow-hidden px-3 py-3 lg:flex-row lg:items-stretch'
+  const previewLayoutClassName = 'flex h-full min-h-0 flex-col gap-3 overflow-hidden px-3 core-3 lg:flex-row lg:items-stretch'
   const editorColumnClassName = 'flex min-h-0 w-full flex-1 justify-center overflow-hidden'
 
   useEffect(() => {

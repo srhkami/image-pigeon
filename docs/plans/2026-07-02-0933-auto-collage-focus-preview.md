@@ -472,13 +472,13 @@ pnpm run build
 涉及 Python model / Word 輸出時加跑：
 
 ```bash
-uv run python -m pytest py/tests/test_models.py py/tests/test_project_service.py
+uv run python -m pytest core/tests/test_models.core core/tests/test_project_service.core
 ```
 
 若新增 Word renderer tests：
 
 ```bash
-uv run python -m pytest py/tests/test_save_docx_collage.py
+uv run python -m pytest core/tests/test_save_docx_collage.core
 ```
 
 ---

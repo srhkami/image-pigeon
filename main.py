@@ -1,28 +1,30 @@
 import json
-import sys
-import webview
 import os.path
-import threading
 import subprocess
-from app.api import create_app
-from save_docx import creat_docx, add_header, OutputWord
-from handle_request import OutputBaseData, Response
-from handle_log import log
-from upload_imags import UploadImage
-from crop_image import LongScreenImage, crop_to_images
-from save_images import SaveAsImages, save
+import sys
+import threading
 
-DEBUG_MODE = True
+import webview
+
+from core.app.api import create_app
+from core.crop_image import LongScreenImage, crop_to_images
+from core.handle_log import log
+from core.handle_request import OutputBaseData, Response
+from core.save_docx import creat_docx, add_header, OutputWord
+from core.save_images import SaveAsImages, save
+from core.upload_imags import UploadImage
+
+DEBUG_MODE = False
 FASTAPI_HOST = '127.0.0.1'
 FASTAPI_PORT = 18765
-VITE_DEV_URL = 'http://localhost:5175'
+VITE_DEV_URL = 'http://localhost:5173'
 
 
 def get_root_path():
     # 如果是打包後的 exe
     if getattr(sys, 'frozen', False):
         return os.path.dirname(sys.executable)
-    # 如果是開發環境的 .py
+    # 如果是開發環境的 .core
     else:
         return os.path.dirname(os.path.abspath(__file__))
 

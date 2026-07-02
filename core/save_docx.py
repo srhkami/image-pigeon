@@ -1,17 +1,17 @@
+import webview
+from PIL import Image
 from docx import Document
-from docx.shared import Cm
+from docx.enum.section import WD_ORIENT
 from docx.enum.table import WD_ALIGN_VERTICAL, WD_ROW_HEIGHT_RULE
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.enum.section import WD_ORIENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.shared import Cm
 from docx.shared import Pt, RGBColor
 
-from PIL import Image
-from handle_log import log
-import webview
-from handle_request import OutputBaseData
-from save_images import SaveImage
+from core.handle_log import log
+from core.handle_request import OutputBaseData
+from core.save_images import SaveImage
 
 
 class OutputWord(OutputBaseData):

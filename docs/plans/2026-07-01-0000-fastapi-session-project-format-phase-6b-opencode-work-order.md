@@ -153,9 +153,9 @@ AC8. Existing lint may have unrelated errors; result report must distinguish unr
 Run and record exact outcomes:
 
 ```bash
-uv run python -m unittest discover -s py/tests -p 'test_project_api.py' -v
-uv run python -m unittest discover -s py/tests -v
-uv run python -m compileall py
+uv run python -m unittest discover -s core/tests -p 'test_project_api.core' -v
+uv run python -m unittest discover -s core/tests -v
+uv run python -m compileall core
 pnpm -s tsc -b
 pnpm run build
 pnpm run lint
@@ -164,7 +164,7 @@ pnpm run lint
 Also run grep checks and record:
 
 ```bash
-grep -R "project-save\|project-open" -n py/main.py src
+grep -R "project-save\|project-open" -n core/main.core src
 ```
 
 If `python -m compileall py` creates `__pycache__`, remove those generated cache dirs before final result.

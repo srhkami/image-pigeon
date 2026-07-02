@@ -179,10 +179,10 @@ Minimum API tests:
 Run and record exact outcomes:
 
 ```bash
-python -m unittest discover -s py/tests -p 'test_project_service.py' -v
-python -m unittest discover -s py/tests -p 'test_project_api.py' -v
-python -m unittest discover -s py/tests -v
-python -m compileall py
+python -m unittest discover -s core/tests -p 'test_project_service.core' -v
+python -m unittest discover -s core/tests -p 'test_project_api.core' -v
+python -m unittest discover -s core/tests -v
+python -m compileall core
 ```
 
 ## Required result report
