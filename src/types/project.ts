@@ -23,6 +23,7 @@ export type Item = {
   remark: string
   rotation: 0 | 90 | 180 | 270
   crop: Crop
+  portraitSize?: 'large' | 'small'
 }
 
 export type WordCompatibleGridLayout = {
@@ -70,6 +71,9 @@ export type ProjectItemViewModel = {
   rotation: 0 | 90 | 180 | 270
   assetId: string
   crop: Crop
+  orientation: 'landscape' | 'portrait'
+  portraitSize: 'large' | 'small'
+  collageKind: 'landscape' | 'portrait-large' | 'portrait-small'
   assetWidth: number
   assetHeight: number
   assetSize: number

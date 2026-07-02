@@ -61,3 +61,25 @@ class ModelContractTest(unittest.TestCase):
         self.assertEqual(item.crop.width, 1)
         self.assertEqual(item.crop.height, 1)
         self.assertEqual(item.crop.unit, "ratio")
+
+    def test_item_portrait_size_default_large(self):
+        item = Item(id="item_001", assetId="asset_001")
+        self.assertEqual(item.portrait_size, "large")
+
+    def test_item_portrait_size_alias_roundtrip(self):
+        item = Item(id="item_001", assetId="asset_001", portraitSize="small")
+        dumped = item.model_dump(by_alias=True)
+        loaded = Item.model_validate(dumped)
+
+        self.assertEqual(dumped["portraitSize"], "small")
+        self.assertEqual(loaded.portrait_size, "small")
+
+    def test_project_load_old_json_without_portraitSize(self):
+        legacy_payload = {
+            "items": [{"id": "item_001", "assetId": "asset_001", "remark": "legacy"}],
+            "assets": [{"id": "asset_001", "file": "images/asset_001.webp", "mime": "image/webp", "width": 100, "height": 200, "size": 1024}],
+        }
+
+        project = ProjectV2.model_validate(legacy_payload)
+        self.assertEqual(len(project.items), 1)
+        self.assertEqual(project.items[0].portrait_size, "large")

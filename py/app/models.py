@@ -45,6 +45,7 @@ class Item(BaseModel):
     remark: str = ""
     rotation: int = 0
     crop: Crop = Field(default_factory=Crop)
+    portrait_size: Literal["large", "small"] = Field(default="large", alias="portraitSize")
 
     model_config = {"populate_by_name": True}
 

@@ -103,6 +103,14 @@ export function getOrderedItemViewModels(project: ProjectV2, sessionId: string):
         return null
       }
 
+      const orientation = asset.width >= asset.height ? 'landscape' : 'portrait'
+      const portraitSize = item.portraitSize ?? 'large'
+      const collageKind = orientation === 'landscape'
+        ? 'landscape'
+        : portraitSize === 'large'
+          ? 'portrait-large'
+          : 'portrait-small'
+
       return {
         itemId: item.id,
         itemType: item.type,
@@ -110,6 +118,9 @@ export function getOrderedItemViewModels(project: ProjectV2, sessionId: string):
         rotation: item.rotation,
         assetId: item.assetId,
         crop: item.crop,
+        orientation,
+        portraitSize,
+        collageKind,
         assetWidth: asset.width,
         assetHeight: asset.height,
         assetSize: asset.size,
@@ -197,6 +208,15 @@ export function updateItemRotation(project: ProjectV2, itemId: string, rotation:
     ...project,
     items: project.items.map((item) => item.id === itemId
       ? {...item, rotation}
+      : item),
+  }
+}
+
+export function updateItemPortraitSize(project: ProjectV2, itemId: string, portraitSize: 'large' | 'small'): ProjectV2 {
+  return {
+    ...project,
+    items: project.items.map((item) => item.id === itemId
+      ? {...item, portraitSize}
       : item),
   }
 }
