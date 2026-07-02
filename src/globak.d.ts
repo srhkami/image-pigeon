@@ -14,7 +14,9 @@ declare global {
   interface Window {
     pywebview: {
       api: {
+        /** legacy: Phase 5B 改為 FastAPI multipart 上傳，僅保留舊版 pywebview 匯入相容 */
         upload_image(data: UploadImage): Promise<Response<base64Image>>
+        /** legacy: Phase 5B 改為 FastAPI 長截圖 import API，僅保留舊版 pywebview 相容 */
         crop_image(data: UploadImage): Promise<Response<Array<base64Image>>>,
         save_docx(data: OutputWord): Promise<Response<null>>,
         save_images(data: SaveAsImages): Promise<Response<null>>,

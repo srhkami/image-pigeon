@@ -15,7 +15,7 @@ export default function ModalReadme() {
     if (isReadVersion !== AppVersion) {
       onShow();
     }
-  }, []);
+  }, [onShow]);
 
   const onClose = () => {
     localStorage.setItem('readme', AppVersion);

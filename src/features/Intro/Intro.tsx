@@ -15,7 +15,7 @@ export default function Intro() {
               <Badge color='accent'>Step 1</Badge>
             </Col>
             <Col xs={9} className='text-lg font-bold flex items-center my-2'>
-              點擊左下角
+              點擊左上角
               <button className='btn btn-sm btn-outline mx-2'>
                 導入圖片
               </button>
@@ -32,7 +32,7 @@ export default function Intro() {
             </Col>
             <Col xs={9} className='text-lg font-bold flex items-center my-2'>
               <div className='col-span-3 text-lg font-bold flex items-center'>
-                點擊右下角
+                點擊左下角
                 <button className='btn btn-sm mx-2 btn-outline'>
                   輸出檔案
                 </button>
@@ -55,7 +55,7 @@ export default function Intro() {
             <div className='col-span-2 text-start'>
               蔡智楷 C.K.SAI
               <br/>
-              <span className='text-xs'>嘉義縣警察局民雄分局</span>
+              <span className='text-xs'>警政署資訊室</span>
             </div>
             <div className='col-span-2 flex'>
               <ModalFeedback/>

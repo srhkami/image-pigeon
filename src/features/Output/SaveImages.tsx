@@ -1,18 +1,22 @@
 import {Alert, Button, Col, FormInputCol, Row} from "@/component";
 import {LuImageDown} from "react-icons/lu";
 import {SubmitHandler, useForm} from "react-hook-form";
-import {CustomImage, SaveAsImages} from "@/utils/type.ts";
+import {SaveAsImages} from "@/utils/type.ts";
 import {showToast} from "@/utils/handleToast.ts";
 import {checkStatus} from "@/utils/handleError.ts";
 import {useState} from "react";
 import {AlertLoading} from "@/layout";
 import {IoMdAlert} from "react-icons/io";
+import {ProjectV2} from '@/types/project.ts'
+import {buildLegacyOutputImages} from '@/state/projectOutputAdapter.ts'
 
 type Props = {
-  readonly images: Array<CustomImage>;
+  readonly project: ProjectV2;
+  readonly sessionId: string | null;
+  readonly itemCount: number;
 }
 
-export default function SaveImages({images}: Props) {
+export default function SaveImages({project, sessionId, itemCount}: Props) {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -28,18 +32,24 @@ export default function SaveImages({images}: Props) {
     setIsLoading(true);
     showToast(
       async () => {
+        if (!sessionId) {
+          throw new Error('尚未建立圖片 session，請先重新匯入圖片')
+        }
+
+        const outputImages = await buildLegacyOutputImages(project, sessionId)
+
         const res1 = await window.pywebview.api.select_path({mode: 'images'});
         checkStatus(res1);
         const data: SaveAsImages = {
           ...formData,
-          images: images,
+          images: outputImages,
           path: res1.message,
         }
         const res2 = await window.pywebview.api.save_images(data);
         checkStatus(res2);
         setIsLoading(false);
       },
-      {success: '儲存成功', error: err => err.toString()}
+      {success: '儲存成功', error: err => String(err)}
     )
       .finally(() => setIsLoading(false))
   }
@@ -67,12 +77,12 @@ export default function SaveImages({images}: Props) {
           </Alert>
         }
       </FormInputCol>
-      <Col xs={12} className='mt-6'>
+        <Col xs={12} className='mt-6'>
         {isLoading ?
-          <AlertLoading count={images.length}/>
-          :
-          <Button color='success' shape='block'
-                  onClick={handleSubmit(onSave)}>
+           <AlertLoading count={itemCount}/>
+           :
+           <Button color='success' shape='block'
+                   onClick={handleSubmit(onSave)}>
             <LuImageDown/>另存圖片
           </Button>
         }

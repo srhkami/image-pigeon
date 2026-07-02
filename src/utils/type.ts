@@ -17,8 +17,50 @@ export interface OutputBaseData {
   path: string,
 }
 
+export type AutoCollageWordTemplate =
+  | 'landscape-2'
+  | 'portrait-large-2'
+  | 'portrait-small-6'
+  | 'mixed-landscape1-small3'
+  | 'mixed-small3-landscape1'
+
+export type AutoCollageWordSlotRole =
+  | 'landscape-top'
+  | 'landscape-bottom'
+  | 'portrait-large-left'
+  | 'portrait-large-right'
+  | 'portrait-small-1'
+  | 'portrait-small-2'
+  | 'portrait-small-3'
+  | 'portrait-small-4'
+  | 'portrait-small-5'
+  | 'portrait-small-6'
+  | 'mixed-landscape-top'
+  | 'mixed-small-top-left'
+  | 'mixed-small-top-middle'
+  | 'mixed-small-top-right'
+  | 'mixed-small-bottom-left'
+  | 'mixed-small-bottom-middle'
+  | 'mixed-small-bottom-right'
+  | 'mixed-landscape-bottom'
+
+export interface AutoCollageWordSlot {
+  slotId: string
+  itemId: string | null
+  role: AutoCollageWordSlotRole
+  order: number
+}
+
+export interface AutoCollageWordPage {
+  pageId: string
+  template: AutoCollageWordTemplate
+  slots: AutoCollageWordSlot[]
+}
+
 export interface OutputWord extends OutputBaseData {
-  mode: '1' | '2' | '4' | '6',
+  mode?: '1' | '2' | '4' | '6',
+  layoutMode?: 'auto-collage-v1',
+  pages?: AutoCollageWordPage[],
   align_vertical: 'top' | 'center',
   font_size: '10' | '11' | '12' | '13' | '14',
 }
@@ -28,7 +70,7 @@ export interface SaveAsImages extends OutputBaseData {
 }
 
 export type TSelectPath = {
-  mode: 'word' | 'images' | 'json',
+  mode: 'word' | 'images' | 'json' | 'project-save' | 'project-open',
   title?: string,
 }
 

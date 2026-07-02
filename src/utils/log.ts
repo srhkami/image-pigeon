@@ -2,6 +2,33 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '2.0.0',
+    date: '1150702',
+    logs: [
+      {color: "new", text: '新增自動拼貼排版預覽，依圖片方向自動組成橫圖、直向大圖、直向小圖與混合頁面。'},
+      {color: "new", text: '新增焦點式圖片編輯介面，可用滑鼠滾輪或方向鍵切換目前圖片，並支援直向圖片大小切換。'},
+      {color: "new", text: 'Word 輸出改用自動拼貼版型，支援混合橫向圖片與直向小圖排版。'},
+      {color: "info", text: '操作按鈕整合到左側側邊欄，編輯區與預覽區維持同層級，不再遮住圖片內容。'},
+      {color: "info", text: '右側頁面縮圖預覽縮小並改為接近 A4 影印結果的樣式。'},
+      {color: "info", text: '排序模式改為獨立清單並改善拖曳流暢度，降低抖動與卡頓。'},
+      {color: "fix", text: '修復新版提示視窗重複彈出、頁面高度被撐開與焦點圖片無法置中的問題。'},
+      {color: "fix", text: '修正旋轉圖片後仍以原方向判斷排版的問題。'},
+      {color: "fix", text: '修正 Word 橫向圖片編號欄過寬、直向小圖高度與混合版型跑版問題。'},
+    ]
+  },
+  {
+    version: '1.7.0',
+    date: '1150701',
+    logs: [
+      {color: "new", text: '新版專案格式改為 .ipigeon 資料夾，保存 project.json 與圖片檔案。'},
+      {color: "new", text: '新增「儲存專案」與「開啟專案」，可保留圖片排序、備註與旋轉狀態。'},
+      {color: "new", text: '輸出檔案新增「儲存專案」分頁，可自訂專案名稱。'},
+      {color: "info", text: '圖片匯入改用本機 FastAPI session 暫存，不再長期保存 base64。'},
+      {color: "info", text: '一般圖片與長截圖分割已限制可選副檔名，讀取舊檔限制為 JSON。'},
+      {color: "info", text: '開啟專案前會提示將清除目前預覽圖片，避免誤覆蓋目前工作。'},
+    ]
+  },
+  {
     version: '1.6.4',
     date: '1150129',
     logs: [

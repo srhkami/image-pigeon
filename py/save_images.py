@@ -5,6 +5,19 @@ from handle_log import log
 import webview
 from handle_request import OutputBaseData
 import os
+import sys
+import subprocess
+
+
+def open_folder(path: str) -> None:
+    startfile = getattr(os, 'startfile', None)
+    if startfile:
+        startfile(path)
+        return
+    if sys.platform == 'darwin':
+        subprocess.Popen(['open', path])
+        return
+    subprocess.Popen(['xdg-open', path])
 
 
 class SaveImage:
@@ -13,6 +26,7 @@ class SaveImage:
     """
 
     def __init__(self, image):
+        self.id = image.get('id')
         self.name = image.get('name')
         self.remark = image.get('remark')  # 圖片說明
         self.rotation = image.get('rotation') * -1  # 旋轉角度，前端傳入及Pillow的角度相反
@@ -90,4 +104,4 @@ def save(data: SaveAsImages):
         log().info(f'{filename} 儲存成功')
         # 主動呼叫前端增加數量
         webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
-    os.startfile(data.path)
+    open_folder(data.path)

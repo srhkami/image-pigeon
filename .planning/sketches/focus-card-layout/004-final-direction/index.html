@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>最終方向預覽｜焦點編輯 + 獨立排序 + 自動排版</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif;color:#27231d;background:#f5f1e8}.app{height:100vh;display:grid;grid-template-columns:minmax(660px,68%) 1fr}.left{height:100vh;min-height:0;overflow:hidden;min-width:0;padding:24px;background:linear-gradient(180deg,#fffaf0 0%,#f0e4d0 100%);border-right:1px solid #d8c7aa;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:14px}.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.eyebrow{font-size:12px;letter-spacing:.16em;color:#9b6b35;font-weight:900}.topbar h1{margin:4px 0 4px;font-size:24px;line-height:1.15}.topbar p{margin:0;color:#796d5e;font-size:13px}.mode-toggle{display:flex;padding:4px;background:#eadcc5;border:1px solid #d6c3a5;border-radius:16px;box-shadow:inset 0 1px 1px rgba(92,64,27,.12)}.mode-toggle button{border:0;background:transparent;border-radius:12px;padding:9px 13px;font-weight:900;color:#7b6241;cursor:pointer}.mode-toggle button.active{background:#fffaf0;color:#2f2417;box-shadow:0 4px 12px rgba(92,64,27,.16)}.panel{position:relative;min-height:0;overflow:hidden}.edit-stage{height:100%;position:relative;perspective:1100px;touch-action:none}.focus-card{position:absolute;left:50%;top:50%;width:min(390px,82%);height:500px;transform:translate(-50%,-50%);border-radius:30px;background:#fffdf8;border:1px solid rgba(93,70,38,.16);box-shadow:0 24px 70px rgba(75,52,20,.18);padding:14px;transition:transform .34s cubic-bezier(.2,.8,.2,1),opacity .34s,filter .34s;cursor:pointer}.focus-card[data-pos="-2"]{transform:translate(-50%,-50%) translateY(-270px) scale(.72) rotateX(-12deg);opacity:.16;filter:blur(2.6px);z-index:1}.focus-card[data-pos="-1"]{transform:translate(-50%,-50%) translateY(-155px) scale(.84) rotateX(-7deg);opacity:.48;filter:blur(1.1px);z-index:2}.focus-card[data-pos="0"]{transform:translate(-50%,-50%) translateY(0) scale(1);opacity:1;filter:none;z-index:5}.focus-card[data-pos="1"]{transform:translate(-50%,-50%) translateY(155px) scale(.84) rotateX(7deg);opacity:.48;filter:blur(1.1px);z-index:2}.focus-card[data-pos="2"]{transform:translate(-50%,-50%) translateY(270px) scale(.72) rotateX(12deg);opacity:.16;filter:blur(2.6px);z-index:1}.focus-card:not([data-pos="0"]) .edit-tools,.focus-card:not([data-pos="0"]) textarea,.focus-card:not([data-pos="0"]) .delete-btn{display:none}.photo{height:300px;border-radius:22px;background:var(--bg);position:relative;overflow:hidden}.photo.landscape{height:222px;margin-top:26px}.photo:after{content:"";position:absolute;inset:18px;border:2px solid rgba(255,255,255,.48);border-radius:18px}.meta{display:flex;justify-content:space-between;align-items:center;margin:12px 4px 8px}.meta strong{font-size:17px}.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:6px 10px;border-radius:999px;background:#efe1c9;color:#75522b;font-weight:900}.pill.land{background:#dbeafe;color:#1d4ed8}.pill.small{background:#dcfce7;color:#166534}.pill.large{background:#fef3c7;color:#92400e}.note-label{font-size:12px;color:#8a7b68;font-weight:900;margin:8px 5px 5px}textarea{width:100%;height:62px;resize:none;border:1px dashed #cdbd9f;border-radius:14px;background:#fffaf0;padding:10px 12px;font:inherit;font-size:14px;color:#41382e;outline:none}.edit-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.tool-btn,.delete-btn,.foot button{border:1px solid #cdbd9f;background:#fffaf0;border-radius:13px;padding:9px 11px;font-weight:900;color:#5d4728;box-shadow:0 2px 0 #dac6a1;cursor:pointer}.tool-btn.primary{background:#2f6b55;color:#fff;border-color:#2f6b55;box-shadow:0 2px 0 #1b4636}.delete-btn{background:#fff1f2;color:#be123c;border-color:#fecdd3;box-shadow:0 2px 0 #fecdd3}.sort-view{height:100%;overflow:auto;padding:6px 7px 90px;display:none}.sort-help{position:sticky;top:0;z-index:3;margin:0 0 10px;padding:11px 12px;border-radius:16px;background:rgba(255,250,240,.92);backdrop-filter:blur(8px);border:1px solid #decfb8;color:#735f43;font-size:13px}.sort-list{display:flex;flex-direction:column;gap:10px}.sort-row{display:grid;grid-template-columns:34px 76px 1fr auto;gap:12px;align-items:center;background:#fffdf8;border:1px solid #e0d2bb;border-radius:18px;padding:10px;box-shadow:0 8px 22px rgba(75,52,20,.07);cursor:grab}.sort-row.active{border-color:#2f6b55;box-shadow:0 0 0 4px rgba(47,107,85,.14),0 10px 24px rgba(75,52,20,.08)}.sort-row.dragging{opacity:.45}.handle{font-size:22px;color:#a89983;text-align:center}.thumb{height:58px;border-radius:13px;background:var(--bg);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}.row-title{font-weight:900}.row-sub{font-size:12px;color:#7d7162;margin-top:3px}.row-index{font-size:12px;color:#9a866b;font-weight:900}.foot{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#7d7162;font-size:13px}.kbd{padding:3px 7px;border-radius:8px;background:#fffaf0;border:1px solid #d8c7aa;color:#5d4728;font-weight:850}.right{height:100vh;min-height:0;overflow:hidden;min-width:0;background:#f8fafc;padding:22px 18px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:14px}.preview-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.preview-head h2{margin:0;font-size:22px}.preview-head p{margin:4px 0 0;color:#667085;font-size:13px}.stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.stat{border-radius:999px;padding:8px 11px;background:#e6f0ff;color:#28528f;font-weight:900;font-size:13px}.stat.warn{background:#fff7ed;color:#9a3412}.preview-area{display:block;min-height:0;overflow:hidden}.paper-wrap{display:none}.paper{display:none}.page{height:100%;display:grid;gap:13px}.page.landscape2{grid-template-rows:1fr 1fr}.page.large2{grid-template-columns:1fr 1fr}.page.small6{grid-template-rows:1fr 1fr}.page.small6 .row,.page.mixed-s3-l1 .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.page.mixed-s3-l1{grid-template-rows:1fr 1.28fr}.page.mixed-l1-s3{grid-template-rows:1.28fr 1fr}.page.mixed-l1-s3 .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.slot{border:1.5px solid #cbd5e1;border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column;min-width:0;min-height:0}.slot.active{border-color:#2f6b55;outline:5px solid rgba(47,107,85,.20)}.slot.empty{opacity:.28}.slot-img{flex:1;min-height:48px;background:var(--bg);position:relative}.slot-img:after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.20),transparent 50%,rgba(0,0,0,.08))}.slot-note{height:32px;border-top:1px dashed #cbd5e1;background:#f8fafc;font-size:12px;color:#64748b;display:flex;align-items:center;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.page-strip{height:100%;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:4px 8px 24px}.mini-page{border:1px solid #d0d7e2;background:white;border-radius:18px;padding:13px;cursor:pointer;box-shadow:0 10px 28px rgba(15,23,42,.09)}.mini-page.active{border-color:#2f6b55;box-shadow:0 0 0 5px rgba(47,107,85,.15),0 14px 34px rgba(15,23,42,.12)}.mini-title{font-size:14px;font-weight:950;color:#334155;margin-bottom:10px;display:flex;justify-content:space-between}.mini-title:after{content:'點擊預覽';font-size:11px;color:#94a3b8;font-weight:800}.mini-grid{height:220px;display:grid;gap:8px}.mini-grid.landscape2{grid-template-rows:1fr 1fr}.mini-grid.large2{grid-template-columns:1fr 1fr}.mini-grid.small6{grid-template:repeat(2,1fr)/repeat(3,1fr)}.mini-grid.mixed-s3-l1{grid-template-rows:1fr 1.15fr}.mini-grid.mixed-l1-s3{grid-template-rows:1.15fr 1fr}.mini-row{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}.mini-cell{border-radius:9px;background:#cbd5e1;position:relative;overflow:hidden}.mini-cell.active{background:#2f6b55}.mini-cell.empty{opacity:.35}.mini-cell:after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.25),transparent 55%,rgba(0,0,0,.08))}.hidden{display:none!important}@media(max-width:980px){.app{grid-template-columns:1fr}.right{display:none}.left{border-right:0}.focus-card{width:min(390px,88%)}}
+</style>
+</head>
+<body>
+<main class="app" data-layout="final-center-stage-with-sort-mode">
+  <section class="left">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">AUTO COLLAGE V1</div>
+        <h1>焦點編輯模式</h1>
+        <p id="modeDesc">捲動切換焦點圖片；排序獨立到排序模式。</p>
+      </div>
+      <div class="mode-toggle" aria-label="模式切換">
+        <button id="editBtn" class="active" onclick="setMode('edit')">編輯</button>
+        <button id="sortBtn" onclick="setMode('sort')">排序</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="edit-stage" id="editStage" tabindex="0" aria-label="焦點圖片編輯區"></div>
+      <div class="sort-view" id="sortView">
+        <div class="sort-help">排序模式只保留小圖拖曳排序；不編輯備註、不旋轉。拖曳後會嚴格依新順序重新自動排版。</div>
+        <div class="sort-list" id="sortList"></div>
+      </div>
+    </div>
+    <div class="foot">
+      <div><span class="kbd">滑鼠滾輪</span> / <span class="kbd">↑↓</span> 切換焦點；右側永遠顯示焦點圖片所在頁。</div>
+      <div><button onclick="moveFocus(-1)">上一張</button> <button onclick="moveFocus(1)">下一張</button></div>
+    </div>
+  </section>
+  <section class="right">
+    <div class="preview-head">
+      <div>
+        <h2 id="previewTitle">第 1 頁預覽</h2>
+        <p id="previewDesc">右側只保留放大版頁面縮圖；點頁面可切換焦點。</p>
+      </div>
+      <div class="stats">
+        <span class="stat" id="focusStat">焦點</span>
+        <span class="stat" id="pageStat">共 0 頁</span>
+        <span class="stat warn" id="blankStat">空白 0 格</span>
+      </div>
+    </div>
+    <div class="preview-area">
+      <div class="paper-wrap"><div class="paper"><div id="paperPage" class="page"></div></div></div>
+      <div class="page-strip" id="pageStrip" aria-label="頁面預覽清單"></div>
+    </div>
+  </section>
+</main>
+<script>
+const colors=[
+'linear-gradient(135deg,#95c2ff,#f8c8dc)',
+'linear-gradient(135deg,#f8bf7b,#d94f45)',
+'linear-gradient(135deg,#8ac6d1,#28527a)',
+'linear-gradient(160deg,#bdd7b4,#3b7a57)',
+'linear-gradient(135deg,#d8b4fe,#60a5fa)',
+'linear-gradient(160deg,#fef08a,#fb923c)',
+'linear-gradient(160deg,#c4b5fd,#6366f1)',
+'linear-gradient(160deg,#bae6fd,#0284c7)',
+'linear-gradient(160deg,#fecaca,#dc2626)',
+'linear-gradient(135deg,#fde68a,#f97316)'
+];
+let items=[
+{id:'i1',name:'IMG-01',kind:'landscape',note:'現場遠景',color:colors[0]},
+{id:'i2',name:'IMG-02',kind:'landscape',note:'門口招牌',color:colors[1]},
+{id:'i3',name:'IMG-03',kind:'landscape',note:'施工區域',color:colors[2]},
+{id:'i4',name:'IMG-04',kind:'large',note:'直式文件',color:colors[3]},
+{id:'i5',name:'IMG-05',kind:'landscape',note:'補充照片',color:colors[4]},
+{id:'i6',name:'IMG-06',kind:'large',note:'人員簽核',color:colors[5]},
+{id:'i7',name:'IMG-07',kind:'large',note:'設備照片',color:colors[6]},
+{id:'i8',name:'IMG-08',kind:'small',note:'窗邊細節',color:colors[7]},
+{id:'i9',name:'IMG-09',kind:'small',note:'門框近照',color:colors[8]},
+{id:'i10',name:'IMG-10',kind:'landscape',note:'完整橫圖',color:colors[9]}
+];
+let activeId='i2';let mode='edit';let wheelAcc=0;let wheelLock=false;let draggedId=null;
+function label(k){return k==='landscape'?'橫圖':k==='large'?'大直圖':'小直圖'}
+function activeIndex(){return Math.max(0,items.findIndex(x=>x.id===activeId))}
+function setActive(id){activeId=id;render()}
+function moveFocus(delta){const idx=activeIndex();const next=Math.max(0,Math.min(items.length-1,idx+delta));activeId=items[next].id;render()}
+function setMode(next){mode=next;document.getElementById('editBtn').classList.toggle('active',mode==='edit');document.getElementById('sortBtn').classList.toggle('active',mode==='sort');document.getElementById('editStage').style.display=mode==='edit'?'block':'none';document.getElementById('sortView').style.display=mode==='sort'?'block':'none';document.getElementById('modeDesc').textContent=mode==='edit'?'捲動切換焦點圖片；排序獨立到排序模式。':'小圖清單拖曳排序；排序後右側立即重新排版。';render()}
+function buildLayout(list){const pages=[];let i=0;while(i<list.length){const cur=list[i];if(cur.kind==='landscape'){if(list[i+1]?.kind==='landscape'){pages.push({template:'landscape2',title:'橫圖 2 張',slots:[cur,list[i+1]]});i+=2}else if(list[i+1]?.kind==='small'){const smalls=[];let j=i+1;while(j<list.length&&list[j].kind==='small'&&smalls.length<3){smalls.push(list[j]);j++}pages.push({template:'mixed-l1-s3',title:'上 1 橫，下 3 小直',slots:[cur,...smalls]});i=1+i+smalls.length}else{pages.push({template:'landscape2',title:'橫圖 2 張',slots:[cur,null]});i++}}else if(cur.kind==='large'){if(list[i+1]?.kind==='large'){pages.push({template:'large2',title:'大直圖 2 張',slots:[cur,list[i+1]]});i+=2}else{pages.push({template:'large2',title:'大直圖 2 張',slots:[cur,null]});i++}}else{const smalls=[];let j=i;while(j<list.length&&list[j].kind==='small'&&smalls.length<6){smalls.push(list[j]);j++}if(smalls.length<=3 && list[j]?.kind==='landscape'){pages.push({template:'mixed-s3-l1',title:'上 3 小直，下 1 橫',slots:[...smalls,list[j]]});i=j+1}else{while(smalls.length<6)smalls.push(null);pages.push({template:'small6',title:'小直圖 6 張',slots:smalls});i=j}}}return pages}
+function pageOf(layout,id){let found=layout.findIndex(p=>p.slots.some(s=>s&&s.id===id));return found<0?0:found}
+function renderEdit(){const stage=document.getElementById('editStage');stage.innerHTML='';const idx=activeIndex();for(let i=Math.max(0,idx-2);i<=Math.min(items.length-1,idx+2);i++){const it=items[i];const pos=i-idx;const card=document.createElement('article');card.className='focus-card';card.dataset.pos=pos;card.style.setProperty('--bg',it.color);card.onclick=()=>setActive(it.id);card.innerHTML=`<div class="photo ${it.kind==='landscape'?'landscape':''}"></div><div class="meta"><strong>${it.name}</strong><span class="pill ${it.kind==='landscape'?'land':it.kind}">${label(it.kind)}</span></div><div class="note-label">圖片備註</div><textarea oninput="updateNote('${it.id}', this.value)" onclick="event.stopPropagation()">${it.note}</textarea><div class="edit-tools"><button class="tool-btn" onclick="event.stopPropagation(); rotateHint()">旋轉左</button><button class="tool-btn" onclick="event.stopPropagation(); rotateHint()">旋轉右</button>${it.kind!=='landscape'?`<button class="tool-btn primary" onclick="event.stopPropagation(); toggleSize('${it.id}')">切換大 / 小直圖</button>`:''}<button class="delete-btn" onclick="event.stopPropagation(); deleteItem('${it.id}')">刪除</button></div>`;stage.appendChild(card)}}
+function renderSort(){const list=document.getElementById('sortList');list.innerHTML='';items.forEach((it,idx)=>{const row=document.createElement('div');row.className='sort-row '+(it.id===activeId?'active':'');row.draggable=true;row.dataset.id=it.id;row.style.setProperty('--bg',it.color);row.innerHTML=`<div class="handle">⋮⋮</div><div class="thumb"></div><div><div class="row-title">${String(idx+1).padStart(2,'0')}　${it.name}</div><div class="row-sub">${label(it.kind)} · ${it.note}</div></div><div class="row-index">拖曳排序</div>`;row.onclick=()=>setActive(it.id);row.addEventListener('dragstart',e=>{draggedId=it.id;row.classList.add('dragging');e.dataTransfer.effectAllowed='move'});row.addEventListener('dragend',()=>{draggedId=null;row.classList.remove('dragging')});row.addEventListener('dragover',e=>e.preventDefault());row.addEventListener('drop',e=>{e.preventDefault();if(!draggedId||draggedId===it.id)return;const from=items.findIndex(x=>x.id===draggedId);const to=items.findIndex(x=>x.id===it.id);const [moved]=items.splice(from,1);items.splice(to,0,moved);activeId=moved.id;render()});list.appendChild(row)})}
+function renderPaper(layout){const pi=pageOf(layout,activeId);const page=layout[pi]||{template:'landscape2',title:'空白',slots:[]};document.getElementById('previewTitle').textContent=`第 ${pi+1} 頁預覽`;document.getElementById('previewDesc').textContent=`自動版型：${page.title}`;document.getElementById('focusStat').textContent=`焦點：${items[activeIndex()]?.name||''}`;document.getElementById('pageStat').textContent=`共 ${layout.length} 頁`;const blanks=layout.reduce((n,p)=>n+p.slots.filter(s=>!s).length,0);document.getElementById('blankStat').textContent=`空白 ${blanks} 格`;const paper=document.getElementById('paperPage');paper.className='page '+page.template;paper.innerHTML='';function slotEl(s){const d=document.createElement('div');d.className='slot '+(!s?'empty':'')+(s&&s.id===activeId?' active':'');if(s)d.style.setProperty('--bg',s.color);d.innerHTML=`<div class="slot-img"></div><div class="slot-note">${s?s.note:'空白備註欄'}</div>`;return d}if(page.template==='small6'){[0,3].forEach(start=>{const row=document.createElement('div');row.className='row';page.slots.slice(start,start+3).forEach(s=>row.appendChild(slotEl(s)));paper.appendChild(row)})}else if(page.template==='mixed-s3-l1'){const row=document.createElement('div');row.className='row';[0,1,2].forEach(n=>row.appendChild(slotEl(page.slots[n]||null)));paper.appendChild(row);paper.appendChild(slotEl(page.slots[3]||null))}else if(page.template==='mixed-l1-s3'){paper.appendChild(slotEl(page.slots[0]||null));const row=document.createElement('div');row.className='row';[1,2,3].forEach(n=>row.appendChild(slotEl(page.slots[n]||null)));paper.appendChild(row)}else{page.slots.forEach(s=>paper.appendChild(slotEl(s)))}renderStrip(layout,pi)}
+function renderStrip(layout,activePage){const strip=document.getElementById('pageStrip');strip.innerHTML='';layout.forEach((p,idx)=>{const m=document.createElement('div');m.className='mini-page '+(idx===activePage?'active':'');m.onclick=()=>{const first=p.slots.find(Boolean);if(first){activeId=first.id;render()}};let grid=`<div class="mini-grid ${p.template}">`;if(p.template==='small6'){p.slots.forEach(s=>grid+=`<div class="mini-cell ${!s?'empty ':''}${s&&s.id===activeId?'active':''}"></div>`)}else if(p.template==='mixed-s3-l1'){grid+=`<div class="mini-row">${[0,1,2].map(n=>`<div class="mini-cell ${!p.slots[n]?'empty ':''}${p.slots[n]?.id===activeId?'active':''}"></div>`).join('')}</div><div class="mini-cell ${p.slots[3]?.id===activeId?'active':''}"></div>`}else if(p.template==='mixed-l1-s3'){grid+=`<div class="mini-cell ${p.slots[0]?.id===activeId?'active':''}"></div><div class="mini-row">${[1,2,3].map(n=>`<div class="mini-cell ${!p.slots[n]?'empty ':''}${p.slots[n]?.id===activeId?'active':''}"></div>`).join('')}</div>`}else{p.slots.forEach(s=>grid+=`<div class="mini-cell ${!s?'empty ':''}${s&&s.id===activeId?'active':''}"></div>`)}grid+='</div>';m.innerHTML=`<div class="mini-title">${idx+1}. ${p.title}</div>${grid}`;strip.appendChild(m)})}
+function updateNote(id,val){const it=items.find(x=>x.id===id);if(it){it.note=val;renderPaper(buildLayout(items));renderSort()}}
+function toggleSize(id){const it=items.find(x=>x.id===id);if(!it||it.kind==='landscape')return;it.kind=it.kind==='large'?'small':'large';render()}
+function deleteItem(id){const idx=items.findIndex(x=>x.id===id);if(idx<0)return;items.splice(idx,1);if(!items.length)return;activeId=items[Math.min(idx,items.length-1)].id;render()}
+function rotateHint(){const old=document.getElementById('modeDesc').textContent;document.getElementById('modeDesc').textContent='示意：旋轉後仍會保留同一張焦點圖片並重算預覽。';setTimeout(()=>document.getElementById('modeDesc').textContent=old,1200)}
+function render(){const layout=buildLayout(items);if(mode==='edit')renderEdit();else renderSort();renderPaper(layout)}
+const stage=document.getElementById('editStage');stage.addEventListener('wheel',e=>{e.preventDefault();wheelAcc+=e.deltaY;if(wheelLock||Math.abs(wheelAcc)<62)return;wheelLock=true;moveFocus(wheelAcc>0?1:-1);wheelAcc=0;setTimeout(()=>wheelLock=false,260)},{passive:false});document.addEventListener('keydown',e=>{if(e.key==='ArrowDown')moveFocus(1);if(e.key==='ArrowUp')moveFocus(-1)});render();
+</script>
+</body>
+</html>

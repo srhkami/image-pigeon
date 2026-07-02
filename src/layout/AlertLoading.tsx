@@ -16,7 +16,7 @@ export default function AlertLoading({count}: Props) {
         setProgress(progress);
       };
     }
-  }, []);
+  }, [count]);
 
   return (
     <div className='alert mx-auto flex flex-col justify-center items-center text-error w-full'>
