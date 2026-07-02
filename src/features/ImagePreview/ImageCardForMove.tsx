@@ -1,23 +1,24 @@
-import {useSortable} from "@dnd-kit/sortable";
-import {CSS} from "@dnd-kit/utilities";
-import {CustomImage} from "@/utils/type.ts";
-import {Button} from "@/component";
-import {FaXmark} from "react-icons/fa6";
-import {twMerge} from "tailwind-merge";
-import clsx from "clsx";
-import {CgMenuGridR} from "react-icons/cg";
-import {Dispatch, SetStateAction} from "react";
-import {ProjectItemViewModel, ProjectV2} from "@/types/project.ts";
-import {removeItem} from "@/state/projectState.ts";
+import {Dispatch, SetStateAction} from 'react'
+import {CgMenuGridR} from 'react-icons/cg'
+import {useSortable} from '@dnd-kit/sortable'
+import {CSS} from '@dnd-kit/utilities'
+import clsx from 'clsx'
+import {twMerge} from 'tailwind-merge'
+import {ProjectItemViewModel} from '@/types/project.ts'
 
 type Props = {
   readonly viewModel: ProjectItemViewModel,
-  readonly setProject: Dispatch<SetStateAction<ProjectV2>>,
   readonly index: number,
-  readonly setImages: Dispatch<SetStateAction<CustomImage[]>>
+  readonly activeItemId: string | null,
+  readonly setActiveItemId: Dispatch<SetStateAction<string | null>>,
 }
 
-export default function ImageCardForMove({viewModel, setProject, index, setImages}: Props) {
+export default function ImageCardForMove({
+  viewModel,
+  index,
+  activeItemId,
+  setActiveItemId,
+}: Props) {
 
   const {
     attributes,
@@ -28,21 +29,28 @@ export default function ImageCardForMove({viewModel, setProject, index, setImage
     isDragging
   } = useSortable({id: viewModel.itemId})
 
+  const isActive = viewModel.itemId === activeItemId
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition
   }
 
-  // 移除圖片
-  const handleRemoveImage = () => {
-    setProject((prev) => removeItem(prev, viewModel.itemId))
-    setImages(prev => prev.filter((item) => item.id !== viewModel.itemId));
-  };
+  const typeTag = viewModel.orientation === 'landscape'
+    ? {label: '橫向', style: 'badge-info'}
+    : viewModel.portraitSize === 'small'
+      ? {label: '直向小圖', style: 'badge-warning'}
+      : {label: '直向大圖', style: 'badge-success'}
+
+  const summaryText = viewModel.remark.trim() || viewModel.originalName || '未命名'
 
   const classes = twMerge(
-    'relative rounded-2xl bg-base-100 border shadow-sm my-2 p-2 flex items-center gap-2',
+    'relative rounded-xl border bg-base-100 shadow-sm p-2',
+    'flex items-center gap-2 cursor-pointer transition-all',
     clsx({
-      'border-2 border-accent z-20 opacity-95 backdrop-blur-lg': isDragging,
+      'border-accent/40 bg-accent/5 ring-2 ring-accent': isActive,
+      'border-warning/40 shadow-lg z-20 bg-accent/10': isDragging,
+      'hover:border-accent/60': !isActive,
     })
   )
 
@@ -52,33 +60,43 @@ export default function ImageCardForMove({viewModel, setProject, index, setImage
       {...attributes}
       style={style}
       className={classes}
+      role='button'
+      onClick={() => setActiveItemId(viewModel.itemId)}
     >
-
       <div className='rounded-tr flex flex-col z-10'>
-        <button {...listeners} className="btn btn-accent btn-lg btn-ghost btn-circle cursor-grab">
+        <button
+          type='button'
+          className='btn btn-ghost btn-sm btn-circle cursor-grab'
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+          {...listeners}
+          title='拖曳排序'
+        >
           <CgMenuGridR className='text-lg'/>
         </button>
       </div>
-      <div className='sticky bottom-0'>
-        {index + 1}
-      </div>
-      <figure className=' aspect-video h-32 max-w-xl overflow-hidden'>
-        <div className="inset-0 flex items-center justify-center"
+
+      <span className='badge badge-outline'>#{index + 1}</span>
+
+      <figure className='aspect-video h-20 w-36 overflow-hidden rounded-lg bg-base-200/50 shrink-0'>
+        <div className='inset-0 flex items-center justify-center'
              style={{
                transform: `rotate(${viewModel.rotation}deg)`,
                transformOrigin: 'center',
              }}>
           <img
             src={viewModel.previewUrl}
-            alt={viewModel.remark}
-            className="object-contain max-w-full max-h-full"
+            alt={summaryText}
+            className="object-cover w-full h-full"
           />
         </div>
       </figure>
-      <div>
-        <Button color='error' style='ghost' shape='circle' onClick={handleRemoveImage}>
-          <FaXmark className='text-lg'/>
-        </Button>
+
+      <div className='flex-1 min-w-0 flex items-center justify-between'>
+        <span className={`badge ${typeTag.style}`}>{typeTag.label}</span>
+        <span className='text-sm text-base-content/70 truncate ml-3' title={summaryText}>
+          {summaryText}
+        </span>
       </div>
     </div>
   )
