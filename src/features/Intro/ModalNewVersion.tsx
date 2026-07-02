@@ -7,6 +7,8 @@ import axios from "axios";
 import {AppVersion} from "@/utils/log.ts";
 import {useModal} from "@/hooks";
 
+const DISMISSED_VERSION_KEY = 'image-pigeon.dismissed-new-version'
+
 /* 檢查新版本 */
 const handleCheckVersion = async () => {
   const res = await axios({
@@ -24,11 +26,21 @@ export default function ModalNewVersion() {
   const {isShow, onShow, onHide} = useModal()
   const [data, setData] = useState<VersionCheckData | null>(null); // 更新資料
 
+  const handleHide = () => {
+    if (data?.app_version) {
+      sessionStorage.setItem(DISMISSED_VERSION_KEY, data.app_version)
+    }
+    onHide()
+  }
+
   // 檢查新版本
   useEffect(() => {
     handleCheckVersion()
       .then(data => {
         if (data.app_version !== AppVersion) {
+          if (sessionStorage.getItem(DISMISSED_VERSION_KEY) === data.app_version) {
+            return
+          }
           setData(data);
           onShow();
         }
@@ -36,7 +48,7 @@ export default function ModalNewVersion() {
   }, [onShow]);
 
   return (
-    <Modal isShow={isShow} onHide={onHide} closeButton>
+    <Modal isShow={isShow} onHide={handleHide} closeButton>
       <ModalBody>
         <div className='text-lg font-bold mt-1 mb-4'>有新版本可供下載！</div>
         <div className='grid grid-cols-4'>

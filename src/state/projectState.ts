@@ -65,6 +65,20 @@ const replaceDefaultLayout = (project: ProjectV2, nextLayout: WordCompatibleGrid
   }
 }
 
+const getEffectiveAssetDimensions = (asset: Asset, rotation: Item['rotation']) => {
+  if (rotation === 90 || rotation === 270) {
+    return {
+      width: asset.height,
+      height: asset.width,
+    }
+  }
+
+  return {
+    width: asset.width,
+    height: asset.height,
+  }
+}
+
 export function applyImportResult(project: ProjectV2, importData: ProjectImportData): ProjectV2 {
   const defaultLayout = getDefaultLayout(project)
   const nextLayout: WordCompatibleGridLayout = {
@@ -103,7 +117,8 @@ export function getOrderedItemViewModels(project: ProjectV2, sessionId: string):
         return null
       }
 
-      const orientation = asset.width >= asset.height ? 'landscape' : 'portrait'
+      const effectiveDimensions = getEffectiveAssetDimensions(asset, item.rotation)
+      const orientation = effectiveDimensions.width >= effectiveDimensions.height ? 'landscape' : 'portrait'
       const portraitSize = item.portraitSize ?? 'large'
       const collageKind = orientation === 'landscape'
         ? 'landscape'
@@ -121,8 +136,8 @@ export function getOrderedItemViewModels(project: ProjectV2, sessionId: string):
         orientation,
         portraitSize,
         collageKind,
-        assetWidth: asset.width,
-        assetHeight: asset.height,
+        assetWidth: effectiveDimensions.width,
+        assetHeight: effectiveDimensions.height,
         assetSize: asset.size,
         mime: asset.mime,
         originalName: asset.originalName,

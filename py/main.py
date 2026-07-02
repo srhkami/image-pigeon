@@ -12,7 +12,7 @@ from upload_imags import UploadImage
 from crop_image import LongScreenImage, crop_to_images
 from save_images import SaveAsImages, save
 
-DEBUG_MODE = os.environ.get('IMAGE_PIGEON_DEBUG') == '1'
+DEBUG_MODE = True
 FASTAPI_HOST = '127.0.0.1'
 FASTAPI_PORT = 18765
 VITE_DEV_URL = 'http://localhost:5175'

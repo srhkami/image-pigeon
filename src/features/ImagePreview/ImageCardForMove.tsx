@@ -33,7 +33,9 @@ export default function ImageCardForMove({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition
+    transition,
+    touchAction: 'none',
+    willChange: isDragging ? 'transform' : undefined,
   }
 
   const typeTag = viewModel.orientation === 'landscape'
@@ -45,11 +47,11 @@ export default function ImageCardForMove({
   const summaryText = viewModel.remark.trim() || viewModel.originalName || '未命名'
 
   const classes = twMerge(
-    'relative rounded-xl border bg-base-100 shadow-sm p-2',
-    'flex items-center gap-2 cursor-pointer transition-all',
+    'relative w-full rounded-xl border bg-base-100 shadow-sm p-2',
+    'flex items-center gap-2 cursor-pointer select-none transition-colors',
     clsx({
       'border-accent/40 bg-accent/5 ring-2 ring-accent': isActive,
-      'border-warning/40 shadow-lg z-20 bg-accent/10': isDragging,
+      'border-warning/40 opacity-90 shadow-lg z-20 bg-accent/10': isDragging,
       'hover:border-accent/60': !isActive,
     })
   )
@@ -66,7 +68,7 @@ export default function ImageCardForMove({
       <div className='rounded-tr flex flex-col z-10'>
         <button
           type='button'
-          className='btn btn-ghost btn-sm btn-circle cursor-grab'
+          className={twMerge('btn btn-ghost btn-sm btn-circle touch-none cursor-grab', clsx({'cursor-grabbing': isDragging}))}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => event.stopPropagation()}
           {...listeners}

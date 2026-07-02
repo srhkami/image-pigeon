@@ -3,9 +3,9 @@ import {Toaster} from "react-hot-toast";
 import {useState} from "react";
 import {CustomImage} from "./utils/type.ts";
 import {clearProjectItems, createEmptyProject, getOrderedItemViewModels} from "./state/projectState.ts";
-import {Footer, Nav} from "@/layout";
+import {Nav} from "@/layout";
 import {ImagePreview, Intro, ModalNewVersion} from "@/features";
-import ModalUpload from "@/features/Upload/ModalUpload.tsx";
+import Sidebar from "@/layout/Sidebar.tsx";
 
 function App() {
 
@@ -18,37 +18,35 @@ function App() {
   const projectItemCount = previewItems.length
 
   return (
-    <div>
+    <div className='h-dvh overflow-hidden flex flex-col'>
       <Nav/>
-      <div className='min-h-[84vh]'>
-        {!projectItemCount && <Intro/>}
-        {/*圖片預覽*/}
-        <ImagePreview
+      <div className='flex min-h-0 flex-1 overflow-hidden'>
+        <Sidebar
+          setImages={setImages}
+          itemCount={projectItemCount}
           project={project}
           setProject={setProject}
           sessionId={sessionId}
-          setImages={setImages}
+          setSessionId={setSessionId}
+          onClearProject={() => setProject(clearProjectItems)}
           isMoveMode={isMoveMode}
+          setIsMoveMode={setIsMoveMode}
         />
+        <main className='min-w-0 flex-1 overflow-hidden'>
+          {!projectItemCount ? (
+            <Intro/>
+          ) : (
+            <ImagePreview
+              project={project}
+              setProject={setProject}
+              sessionId={sessionId}
+              setImages={setImages}
+              isMoveMode={isMoveMode}
+            />
+          )}
+        </main>
       </div>
-      {/*底端欄*/}
-      <ModalUpload
-        setImages={setImages}
-        project={project}
-        setProject={setProject}
-        sessionId={sessionId}
-        setSessionId={setSessionId}
-      />
-      <Footer
-        setImages={setImages}
-        itemCount={projectItemCount}
-        project={project}
-        setProject={setProject}
-        sessionId={sessionId}
-        onClearProject={() => setProject(clearProjectItems)}
-        isMoveMode={isMoveMode}
-        setIsMoveMode={setIsMoveMode}
-      />
+
       {/*對話框*/}
       <ModalNewVersion/>
       {/*快速彈窗*/}

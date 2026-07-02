@@ -23,10 +23,10 @@ phase: 6B
   - `project-open`
   - 舊有 `word` / `json` / `images` 模式保留。
   - `project-save` 若 path 未以 `.ipigeon` 結尾會補上 `.ipigeon`。
-- AC2：frontend 已可由 `ProjectActions` 呼叫 `/api/project/save`。
+- AC2：frontend 已可由 `OpenProject` 呼叫 `/api/project/save`。
   - `src/services/projectApi.ts` 新增 `saveProject()`。
   - `src/features/Project/OpenProject.tsx` 會先用 `select_path({ mode: 'project-save' })` 取得 target path，再 POST `sessionId / project / targetPath`。
-- AC3：frontend 已可由 `ProjectActions` 呼叫 `/api/project/open`。
+- AC3：frontend 已可由 `OpenProject` 呼叫 `/api/project/open`。
   - `src/services/projectApi.ts` 新增 `openProject()`。
   - 開啟後更新 `project`、`sessionId`、legacy `images` bridge。
 - AC4：opened project preview bridge 使用 `toCustomImagesFromProject()`，內部走 `getOrderedItemViewModels()`，因此依 `layout.itemOrder` 排序。
@@ -91,7 +91,7 @@ phase: 6B
 - 修正：已將 `DEBUG_MODE=False`、`VITE_DEV_URL=http://localhost:5173`，並保留 `test_main_production_frontend_url_uses_local_fastapi` 驗證。
 - 根因 3：`.ipigeon` 是專案資料夾格式，但 `project-save` 先前嘗試使用 SAVE 檔案對話框；這與後端 `save_project_folder()` 預期資料夾語意不一致。
 - 修正：`project-save` 改為選擇父資料夾，再用 `build_project_save_path(parent, title)` 產生 `<title>.ipigeon/` 目標資料夾；已新增 `test_build_project_save_path_creates_ipigeon_folder_name`。
-- UX 防護：`ProjectActions` 新增 `getPywebviewApi()`，若在一般瀏覽器而非桌面 pywebview 環境按下 project 按鈕，會顯示「請在桌面程式中使用專案儲存/開啟功能」，而不是 undefined runtime error。
+- UX 防護：`OpenProject` 新增 `getPywebviewApi()`，若在一般瀏覽器而非桌面 pywebview 環境按下 project 按鈕，會顯示「請在桌面程式中使用專案儲存/開啟功能」，而不是 undefined runtime error。
 
 Follow-up 驗證：
 

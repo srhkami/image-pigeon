@@ -1,8 +1,9 @@
 from docx import Document
 from docx.shared import Cm
-from docx.enum.table import WD_ALIGN_VERTICAL
+from docx.enum.table import WD_ALIGN_VERTICAL, WD_ROW_HEIGHT_RULE
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.enum.section import WD_ORIENT
+from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor
 
@@ -69,6 +70,43 @@ def _safe_update_progress(value: int):
         log().debug('更新進度失敗，繼續輸出', exc_info=True)
 
 
+def _width_twips(width_cm: int | float) -> str:
+    return str(Cm(width_cm).twips)
+
+
+def _set_cell_width(cell, width_cm: int | float):
+    cell.width = Cm(width_cm)
+    tc_pr = cell._tc.get_or_add_tcPr()
+    tc_w = tc_pr.tcW
+    if tc_w is None:
+        tc_w = OxmlElement('w:tcW')
+        tc_pr.append(tc_w)
+    tc_w.set(qn('w:w'), _width_twips(width_cm))
+    tc_w.set(qn('w:type'), 'dxa')
+
+
+def _set_table_grid_widths(table, widths_cm: list[int | float]):
+    table.autofit = False
+    tbl_grid = table._tbl.tblGrid
+    if tbl_grid is None:
+        tbl_grid = OxmlElement('w:tblGrid')
+        table._tbl.insert(0, tbl_grid)
+
+    for grid_col in list(tbl_grid):
+        tbl_grid.remove(grid_col)
+
+    for width_cm in widths_cm:
+        grid_col = OxmlElement('w:gridCol')
+        grid_col.set(qn('w:w'), _width_twips(width_cm))
+        tbl_grid.append(grid_col)
+
+
+def _set_row_heights(table, heights_cm: list[int | float]):
+    for row, height_cm in zip(table.rows, heights_cm, strict=False):
+        row.height = Cm(height_cm)
+        row.height_rule = WD_ROW_HEIGHT_RULE.EXACTLY
+
+
 def _normalize_slot_list(page: dict, expected_template: str) -> list[dict]:
     if not isinstance(page, dict) or page.get('template') != expected_template:
         return []
@@ -101,7 +139,14 @@ def _write_auto_slot(
     image_index: int,
     max_height: int | float,
     max_width: int | float,
+    number_width_cm: int | float | None = None,
+    remark_width_cm: int | float | None = None,
 ) -> int:
+    if number_width_cm is not None:
+        _set_cell_width(number_cell, number_width_cm)
+    if remark_width_cm is not None:
+        _set_cell_width(remark_cell, remark_width_cm)
+
     if image is None:
         number_cell.text = ''
         number_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -127,6 +172,32 @@ def _write_auto_slot(
     return image_index + 1
 
 
+def _write_horizontal_auto_slot(
+    align,
+    image: SaveImage | None,
+    image_cell,
+    number_cell,
+    remark_cell,
+    image_index: int,
+    max_height: int | float,
+    max_width: int | float,
+    writable_width_cm: int | float = 15.5,
+    number_width_cm: int | float = 1.8,
+) -> int:
+    return _write_auto_slot(
+        align,
+        image=image,
+        image_cell=image_cell,
+        number_cell=number_cell,
+        remark_cell=remark_cell,
+        image_index=image_index,
+        max_height=max_height,
+        max_width=max_width,
+        number_width_cm=number_width_cm,
+        remark_width_cm=writable_width_cm - number_width_cm,
+    )
+
+
 def _append_landscape_2_table(
     doc,
     align,
@@ -140,15 +211,17 @@ def _append_landscape_2_table(
     table.rows[2].height = Cm(9)
     table.rows[3].height = Cm(2)
 
-    for col in range(2):
-        for cell in table.columns[col].cells:
-            cell.width = Cm(8.5)
+    _set_table_grid_widths(table, [1.8, 15.2])
+    for cell in table.columns[0].cells:
+        _set_cell_width(cell, 1.8)
+    for cell in table.columns[1].cells:
+        _set_cell_width(cell, 15.2)
 
     table.cell(0, 0).merge(table.cell(0, 1))
     table.cell(2, 0).merge(table.cell(2, 1))
 
     first_image = _resolve_slot_image(images_by_id, slots[0] if len(slots) > 0 else None)
-    image_index = _write_auto_slot(
+    image_index = _write_horizontal_auto_slot(
         align,
         image=first_image,
         image_cell=table.cell(0, 0),
@@ -160,7 +233,7 @@ def _append_landscape_2_table(
     )
 
     second_image = _resolve_slot_image(images_by_id, slots[1] if len(slots) > 1 else None)
-    image_index = _write_auto_slot(
+    image_index = _write_horizontal_auto_slot(
         align,
         image=second_image,
         image_cell=table.cell(2, 0),
@@ -224,12 +297,7 @@ def _append_portrait_small_6_table(
     image_index: int,
 ) -> int:
     table = doc.add_table(rows=6, cols=3, style='Table Grid')
-    table.rows[0].height = Cm(10)
-    table.rows[1].height = Cm(1)
-    table.rows[2].height = Cm(2.2)
-    table.rows[3].height = Cm(10)
-    table.rows[4].height = Cm(1)
-    table.rows[5].height = Cm(2.2)
+    _set_row_heights(table, [7.2, 0.6, 3.2, 7.2, 0.6, 3.2])
 
     for col in range(3):
         for cell in table.columns[col].cells:
@@ -248,7 +316,7 @@ def _append_portrait_small_6_table(
             number_cell=table.cell(block_base + 1, col),
             remark_cell=table.cell(block_base + 2, col),
             image_index=image_index,
-            max_height=9,
+            max_height=7,
             max_width=5,
         )
     return image_index
@@ -261,29 +329,25 @@ def _append_mixed_landscape1_small3_table(
     slots: list[dict],
     image_index: int,
 ) -> int:
-    table = doc.add_table(rows=6, cols=3, style='Table Grid')
-    table.rows[0].height = Cm(10)
-    table.rows[1].height = Cm(1)
-    table.rows[2].height = Cm(1.8)
-    table.rows[3].height = Cm(10)
-    table.rows[4].height = Cm(1)
-    table.rows[5].height = Cm(2.2)
+    table = doc.add_table(rows=5, cols=3, style='Table Grid')
+    _set_row_heights(table, [8.2, 3.2, 7.6, 0.6, 3.2])
 
     for col in range(3):
         for cell in table.columns[col].cells:
             cell.width = Cm(5.2)
 
     table.cell(0, 0).merge(table.cell(0, 1)).merge(table.cell(0, 2))
+    table.cell(1, 1).merge(table.cell(1, 2))
 
     landscape = _resolve_slot_image(images_by_id, slots[0] if len(slots) > 0 else None)
-    image_index = _write_auto_slot(
+    image_index = _write_horizontal_auto_slot(
         align,
         image=landscape,
         image_cell=table.cell(0, 0),
         number_cell=table.cell(1, 0),
         remark_cell=table.cell(1, 1),
         image_index=image_index,
-        max_height=9,
+        max_height=8,
         max_width=15,
     )
 
@@ -293,11 +357,11 @@ def _append_mixed_landscape1_small3_table(
         image_index = _write_auto_slot(
             align,
             image=image,
-            image_cell=table.cell(3, index),
-            number_cell=table.cell(4, index),
-            remark_cell=table.cell(5, index),
+            image_cell=table.cell(2, index),
+            number_cell=table.cell(3, index),
+            remark_cell=table.cell(4, index),
             image_index=image_index,
-            max_height=6,
+            max_height=7.4,
             max_width=5.2,
         )
     return image_index
@@ -310,13 +374,8 @@ def _append_mixed_small3_landscape1_table(
     slots: list[dict],
     image_index: int,
 ) -> int:
-    table = doc.add_table(rows=6, cols=3, style='Table Grid')
-    table.rows[0].height = Cm(10)
-    table.rows[1].height = Cm(1)
-    table.rows[2].height = Cm(1.8)
-    table.rows[3].height = Cm(10)
-    table.rows[4].height = Cm(1)
-    table.rows[5].height = Cm(2.2)
+    table = doc.add_table(rows=5, cols=3, style='Table Grid')
+    _set_row_heights(table, [7.6, 0.6, 3.2, 8.2, 3.2])
 
     for col in range(3):
         for cell in table.columns[col].cells:
@@ -332,20 +391,21 @@ def _append_mixed_small3_landscape1_table(
             number_cell=table.cell(1, index),
             remark_cell=table.cell(2, index),
             image_index=image_index,
-            max_height=6,
+            max_height=7.4,
             max_width=5.2,
         )
 
     table.cell(3, 0).merge(table.cell(3, 1)).merge(table.cell(3, 2))
+    table.cell(4, 1).merge(table.cell(4, 2))
     landscape = _resolve_slot_image(images_by_id, slots[3] if len(slots) > 3 else None)
-    image_index = _write_auto_slot(
+    image_index = _write_horizontal_auto_slot(
         align,
         image=landscape,
         image_cell=table.cell(3, 0),
         number_cell=table.cell(4, 0),
-        remark_cell=table.cell(5, 0),
+        remark_cell=table.cell(4, 1),
         image_index=image_index,
-        max_height=9,
+        max_height=8,
         max_width=15,
     )
     return image_index
@@ -499,10 +559,11 @@ def add_table_two_of_page_horizontal(doc, align, image: SaveImage, index: int):
         table.rows[0].height = Cm(9)
         table.rows[1].height = Cm(2.2)
         # 設定Col的寬度
+        _set_table_grid_widths(table, [1.8, 15.2])
         for cell in table.columns[0].cells:
-            cell.width = Cm(1.5)
+            _set_cell_width(cell, 1.8)
         for cell in table.columns[1].cells:
-            cell.width = Cm(15.5)
+            _set_cell_width(cell, 15.2)
 
         # 合併表格
         table.cell(0, 0).merge(table.cell(0, 1))

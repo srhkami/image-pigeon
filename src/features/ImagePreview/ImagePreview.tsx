@@ -14,7 +14,7 @@ import {
 } from '@dnd-kit/sortable'
 import {
   restrictToVerticalAxis,
-  restrictToWindowEdges
+  restrictToFirstScrollableAncestor
 } from '@dnd-kit/modifiers'
 import {CustomImage} from '@/utils/type.ts'
 import FocusImageEditor from '@/features/ImagePreview/FocusImageEditor.tsx'
@@ -37,14 +37,18 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
   const viewModels: ProjectItemViewModel[] = getOrderedItemViewModels(project, sessionId ?? "")
   const [activeItemId, setActiveItemId] = useState<string | null>(null)
   const collageLayout = useMemo(() => buildAutoCollageLayout(viewModels), [viewModels])
+  const sortableItemIds = useMemo(() => viewModels.map(item => item.itemId), [viewModels])
   const activePageIndex = useMemo(() => {
     if (!activeItemId) return -1
     return findPageIndexByItemId(collageLayout, activeItemId)
   }, [collageLayout, activeItemId])
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {activationConstraint: {distance: 5}})
+    useSensor(PointerSensor, {activationConstraint: {distance: 8}})
   )
+
+  const previewLayoutClassName = 'flex h-full min-h-0 flex-col gap-3 overflow-hidden px-3 py-3 lg:flex-row lg:items-stretch'
+  const editorColumnClassName = 'flex min-h-0 w-full flex-1 justify-center overflow-hidden'
 
   useEffect(() => {
     if (!viewModels.length) {
@@ -79,16 +83,16 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
 
   if (isMoveMode) {
     return (
-      <div className='px-3 py-5 flex flex-col lg:flex-row gap-3'>
-        <div className='w-full lg:w-[68%]'>
+      <div className={previewLayoutClassName}>
+        <div className={editorColumnClassName}>
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+            modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
           >
             <SortableContext
-              items={viewModels.map(item => item.itemId)}
+              items={sortableItemIds}
               strategy={verticalListSortingStrategy}
             >
               <SortableImageList
@@ -111,8 +115,8 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
   }
 
   return (
-    <div className='px-3 py-5 flex flex-col lg:flex-row gap-3'>
-      <div className='w-full lg:w-[68%]'>
+    <div className={previewLayoutClassName}>
+      <div className={editorColumnClassName}>
         <FocusImageEditor
           viewModels={viewModels}
           activeItemId={activeItemId}

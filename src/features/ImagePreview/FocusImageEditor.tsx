@@ -1,5 +1,4 @@
-import {Dispatch, SetStateAction, type WheelEvent, useCallback, useEffect, useMemo, useRef} from 'react'
-import {FaChevronDown, FaChevronUp} from 'react-icons/fa6'
+import {Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, type WheelEvent} from 'react'
 import {CustomImage} from '@/utils/type.ts'
 import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
 import FocusImageCard from '@/features/ImagePreview/FocusImageCard.tsx'
@@ -30,9 +29,6 @@ export default function FocusImageEditor({viewModels, activeItemId, setActiveIte
     if (nextIndex === activeItemIndex) return
     setActiveItemId(viewModels[nextIndex]?.itemId ?? null)
   }, [activeItemIndex, setActiveItemId, viewModels])
-
-  const goPrev = () => setActiveByOffset(-1)
-  const goNext = () => setActiveByOffset(1)
 
   const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
     if (!viewModels.length || activeItemIndex < 0) return
@@ -91,57 +87,33 @@ export default function FocusImageEditor({viewModels, activeItemId, setActiveIte
   }, [activeItemId])
 
   if (activeItemIndex < 0 || !viewModels.length) {
-    return <div className='text-sm text-base-content/55'>請先選擇圖片</div>
+    return null
   }
 
-  const startIndex = Math.max(0, activeItemIndex - 2)
-  const endIndex = Math.min(viewModels.length - 1, activeItemIndex + 2)
-
-  const visibleCards = [] as Array<{viewModel: ProjectItemViewModel, index: number, distance: 0 | 1 | 2}>
-  for (let currentIndex = startIndex; currentIndex <= endIndex; currentIndex += 1) {
-    const distance = Math.abs(currentIndex - activeItemIndex)
-    visibleCards.push({
-      viewModel: viewModels[currentIndex],
-      index: currentIndex,
-      distance: distance > 2 ? 2 : distance as 0 | 1 | 2,
-    })
-  }
+  const visibleSlots = [-2, -1, 0, 1, 2].map((offset) => {
+    const viewModelIndex = activeItemIndex + offset
+    const viewModel = viewModels[viewModelIndex]
+    const distance = Math.abs(offset) as 0 | 1 | 2
+    return {viewModel, index: viewModelIndex, distance, slotKey: offset}
+  })
 
   return (
-    <div className='w-full' onWheel={handleWheel}>
-      <div className='flex items-center justify-center gap-2 mb-3'>
-        <button
-          type='button'
-          className='btn btn-ghost btn-sm'
-          onClick={goPrev}
-          disabled={activeItemIndex <= 0}
-        >
-          <FaChevronUp />
-          上一張
-        </button>
-        <button
-          type='button'
-          className='btn btn-ghost btn-sm'
-          onClick={goNext}
-          disabled={activeItemIndex >= viewModels.length - 1}
-        >
-          下一張
-          <FaChevronDown />
-        </button>
-      </div>
-
-      <div className='flex flex-col items-center gap-3'>
-        {visibleCards.map(({index: viewModelIndex, distance, viewModel}) => (
-          <FocusImageCard
-            key={viewModel.itemId}
-            viewModel={viewModel}
-            distance={distance}
-            index={viewModelIndex}
-            setProject={setProject}
-            setImages={setImages}
-            isActive={viewModelIndex === activeItemIndex}
-            onActivate={() => setActiveItemId(viewModel.itemId)}
-          />
+    <div className='relative flex h-full min-h-0 w-full flex-col overflow-hidden' onWheel={handleWheel}>
+      <div className='grid h-full min-h-0 flex-1 grid-rows-5 overflow-hidden pt-10'>
+        {visibleSlots.map(({index: viewModelIndex, distance, slotKey, viewModel}) => (
+          <div key={slotKey} className='flex min-h-0 items-center justify-center overflow-visible'>
+            {viewModel && (
+              <FocusImageCard
+                viewModel={viewModel}
+                distance={distance}
+                index={viewModelIndex}
+                setProject={setProject}
+                setImages={setImages}
+                isActive={viewModelIndex === activeItemIndex}
+                onActivate={() => setActiveItemId(viewModel.itemId)}
+              />
+            )}
+          </div>
         ))}
       </div>
     </div>

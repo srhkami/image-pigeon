@@ -7,6 +7,9 @@ import sys
 from pathlib import Path
 
 from typing import Any
+from docx import Document
+from docx.oxml.ns import qn
+from docx.shared import Cm
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -165,6 +168,78 @@ class SaveDocxCollageTest(unittest.TestCase):
 
         self.assertEqual(len(doc.tables), 1)
         write_mock.assert_not_called()
+
+    def test_portrait_small_rows_fit_two_rows_on_one_page(self):
+        doc = Document()
+
+        save_docx._append_portrait_small_6_table(
+            doc,
+            align="center",
+            images_by_id={},
+            slots=TEMPLATE_SLOTS["portrait-small-6"],
+            image_index=1,
+        )
+
+        table = doc.tables[0]
+        total_height = sum(int(row.height) for row in table.rows if row.height is not None)
+        self.assertLessEqual(total_height, int(Cm(23)))
+        actual_heights = [int(row.height) for row in table.rows if row.height is not None]
+        expected_heights = [int(Cm(value)) for value in [7.2, 0.6, 3.2, 7.2, 0.6, 3.2]]
+        for actual, expected in zip(actual_heights, expected_heights, strict=True):
+            self.assertAlmostEqual(actual, expected, delta=500)
+
+    def test_mixed_portrait_small_and_landscape_rows_are_role_aware(self):
+        doc = Document()
+        save_docx._append_mixed_landscape1_small3_table(
+            doc,
+            align="center",
+            images_by_id={},
+            slots=TEMPLATE_SLOTS["mixed-landscape1-small3"],
+            image_index=1,
+        )
+        top_landscape_rows = [int(row.height) for row in doc.tables[0].rows if row.height is not None]
+        self.assertEqual(len(doc.tables[0].rows), 5)
+        expected_top_landscape = [int(Cm(value)) for value in [8.2, 3.2, 7.6, 0.6, 3.2]]
+        for actual, expected in zip(top_landscape_rows, expected_top_landscape, strict=True):
+            self.assertAlmostEqual(actual, expected, delta=500)
+        self.assertAlmostEqual(sum(top_landscape_rows[:2]), sum(top_landscape_rows[2:]), delta=1000)
+
+        doc = Document()
+        save_docx._append_mixed_small3_landscape1_table(
+            doc,
+            align="center",
+            images_by_id={},
+            slots=TEMPLATE_SLOTS["mixed-small3-landscape1"],
+            image_index=1,
+        )
+        bottom_landscape_rows = [int(row.height) for row in doc.tables[0].rows if row.height is not None]
+        self.assertEqual(len(doc.tables[0].rows), 5)
+        expected_bottom_landscape = [int(Cm(value)) for value in [7.6, 0.6, 3.2, 8.2, 3.2]]
+        for actual, expected in zip(bottom_landscape_rows, expected_bottom_landscape, strict=True):
+            self.assertAlmostEqual(actual, expected, delta=500)
+        self.assertAlmostEqual(sum(bottom_landscape_rows[:3]), sum(bottom_landscape_rows[3:]), delta=1000)
+
+    def test_landscape_number_column_keeps_minimum_width(self):
+        doc = Document()
+
+        save_docx._append_landscape_2_table(
+            doc,
+            align="center",
+            images_by_id={},
+            slots=TEMPLATE_SLOTS["landscape-2"],
+            image_index=1,
+        )
+
+        table = doc.tables[0]
+        grid_widths = [int(col.get(qn('w:w'))) for col in table._tbl.tblGrid.gridCol_lst]
+        number_width = table.cell(1, 0).width
+        remark_width = table.cell(1, 1).width
+        assert number_width is not None
+        assert remark_width is not None
+        self.assertAlmostEqual(grid_widths[0], int(Cm(1.8).twips), delta=1)
+        self.assertAlmostEqual(int(number_width), int(Cm(1.8)), delta=500)
+        self.assertGreater(grid_widths[1], grid_widths[0])
+        self.assertGreater(int(remark_width), int(number_width))
 
     def test_auto_numbering_continues_across_pages(self):
         request = self._auto_request([

@@ -82,7 +82,7 @@ export default function CollagePageThumbnail({
     const isActiveSlot = slot.itemId === activeItemId && Boolean(activeItemId)
     const slotClassName = twMerge(
       'relative overflow-hidden rounded-lg border bg-base-200/70',
-      'flex items-center justify-center min-h-12',
+      'flex items-center justify-center min-h-0',
       clsx({
         'ring-2 ring-info border-info': isActiveSlot,
         'border-base-300/80': !isActiveSlot,
@@ -105,14 +105,17 @@ export default function CollagePageThumbnail({
         <img
           src={item.previewUrl}
           alt={slotTitle}
-          className='h-full w-full object-cover'
+          className='h-full w-full object-contain'
+          style={{
+            transform: `rotate(${item.rotation}deg)`,
+          }}
         />
       </div>
     )
   }
 
   const pageClassName = twMerge(
-    'card card-compact bg-base-100 border transition-all',
+    'card card-compact mx-auto w-full max-w-[11rem] bg-base-100 border transition-all',
     clsx({
       'border-accent bg-accent/5 shadow-md': isActivePage,
       'border-base-300/50': !isActivePage,
@@ -127,13 +130,13 @@ export default function CollagePageThumbnail({
       onClick={() => firstNonEmptyItemId && onPageActivate()}
       title='點選這一頁後，左側焦點會跳到頁面第一張圖片'
     >
-      <div className='card-body px-3 py-2 space-y-2'>
+      <div className='card-body px-2 py-2 space-y-1'>
         <div className='flex items-center justify-between'>
-          <span className='badge badge-outline'>第 {pageIndex + 1} 頁</span>
-          <span className='badge badge-soft'>{TEMPLATE_LABEL[page.template]}</span>
+          <span className='badge badge-xs badge-outline'>第 {pageIndex + 1} 頁</span>
+          <span className='badge badge-xs badge-soft'>{TEMPLATE_LABEL[page.template]}</span>
         </div>
         <div className='divider my-0'></div>
-        <div className={getGridClass(page.template)}>
+        <div className={twMerge('aspect-[210/297] rounded-sm border border-base-300 bg-white p-1 shadow-inner', getGridClass(page.template))}>
           {page.slots.map(renderSlot)}
         </div>
       </div>

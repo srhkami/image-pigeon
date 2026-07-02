@@ -16,7 +16,7 @@ export default function SortableImageList({viewModels, activeItemId, setActiveIt
   }
 
   return (
-    <div className='columns-1 flex flex-col items-center'>
+    <div className='flex h-full min-h-0 w-full max-w-3xl flex-col gap-2 overflow-y-auto overscroll-contain pr-2'>
       {viewModels.map((viewModel, index) => (
         <ImageCardForMove
           key={viewModel.itemId}

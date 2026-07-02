@@ -36,25 +36,16 @@ export default function CollagePagePreviewRail({
   }, [activePageIndex, pages])
 
   if (!pages.length) {
-    return (
-      <aside className='w-full lg:w-[32%] min-h-0'>
-        <div className='card card-compact bg-base-100 border border-base-300/50'>
-          <div className='card-body'>
-            <h3 className='font-semibold'>頁面縮圖預覽</h3>
-            <p className='text-sm text-base-content/60'>尚無可預覽頁面，請先匯入圖片。</p>
-          </div>
-        </div>
-      </aside>
-    )
+    return null
   }
 
   return (
-    <aside className='w-full lg:w-[32%] min-h-0'>
+    <aside className='w-full min-h-0 lg:w-[24%] xl:w-[22%]'>
       <div className='card card-compact bg-base-100 border border-base-300/50 h-full'>
-        <div className='card-body p-3'>
-          <h3 className='font-semibold'>頁面縮圖預覽</h3>
-          <div className='divider my-1'></div>
-          <div className='max-h-[72vh] overflow-y-auto pr-2 space-y-3'>
+        <div className='card-body min-h-0 p-3'>
+          <h3 className='card-title  flex justify-center items-center'>排版預覽</h3>
+          <div className='divider my-0 mb-1'></div>
+          <div className='min-h-0 flex-1 overflow-y-auto pr-1 space-y-3'>
             {pages.map((page, pageIndex) => {
               const isActivePage = pageIndex === activePageIndex
               const firstItemId = page.slots.find((slot) => slot.itemId)?.itemId ?? null
