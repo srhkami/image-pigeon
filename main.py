@@ -14,7 +14,7 @@ from core.save_docx import creat_docx, add_header, OutputWord
 from core.save_images import SaveAsImages, save
 from core.upload_imags import UploadImage
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 FASTAPI_HOST = '127.0.0.1'
 FASTAPI_PORT = 18765
 VITE_DEV_URL = 'http://localhost:5173'
@@ -31,8 +31,8 @@ def get_root_path():
 
 def get_project_root_path():
     if getattr(sys, 'frozen', False):
-        return os.path.dirname(sys.executable)
-    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        return getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    return os.path.dirname(os.path.abspath(__file__))
 
 
 def get_static_dir():

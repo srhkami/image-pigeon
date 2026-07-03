@@ -1,14 +1,18 @@
 import {Dispatch, SetStateAction, useEffect} from 'react'
 import {SubmitHandler, useForm} from 'react-hook-form'
 import {CustomImage} from '@/utils/type.ts'
-import {FaArrowRotateLeft, FaArrowRotateRight, FaXmark} from 'react-icons/fa6'
+import {FaArrowRightArrowLeft, FaArrowRotateLeft, FaArrowRotateRight, FaXmark} from 'react-icons/fa6'
 import clsx from 'clsx'
 import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
 import {removeItem, updateItemPortraitSize, updateItemRemark, updateItemRotation} from '@/state/projectState.ts'
+import {Button} from "@/component";
+import type {FocusSwitchDirection} from '@/features/ImagePreview/FocusImageEditor.tsx'
 
 type Props = {
   readonly viewModel: ProjectItemViewModel
   readonly distance: 0 | 1 | 2
+  readonly slotOffset: number
+  readonly switchDirection: FocusSwitchDirection
   readonly index: number
   readonly setProject: Dispatch<SetStateAction<ProjectV2>>
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>
@@ -26,16 +30,30 @@ const VISUAL_CLASS: Record<number, string> = {
   2: 'scale-[0.74] opacity-20 blur-[2px]',
 }
 
+const POSITION_CLASS: Record<number, string> = {
+  [-2]: '-translate-y-4',
+  [-1]: '-translate-y-2',
+  0: 'translate-y-0',
+  1: 'translate-y-2',
+  2: 'translate-y-4',
+}
+
 export default function FocusImageCard({
-  viewModel,
-  distance,
-  index,
-  setProject,
-  setImages,
-  onActivate,
-  isActive,
-}: Props) {
+                                         viewModel,
+                                         distance,
+                                         slotOffset,
+                                         switchDirection,
+                                         index,
+                                         setProject,
+                                         setImages,
+                                         onActivate,
+                                         isActive,
+                                       }: Props) {
   const visualClass = VISUAL_CLASS[distance] ?? VISUAL_CLASS[2]
+  const positionClass = POSITION_CLASS[slotOffset] ?? 'translate-y-0'
+  const activeSwitchAnimationClass = isActive && switchDirection
+    ? `focus-image-card-enter-${switchDirection}`
+    : ''
   const {register, getValues, reset} = useForm<RemarkForm>({defaultValues: {remark: viewModel.remark}})
 
   useEffect(() => {
@@ -87,11 +105,13 @@ export default function FocusImageCard({
       role={isActive ? 'article' : 'button'}
       tabIndex={isActive ? undefined : 0}
       className={[
-        'card bg-base-100 shadow border transition-all duration-300',
+        'card bg-base-100 shadow border transition-all duration-300 ease-out will-change-transform motion-reduce:transition-none',
         'flex flex-col items-center gap-2',
         'w-full max-w-2xl',
         'hover:shadow-md',
         visualClass,
+        positionClass,
+        activeSwitchAnimationClass,
         clsx({
           'cursor-pointer': !isActive,
           'cursor-default': isActive,
@@ -131,7 +151,7 @@ export default function FocusImageCard({
         </figure>
 
         {isActive && (
-          <div className='divider my-1' />
+          <div className='divider my-1'/>
         )}
 
         {isActive && (
@@ -143,25 +163,26 @@ export default function FocusImageCard({
                 {...register('remark', {onBlur: onRemarkEdit})}
               />
             </div>
-
-            <div className='flex flex-wrap items-center justify-center gap-2 w-full'>
-              <button type='button' className='btn btn-info btn-ghost' onClick={() => handleRotate(-90)}>
-                <FaArrowRotateLeft />
+            <div className='flex flex-wrap items-center gap-2 w-full'>
+              <Button color='info' style='ghost' onClick={() => handleRotate(-90)}>
+                <FaArrowRotateLeft/>
                 左轉
-              </button>
-              <button type='button' className='btn btn-info btn-ghost' onClick={() => handleRotate(90)}>
-                <FaArrowRotateRight />
+              </Button>
+              <Button color='info' style='ghost' onClick={() => handleRotate(90)}>
+                <FaArrowRotateRight/>
                 右轉
-              </button>
+              </Button>
               {viewModel.orientation === 'portrait' && (
-                <button type='button' className='btn btn-info btn-ghost' onClick={togglePortraitSize}>
+                <Button color='info' style='ghost' onClick={togglePortraitSize}>
+                  <FaArrowRightArrowLeft />
                   {viewModel.portraitSize === 'large' ? '切小圖' : '切大圖'}
-                </button>
+                </Button>
+
               )}
-              <button type='button' className='btn btn-error btn-ghost' onClick={handleRemoveImage}>
-                <FaXmark />
+              <Button color='error' style='ghost' className='ml-auto' onClick={handleRemoveImage}>
+                <FaXmark/>
                 刪除
-              </button>
+              </Button>
             </div>
           </>
         )}

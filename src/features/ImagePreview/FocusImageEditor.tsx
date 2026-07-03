@@ -1,7 +1,9 @@
-import {Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, type WheelEvent} from 'react'
+import {Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {CustomImage} from '@/utils/type.ts'
 import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
 import FocusImageCard from '@/features/ImagePreview/FocusImageCard.tsx'
+
+export type FocusSwitchDirection = 'previous' | 'next' | null
 
 type Props = {
   readonly viewModels: ProjectItemViewModel[]
@@ -11,9 +13,10 @@ type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>
 }
 
-const WHEEL_THRESHOLD = 70
-
 export default function FocusImageEditor({viewModels, activeItemId, setActiveItemId, setProject, setImages}: Props) {
+  const previousActiveItemIndexRef = useRef<number | null>(null)
+  const [switchDirection, setSwitchDirection] = useState<FocusSwitchDirection>(null)
+
   const activeItemIndex = useMemo(() => {
     if (!activeItemId) {
       return -1
@@ -21,7 +24,22 @@ export default function FocusImageEditor({viewModels, activeItemId, setActiveIte
     return viewModels.findIndex((item) => item.itemId === activeItemId)
   }, [viewModels, activeItemId])
 
-  const wheelAccumulatorRef = useRef(0)
+  useEffect(() => {
+    if (activeItemIndex < 0) {
+      previousActiveItemIndexRef.current = null
+      setSwitchDirection(null)
+      return
+    }
+
+    const previousActiveItemIndex = previousActiveItemIndexRef.current
+    previousActiveItemIndexRef.current = activeItemIndex
+
+    if (previousActiveItemIndex === null || previousActiveItemIndex === activeItemIndex) {
+      return
+    }
+
+    setSwitchDirection(activeItemIndex > previousActiveItemIndex ? 'next' : 'previous')
+  }, [activeItemIndex])
 
   const setActiveByOffset = useCallback((offset: number) => {
     if (activeItemIndex < 0 || !viewModels.length) return
@@ -30,29 +48,6 @@ export default function FocusImageEditor({viewModels, activeItemId, setActiveIte
     setActiveItemId(viewModels[nextIndex]?.itemId ?? null)
   }, [activeItemIndex, setActiveItemId, viewModels])
 
-  const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
-    if (!viewModels.length || activeItemIndex < 0) return
-    wheelAccumulatorRef.current += event.deltaY
-
-    if (wheelAccumulatorRef.current >= WHEEL_THRESHOLD) {
-      const steps = Math.floor(wheelAccumulatorRef.current / WHEEL_THRESHOLD)
-      setActiveByOffset(steps)
-      wheelAccumulatorRef.current -= steps * WHEEL_THRESHOLD
-      if (event.deltaY > 0) {
-        event.preventDefault()
-      }
-      return
-    }
-
-    if (wheelAccumulatorRef.current <= -WHEEL_THRESHOLD) {
-      const steps = Math.floor(Math.abs(wheelAccumulatorRef.current) / WHEEL_THRESHOLD)
-      setActiveByOffset(-steps)
-      wheelAccumulatorRef.current += steps * WHEEL_THRESHOLD
-      if (event.deltaY < 0) {
-        event.preventDefault()
-      }
-    }
-  }
 
   useEffect(() => {
     const isEditable = (target: EventTarget | null) => {
@@ -82,9 +77,6 @@ export default function FocusImageEditor({viewModels, activeItemId, setActiveIte
     return () => window.removeEventListener('keydown', onKeydown)
   }, [activeItemIndex, setActiveByOffset, viewModels.length])
 
-  useEffect(() => {
-    wheelAccumulatorRef.current = 0
-  }, [activeItemId])
 
   if (activeItemIndex < 0 || !viewModels.length) {
     return null
@@ -98,14 +90,17 @@ export default function FocusImageEditor({viewModels, activeItemId, setActiveIte
   })
 
   return (
-    <div className='relative flex h-full min-h-0 w-full flex-col overflow-hidden' onWheel={handleWheel}>
+    <div className='relative flex h-full min-h-0 w-full flex-col overflow-hidden'>
       <div className='grid h-full min-h-0 flex-1 grid-rows-5 overflow-hidden pt-10'>
         {visibleSlots.map(({index: viewModelIndex, distance, slotKey, viewModel}) => (
           <div key={slotKey} className='flex min-h-0 items-center justify-center overflow-visible'>
             {viewModel && (
               <FocusImageCard
+                key={viewModel.itemId}
                 viewModel={viewModel}
                 distance={distance}
+                slotOffset={slotKey}
+                switchDirection={switchDirection}
                 index={viewModelIndex}
                 setProject={setProject}
                 setImages={setImages}

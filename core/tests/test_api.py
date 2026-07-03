@@ -1,6 +1,8 @@
 import unittest
 import sys
+import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -24,6 +26,21 @@ class ApiHealthTest(unittest.TestCase):
 
     def test_main_production_frontend_url_uses_local_fastapi(self):
         self.assertEqual(main.get_frontend_url(), "http://127.0.0.1:18765")
+
+    def test_static_dir_uses_project_dist_in_development(self):
+        self.assertEqual(Path(main.get_static_dir()), Path.cwd() / "dist")
+
+    def test_static_dir_uses_pyinstaller_meipass_when_frozen(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            dist_dir = Path(temp_dir) / "dist"
+            dist_dir.mkdir()
+            (dist_dir / "index.html").write_text("<div>packed</div>", encoding="utf-8")
+
+            with (
+                patch.object(sys, "frozen", True, create=True),
+                patch.object(sys, "_MEIPASS", temp_dir, create=True),
+            ):
+                self.assertEqual(Path(main.get_static_dir()), dist_dir)
 
     def test_pywebview_api_exposes_select_path(self):
         api = main.Api()

@@ -1,15 +1,14 @@
 # AGENTS.md
 
-此資料夾是後續改版的主工作區。`pywebview-base` 僅作參考，未來會刪除；所有正式計畫、狀態、執行結果、暫存規劃都應寫在本專案內。
+此資料夾是後續改版的主工作區。`pywebview-base` 僅作參考，未來會刪除；正式狀態摘要應寫在本專案內。
 
 ## 新 session 啟動順序
 
 新 session 或 coding agent 進入 `image-pigeon/` 後，請先讀：
 
 1. `AGENTS.md`
-2. `docs/plans/2026-06-30-1647-fastapi-session-project-format.md`
-3. `docs/status/2026-06-30-fastapi-session-project-format-decisions.md`
-4. 若正在實作，讀取對應 `docs/result/` 與 `.planning/2026-06-30-fastapi-session-project-format/`。
+2. `docs/status/current-architecture-and-features.md`
+3. 若正在實作中的任務另有 `.planning/<topic>/` 或新狀態文件，再讀取對應上下文。
 
 重要：`pywebview-base` 已視為可刪除參考，不是本專案依賴；所有後續改動都必須在 `image-pigeon/` 內完成。
 
@@ -28,11 +27,9 @@
 
 ## 規劃與執行治理
 
-- `.planning/<topic>/`：只放短期草稿、發現、進度，不是正式執行真相。
-- `docs/plans/`：正式可執行計畫，需有 OKF frontmatter。
-- `docs/result/`：執行結果與驗證證據。
-- `docs/status/`：決策紀錄、狀態摘要、handoff。
-- 如果後續開始實作，請先讀 `docs/plans/2026-06-30-1647-fastapi-session-project-format.md`。
+- `.planning/<topic>/`：只放短期草稿、發現、進度，不是長期執行真相。
+- `docs/status/`：保留目前架構、產品決策、handoff 與必要的長期摘要。
+- `docs/plans/`、`docs/result/`：僅在大型功能開發期間視需要短期建立；功能完成後應濃縮進 `docs/status/`，再刪除過程性計畫、派工單與結果報告。
 - 不要直接從 `.planning/` 執行；`.planning/` 只能作為輔助上下文。
 
 ## 已確認的產品/架構決策

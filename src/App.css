@@ -70,3 +70,42 @@
   --depth: 0;
   --noise: 0;
 }
+
+@keyframes focus-image-card-enter-next {
+  from {
+    opacity: 0.72;
+    transform: translateY(0.9rem) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes focus-image-card-enter-previous {
+  from {
+    opacity: 0.72;
+    transform: translateY(-0.9rem) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.focus-image-card-enter-next {
+  animation: focus-image-card-enter-next 220ms ease-out;
+}
+
+.focus-image-card-enter-previous {
+  animation: focus-image-card-enter-previous 220ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-image-card-enter-next,
+  .focus-image-card-enter-previous {
+    animation: none;
+  }
+}

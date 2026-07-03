@@ -1,5 +1,5 @@
 import {arrayMove} from '@dnd-kit/sortable'
-import {Dispatch, SetStateAction, useEffect, useMemo, useState} from 'react'
+import {Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState, type WheelEvent} from 'react'
 import {
   DndContext,
   closestCenter,
@@ -32,12 +32,44 @@ type Props = {
   readonly isMoveMode: boolean,
 }
 
+const WHEEL_THRESHOLD = 90
+const WHEEL_COOLDOWN_MS = 150
+
+const getNormalizedWheelDelta = (event: WheelEvent<HTMLDivElement>) => {
+  if (event.deltaMode === 1) {
+    return event.deltaY * 16
+  }
+
+  if (event.deltaMode === 2) {
+    return event.deltaY * 320
+  }
+
+  return event.deltaY
+}
+
+const isEditableTarget = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) {
+    return false
+  }
+
+  return target.isContentEditable
+    || target.tagName === 'INPUT'
+    || target.tagName === 'TEXTAREA'
+    || target.tagName === 'SELECT'
+}
+
 export default function ImagePreview({project, setProject, sessionId, setImages, isMoveMode}: Props) {
 
   const viewModels: ProjectItemViewModel[] = getOrderedItemViewModels(project, sessionId ?? "")
   const [activeItemId, setActiveItemId] = useState<string | null>(null)
+  const wheelAccumulatorRef = useRef(0)
+  const lastWheelSwitchAtRef = useRef(0)
   const collageLayout = useMemo(() => buildAutoCollageLayout(viewModels), [viewModels])
   const sortableItemIds = useMemo(() => viewModels.map(item => item.itemId), [viewModels])
+  const activeItemIndex = useMemo(() => {
+    if (!activeItemId) return -1
+    return viewModels.findIndex((item) => item.itemId === activeItemId)
+  }, [viewModels, activeItemId])
   const activePageIndex = useMemo(() => {
     if (!activeItemId) return -1
     return findPageIndexByItemId(collageLayout, activeItemId)
@@ -62,6 +94,46 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
 
     setActiveItemId(viewModels[0]?.itemId ?? null)
   }, [viewModels, activeItemId])
+
+  useEffect(() => {
+    wheelAccumulatorRef.current = 0
+  }, [activeItemId])
+
+  const setActiveByOffset = useCallback((offset: number) => {
+    if (activeItemIndex < 0 || !viewModels.length) return false
+    const nextIndex = Math.min(viewModels.length - 1, Math.max(0, activeItemIndex + offset))
+    if (nextIndex === activeItemIndex) return false
+
+    setActiveItemId(viewModels[nextIndex]?.itemId ?? null)
+    return true
+  }, [activeItemIndex, setActiveItemId, viewModels])
+
+  const handlePreviewWheel = (event: WheelEvent<HTMLDivElement>) => {
+    if (isMoveMode || !viewModels.length || activeItemIndex < 0 || isEditableTarget(event.target)) {
+      return
+    }
+
+    event.preventDefault()
+
+    const now = performance.now()
+    if (now - lastWheelSwitchAtRef.current < WHEEL_COOLDOWN_MS) {
+      return
+    }
+
+    wheelAccumulatorRef.current += getNormalizedWheelDelta(event)
+
+    if (Math.abs(wheelAccumulatorRef.current) < WHEEL_THRESHOLD) {
+      return
+    }
+
+    const offset = wheelAccumulatorRef.current > 0 ? 1 : -1
+    const didSwitch = setActiveByOffset(offset)
+    wheelAccumulatorRef.current = 0
+
+    if (didSwitch) {
+      lastWheelSwitchAtRef.current = now
+    }
+  }
 
   const handleDragEnd = (event: DragEndEvent) => {
     const {active, over} = event
@@ -115,7 +187,7 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
   }
 
   return (
-    <div className={previewLayoutClassName}>
+    <div className={previewLayoutClassName} onWheelCapture={handlePreviewWheel}>
       <div className={editorColumnClassName}>
         <FocusImageEditor
           viewModels={viewModels}

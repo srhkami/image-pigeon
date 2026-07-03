@@ -188,6 +188,33 @@ class SaveDocxCollageTest(unittest.TestCase):
         for actual, expected in zip(actual_heights, expected_heights, strict=True):
             self.assertAlmostEqual(actual, expected, delta=500)
 
+    def test_portrait_small_columns_are_evenly_distributed(self):
+        renderers = [
+            (save_docx._append_portrait_small_6_table, TEMPLATE_SLOTS["portrait-small-6"]),
+            (save_docx._append_mixed_landscape1_small3_table, TEMPLATE_SLOTS["mixed-landscape1-small3"]),
+            (save_docx._append_mixed_small3_landscape1_table, TEMPLATE_SLOTS["mixed-small3-landscape1"]),
+        ]
+
+        for renderer, slots in renderers:
+            with self.subTest(renderer=renderer.__name__):
+                doc = Document()
+                renderer(
+                    doc,
+                    align="center",
+                    images_by_id={},
+                    slots=slots,
+                    image_index=1,
+                )
+
+                table = doc.tables[0]
+                grid_widths = [int(col.get(qn('w:w'))) for col in table._tbl.tblGrid.gridCol_lst]
+                expected_width = int(Cm(5.2).twips)
+                self.assertEqual(len(grid_widths), 3)
+                for grid_width in grid_widths:
+                    self.assertAlmostEqual(grid_width, expected_width, delta=1)
+                self.assertEqual(len(set(grid_widths)), 1)
+
+
     def test_mixed_portrait_small_and_landscape_rows_are_role_aware(self):
         doc = Document()
         save_docx._append_mixed_landscape1_small3_table(

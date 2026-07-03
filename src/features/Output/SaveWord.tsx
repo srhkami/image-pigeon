@@ -60,7 +60,7 @@ export default function SaveWord({project, sessionId, itemCount}: Props) {
       <Col xs={12}>
         <Alert color='info'>
           <IoMdAlert className='text-lg'/>
-          此功能可儲存WORD文件，便於使用者保存、分享及編輯。
+          此功能可儲存WORD文件，會依照右側預覽畫面排版。
         </Alert>
       </Col>
       <FormInputCol xs={12} label='文件標題 / 檔案名稱' error={errors.title?.message}>
@@ -84,12 +84,6 @@ export default function SaveWord({project, sessionId, itemCount}: Props) {
           <option value='14'>大（14）</option>
         </select>
       </FormInputCol>
-       <Col xs={12}>
-         <Alert color='info'>
-           <IoMdAlert className='text-lg'/>
-           依右側自動排版預覽輸出 Word
-         </Alert>
-       </Col>
       <Col xs={12} className='mt-6'>
       {isLoading ?
            <AlertLoading count={itemCount}/>

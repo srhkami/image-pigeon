@@ -23,31 +23,19 @@ export default function ModalOutput({project, setProject, sessionId, itemCount, 
 
   return (
     <>
-       <Button color='success' disabled={itemCount === 0}
-               onClick={onShow}>
+      <Button color='success' disabled={itemCount === 0}
+              onClick={onShow}>
         <BiSolidFileExport/>
         輸出檔案
       </Button>
       <Modal isShow={isShow} onHide={onHide} closeButton>
         <ModalHeader className='flex justify-center items-center'>
-            <BiSolidFileExport className='text-lg mr-2'/>
-            <span className='text-lg font-bold'>輸出檔案</span>
+          <BiSolidFileExport className='text-lg mr-2'/>
+          <span className='text-lg font-bold'>輸出檔案</span>
         </ModalHeader>
         <ModalBody>
           <div className="tabs tabs-lift">
-            <input type="radio" name="output_tabs" className="tab" aria-label="儲存WORD" defaultChecked/>
-            <div className="tab-content bg-base-100 border-base-300 p-6">
-              <SaveWord project={project} sessionId={sessionId} itemCount={itemCount}/>
-            </div>
-            <input type="radio" name="output_tabs" className="tab" aria-label="儲存專案"/>
-            <div className="tab-content bg-base-100 border-base-300 p-6">
-              <SaveProject project={project} setProject={setProject} sessionId={sessionId} itemCount={itemCount}/>
-            </div>
-            <input type="radio" name="output_tabs" className="tab" aria-label="另存圖片" />
-            <div className="tab-content bg-base-100 border-base-300 p-6">
-              <SaveImages project={project} sessionId={sessionId} itemCount={itemCount}/>
-            </div>
-            <input type="radio" name="output_tabs" className="tab" aria-label="預覽列印"/>
+            <input type="radio" name="output_tabs" className="tab" aria-label="直接列印" defaultChecked/>
             <div className="tab-content bg-base-100 border-base-300 p-6">
               <PrintPreviewOutput
                 project={project}
@@ -57,7 +45,18 @@ export default function ModalOutput({project, setProject, sessionId, itemCount, 
                 onEnterPrintPreview={onEnterPrintPreview}
               />
             </div>
-
+            <input type="radio" name="output_tabs" className="tab" aria-label="儲存專案"/>
+            <div className="tab-content bg-base-100 border-base-300 p-6">
+              <SaveProject project={project} setProject={setProject} sessionId={sessionId} itemCount={itemCount}/>
+            </div>
+            <input type="radio" name="output_tabs" className="tab" aria-label="另存WORD"/>
+            <div className="tab-content bg-base-100 border-base-300 p-6">
+              <SaveWord project={project} sessionId={sessionId} itemCount={itemCount}/>
+            </div>
+            <input type="radio" name="output_tabs" className="tab" aria-label="另存圖片"/>
+            <div className="tab-content bg-base-100 border-base-300 p-6">
+              <SaveImages project={project} sessionId={sessionId} itemCount={itemCount}/>
+            </div>
           </div>
         </ModalBody>
       </Modal>

@@ -101,6 +101,13 @@ def _set_table_grid_widths(table, widths_cm: list[int | float]):
         tbl_grid.append(grid_col)
 
 
+def _set_equal_table_column_widths(table, column_count: int, width_cm: int | float):
+    _set_table_grid_widths(table, [width_cm] * column_count)
+    for col in range(column_count):
+        for cell in table.columns[col].cells:
+            _set_cell_width(cell, width_cm)
+
+
 def _set_row_heights(table, heights_cm: list[int | float]):
     for row, height_cm in zip(table.rows, heights_cm, strict=False):
         row.height = Cm(height_cm)
@@ -299,9 +306,7 @@ def _append_portrait_small_6_table(
     table = doc.add_table(rows=6, cols=3, style='Table Grid')
     _set_row_heights(table, [7.2, 0.6, 3.2, 7.2, 0.6, 3.2])
 
-    for col in range(3):
-        for cell in table.columns[col].cells:
-            cell.width = Cm(5.2)
+    _set_equal_table_column_widths(table, 3, 5.2)
 
     for slot_index in range(6):
         slot = slots[slot_index] if slot_index < len(slots) else None
@@ -332,9 +337,7 @@ def _append_mixed_landscape1_small3_table(
     table = doc.add_table(rows=5, cols=3, style='Table Grid')
     _set_row_heights(table, [8.2, 3.2, 7.6, 0.6, 3.2])
 
-    for col in range(3):
-        for cell in table.columns[col].cells:
-            cell.width = Cm(5.2)
+    _set_equal_table_column_widths(table, 3, 5.2)
 
     table.cell(0, 0).merge(table.cell(0, 1)).merge(table.cell(0, 2))
     table.cell(1, 1).merge(table.cell(1, 2))
@@ -377,9 +380,7 @@ def _append_mixed_small3_landscape1_table(
     table = doc.add_table(rows=5, cols=3, style='Table Grid')
     _set_row_heights(table, [7.6, 0.6, 3.2, 8.2, 3.2])
 
-    for col in range(3):
-        for cell in table.columns[col].cells:
-            cell.width = Cm(5.2)
+    _set_equal_table_column_widths(table, 3, 5.2)
 
     for index in range(3):
         slot = slots[index] if len(slots) > index else None
