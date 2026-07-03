@@ -159,7 +159,7 @@
   min-height: calc(var(--print-font-size) * 1.2 * 6);
   font-size: var(--print-font-size);
   line-height: 1.2;
-  text-align: right;
+  text-align: left;
 }
 
 .print-slot-empty {
