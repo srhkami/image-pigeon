@@ -40,14 +40,12 @@ export default function PrintableDocument({
 
   return (
     <div className='print-document'>
-      <div className='print-document-title'>
-        <h1>{title}</h1>
-      </div>
       <div className='print-pages'>
         {pages.map((page, pageIndex) => (
           <PrintablePage
             key={page.pageId}
             page={page}
+            title={title}
             pageIndex={pageIndex}
             totalPages={pages.length}
             slotIndexMap={slotIndexMap}

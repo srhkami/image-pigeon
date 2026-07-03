@@ -36,22 +36,6 @@
   gap: 1rem;
 }
 
-.print-document-title {
-  text-align: center;
-  background: color-mix(in oklab, var(--color-base-100) 82%, white);
-  border: 1px solid var(--color-base-300);
-  border-radius: 0.75rem;
-  padding: 0.7rem 1rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  box-shadow: 0 0.3rem 1rem rgb(0 0 0 / 0.1);
-}
-
-.print-document-title h1 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
 .print-pages {
   display: flex;
   flex-direction: column;
@@ -81,6 +65,20 @@
   min-height: 0;
   display: grid;
   gap: 0.35rem;
+}
+
+.print-page-title {
+  flex: 0 0 auto;
+  text-align: center;
+  color: var(--color-base-content);
+  line-height: 1.2;
+}
+
+.print-page-title h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .print-page-grid-landscape-2,
@@ -383,10 +381,6 @@
     gap: 0;
   }
 
-  .print-document-title {
-    display: none;
-  }
-
   .print-page {
     width: 210mm;
     height: 296mm;
@@ -420,6 +414,10 @@
   }
 
   .print-page-footer {
+    color: black;
+  }
+
+  .print-page-title {
     color: black;
   }
 }

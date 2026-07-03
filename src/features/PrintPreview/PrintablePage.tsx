@@ -5,6 +5,7 @@ import {ProjectItemViewModel} from '@/types/project.ts'
 
 type Props = {
   readonly page: AutoCollagePage
+  readonly title: string
   readonly pageIndex: number
   readonly totalPages: number
   readonly slotIndexMap: Record<string, number | null>
@@ -37,6 +38,7 @@ const getGridClass = (template: AutoCollagePage['template']) => {
 
 export default function PrintablePage({
   page,
+  title,
   pageIndex,
   totalPages,
   slotIndexMap,
@@ -65,6 +67,9 @@ export default function PrintablePage({
 
   return (
     <section className='print-page'>
+      <header className='print-page-title'>
+        <h1>{title}</h1>
+      </header>
       <div className={twMerge('print-page-body', getGridClass(page.template))}>
         {page.slots.map(renderSlot)}
       </div>
