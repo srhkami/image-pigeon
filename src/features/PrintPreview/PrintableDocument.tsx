@@ -49,6 +49,7 @@ export default function PrintableDocument({
             key={page.pageId}
             page={page}
             pageIndex={pageIndex}
+            totalPages={pages.length}
             slotIndexMap={slotIndexMap}
             itemById={itemById}
             fontSize={fontSize}

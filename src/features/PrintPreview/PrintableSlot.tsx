@@ -6,7 +6,6 @@ import {AutoCollageSlot} from '@/features/ImagePreview/autoCollageLayout.ts'
 import {formatPrintImageNumber} from './printLayout.ts'
 
 type Props = {
-  readonly pageTitle: string
   readonly slot: AutoCollageSlot
   readonly indexInPrint: number | null
   readonly item: ProjectItemViewModel | undefined
@@ -38,7 +37,6 @@ const SLOT_CLASS_BY_ROLE: Record<AutoCollageSlot['role'], string> = {
 }
 
 export default function PrintableSlot({
-  pageTitle,
   slot,
   indexInPrint,
   item,
@@ -110,7 +108,7 @@ export default function PrintableSlot({
         <div
           className='print-slot-remark-text'
           style={{fontSize: `${fontSize}px`}}
-          title={item.remark || `${pageTitle} ${slot.slotId}`}
+          title={item.remark || `圖片 ${slot.slotId}`}
         >
           {item.remark || '未填備註'}
         </div>
