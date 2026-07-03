@@ -60,11 +60,11 @@ export default function ModalOutput({project, setProject, sessionId, itemCount, 
             <div className="tab-content bg-base-100 border-base-300 p-6">
               <SaveImages project={project} sessionId={sessionId} itemCount={itemCount}/>
             </div>
-            <input type="radio" name="output_tabs" className="tab" aria-label="預覽列印 / PDF"/>
+            <input type="radio" name="output_tabs" className="tab" aria-label="預覽列印"/>
             <div className="tab-content bg-base-100 border-base-300 p-6">
               <div className='space-y-4'>
                 <div className='alert alert-info text-sm'>
-                  會開啟全頁 A4 預覽；「另存 PDF」第一階段會透過系統列印對話框完成。
+                  會開啟全頁 A4 預覽，確認排版後可直接呼叫系統列印。
                 </div>
                 <label className='form-control w-full'>
                   <div className='label'>

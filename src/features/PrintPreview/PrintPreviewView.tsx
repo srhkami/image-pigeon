@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react'
+import {useMemo} from 'react'
 import {Button} from '@/component'
 import PrintableDocument from '@/features/PrintPreview/PrintableDocument.tsx'
 import {buildAutoCollageLayout} from '@/features/ImagePreview/autoCollageLayout.ts'
@@ -26,8 +26,6 @@ export default function PrintPreviewView({
   alignVertical,
   onBackToEditor,
 }: Props) {
-  const [noticeForPdf, setNoticeForPdf] = useState<string>('')
-
   const viewModels = useMemo(
     () => getOrderedItemViewModels(project, sessionId ?? ''),
     [project, sessionId],
@@ -47,17 +45,6 @@ export default function PrintPreviewView({
 
   const onPrint = () => {
     window.print()
-  }
-
-  const onSaveAsPdf = async () => {
-    const confirmed = window.confirm('系統會開啟列印對話框，請在其中選擇「另存為 PDF」。')
-    if (!confirmed) {
-      return
-    }
-
-    setNoticeForPdf('已觸發系統列印對話框，請在列印目標中選擇「另存為 PDF」。')
-
-    onPrint()
   }
 
   const loadingState = isReady
@@ -104,14 +91,6 @@ export default function PrintPreviewView({
           >
             列印
           </Button>
-          <Button
-            onClick={onSaveAsPdf}
-            color='success'
-            className='ml-2'
-            disabled={!isReady}
-          >
-            另存PDF
-          </Button>
         </div>
       </footer>
 
@@ -121,11 +100,6 @@ export default function PrintPreviewView({
         </div>
       )}
 
-      {noticeForPdf && (
-        <div className='toast toast-top toast-center'>
-          <p>{noticeForPdf}</p>
-        </div>
-      )}
     </div>
   )
 }

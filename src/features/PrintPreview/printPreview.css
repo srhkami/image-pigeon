@@ -156,7 +156,7 @@
   overflow-wrap: anywhere;
   overflow: hidden;
   width: 100%;
-  min-height: calc(var(--print-font-size) * 1.2 * 6);
+  min-height: calc(var(--print-font-size) * 1.2 * 4.8);
   font-size: var(--print-font-size);
   line-height: 1.2;
   text-align: left;
