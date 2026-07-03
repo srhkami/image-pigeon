@@ -16,6 +16,7 @@ dist-ssr
 __pycache__/
 *.py[cod]
 core/web_cache/
+web_cache/
 
 # Editor directories and files
 .vscode/*

@@ -1,0 +1,405 @@
+.print-preview-shell {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: radial-gradient(circle at 15% 20%, rgba(14, 116, 144, 0.12), transparent 52%),
+  radial-gradient(circle at 80% 0%, rgba(139, 92, 246, 0.08), transparent 42%),
+  linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0));
+  gap: 0;
+}
+
+.print-preview-main {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.print-preview-stage {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.print-document {
+  width: min(100%, 920px);
+  padding-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.print-document-title {
+  text-align: center;
+  background: color-mix(in oklab, var(--color-base-100) 82%, white);
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.75rem;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0.3rem 1rem rgb(0 0 0 / 0.1);
+}
+
+.print-document-title h1 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.print-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.print-page {
+  width: min(94vw, 794px);
+  aspect-ratio: 210 / 297;
+  padding: 10mm 8mm 8mm;
+  background: var(--color-base-100);
+  border: 1px solid var(--color-base-300);
+  border-radius: 0.85rem;
+  box-shadow: 0 18px 32px rgb(0 0 0 / 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.print-page-header {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-base-content);
+}
+
+.print-page-title {
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+}
+
+.print-page-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.print-page-grid-landscape-2,
+.print-page-grid-portrait-large-2,
+.print-page-grid-portrait-small-6,
+.print-page-grid-mixed-landscape1-small3,
+.print-page-grid-mixed-small3-landscape1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-rows: repeat(1, minmax(0, 1fr));
+}
+
+.print-page-grid-landscape-2 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.print-page-grid-portrait-large-2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+}
+
+.print-page-grid-portrait-small-6,
+.print-page-grid-mixed-landscape1-small3,
+.print-page-grid-mixed-small3-landscape1 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.print-slot {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-base-300);
+  background: color-mix(in oklab, var(--color-base-100) 88%, var(--color-base-200));
+  border-radius: 0.45rem;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.print-slot-media {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: color-mix(in oklab, var(--color-base-200) 76%, transparent);
+}
+
+.print-slot-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.print-slot-remark {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-top: 1px dashed color-mix(in oklab, var(--color-base-content) 24%, transparent);
+  padding: 0.25rem 0.35rem;
+  line-height: 1.1;
+}
+
+.print-slot-number {
+  font-weight: 700;
+  color: color-mix(in oklab, var(--color-base-content) 88%, transparent);
+  font-size: 0.75rem;
+}
+
+.print-slot-remark-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 1.6rem;
+}
+
+.print-slot-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in oklab, var(--color-base-content) 33%, transparent);
+  font-size: 0.75rem;
+  background: color-mix(in oklab, var(--color-base-200) 82%, transparent);
+}
+
+.print-slot-grid-landscape-top {
+  grid-row: 1 / 2;
+  grid-column: 1 / 4;
+}
+
+.print-slot-grid-landscape-bottom {
+  grid-row: 2 / 3;
+  grid-column: 1 / 4;
+}
+
+.print-slot-grid-portrait-large-left {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+}
+
+.print-slot-grid-portrait-large-right {
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
+}
+
+.print-slot-grid-portrait-small-1 {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+}
+
+.print-slot-grid-portrait-small-2 {
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
+}
+
+.print-slot-grid-portrait-small-3 {
+  grid-row: 1 / 2;
+  grid-column: 3 / 4;
+}
+
+.print-slot-grid-portrait-small-4 {
+  grid-row: 2 / 3;
+  grid-column: 1 / 2;
+}
+
+.print-slot-grid-portrait-small-5 {
+  grid-row: 2 / 3;
+  grid-column: 2 / 3;
+}
+
+.print-slot-grid-portrait-small-6 {
+  grid-row: 2 / 3;
+  grid-column: 3 / 4;
+}
+
+.print-slot-grid-mixed-landscape-top {
+  grid-row: 1 / 2;
+  grid-column: 1 / 4;
+}
+
+.print-slot-grid-mixed-small-top-left {
+  grid-row: 2 / 3;
+  grid-column: 1 / 2;
+}
+
+.print-slot-grid-mixed-small-top-middle {
+  grid-row: 2 / 3;
+  grid-column: 2 / 3;
+}
+
+.print-slot-grid-mixed-small-top-right {
+  grid-row: 2 / 3;
+  grid-column: 3 / 4;
+}
+
+.print-slot-grid-mixed-small-bottom-left {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+}
+
+.print-slot-grid-mixed-small-bottom-middle {
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
+}
+
+.print-slot-grid-mixed-small-bottom-right {
+  grid-row: 1 / 2;
+  grid-column: 3 / 4;
+}
+
+.print-slot-grid-mixed-landscape-bottom {
+  grid-row: 2 / 3;
+  grid-column: 1 / 4;
+}
+
+.print-slot-grid-mixed-small-top-left,
+.print-slot-grid-mixed-small-top-middle,
+.print-slot-grid-mixed-small-top-right,
+.print-slot-grid-mixed-small-bottom-left,
+.print-slot-grid-mixed-small-bottom-middle,
+.print-slot-grid-mixed-small-bottom-right,
+.print-slot-grid-mixed-landscape-bottom,
+.print-slot-grid-mixed-landscape-top {
+  box-shadow: none;
+}
+
+.print-page-footer {
+  color: color-mix(in oklab, var(--color-base-content) 58%, transparent);
+  padding-top: 0.16rem;
+  border-top: 1px dashed color-mix(in oklab, var(--color-base-content) 22%, transparent);
+}
+
+.print-document-empty {
+  min-height: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--color-base-content);
+  background: color-mix(in oklab, var(--color-base-200) 86%, transparent);
+  border-radius: 0.85rem;
+  border: 1px dashed var(--color-base-300);
+  width: min(94vw, 794px);
+  aspect-ratio: 210 / 297;
+}
+
+.print-preview-chrome {
+  position: sticky;
+  bottom: 0;
+  padding: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: color-mix(in oklab, var(--color-base-100) 92%, transparent);
+  border-top: 1px solid var(--color-base-300);
+  backdrop-filter: blur(3px);
+}
+
+.print-preview-pages {
+  color: var(--color-base-content);
+}
+
+.print-preview-actions {
+  display: flex;
+  align-items: center;
+}
+
+.print-preview-warning {
+  position: fixed;
+  left: 50%;
+  bottom: 4.5rem;
+  transform: translateX(-50%);
+  padding: 0.55rem 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--color-warning) 60%, transparent);
+  background: color-mix(in oklab, var(--color-warning) 14%, var(--color-base-100));
+  color: color-mix(in oklab, var(--color-base-content) 86%, var(--color-warning));
+  border-radius: 0.6rem;
+  font-size: 0.9rem;
+  z-index: 20;
+}
+
+.print-preview-chrome .btn {
+  min-height: 2.15rem;
+}
+
+@media print {
+  .print-preview-shell {
+    height: auto;
+    background: none;
+    padding: 0;
+    gap: 0;
+  }
+
+  .print-preview-main {
+    overflow: visible;
+  }
+
+  .print-preview-stage {
+    position: static;
+    inset: unset;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .print-preview-chrome,
+  .print-preview-warning {
+    display: none;
+  }
+
+  .print-document {
+    width: 100%;
+    padding-bottom: 0;
+    gap: 0;
+  }
+
+  .print-document-title {
+    display: none;
+  }
+
+  .print-page {
+    width: 210mm;
+    height: 297mm;
+    max-width: none;
+    border: none;
+    box-shadow: none;
+    page-break-after: always;
+    break-after: page;
+    border-radius: 0;
+    padding: 10mm 8mm 8mm;
+    margin: 0;
+  }
+
+  .print-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  .print-slot {
+    background: white;
+  }
+
+  .print-slot-media,
+  .print-slot-remark {
+    background: white;
+  }
+}

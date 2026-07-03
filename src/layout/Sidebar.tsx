@@ -7,6 +7,7 @@ import {ProjectV2} from '@/types/project.ts'
 import {CustomImage} from '@/utils/type.ts'
 import OpenProject from "../features/Upload/OpenProject.tsx";
 import ModalImport from "@/features/Upload/ModalImport.tsx";
+import {PrintPreviewOptions} from "@/features/PrintPreview/printLayout.ts";
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
@@ -18,6 +19,7 @@ type Props = {
   readonly onClearProject: () => void,
   readonly isMoveMode: boolean,
   readonly setIsMoveMode: Dispatch<SetStateAction<boolean>>,
+  readonly onPrintPreview: (options: PrintPreviewOptions) => void,
 }
 
 /* 左側操作欄 */
@@ -31,6 +33,7 @@ export default function Sidebar({
                                   onClearProject,
                                   isMoveMode,
                                   setIsMoveMode,
+                                  onPrintPreview,
                                 }: Props) {
 
   const onClear = () => {
@@ -91,6 +94,7 @@ export default function Sidebar({
         setProject={setProject}
         sessionId={sessionId}
         itemCount={itemCount}
+        onEnterPrintPreview={onPrintPreview}
       />
     </aside>
   )
