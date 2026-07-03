@@ -147,7 +147,6 @@
 .print-slot-number {
   font-weight: 700;
   color: color-mix(in oklab, var(--color-base-content) 88%, transparent);
-  font-size: 0.75rem;
 }
 
 .print-slot-remark-text {
@@ -389,18 +388,16 @@
     max-width: none;
     border: none;
     box-shadow: none;
-    page-break-after: always;
     page-break-inside: avoid;
-    break-after: page;
     break-inside: avoid;
     border-radius: 0;
     padding: 10mm 8mm 8mm;
     margin: 0;
   }
 
-  .print-page:last-child {
-    page-break-after: auto;
-    break-after: auto;
+  .print-page + .print-page {
+    page-break-before: always;
+    break-before: page;
   }
 
   @page {

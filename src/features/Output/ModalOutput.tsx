@@ -22,7 +22,7 @@ export default function ModalOutput({project, setProject, sessionId, itemCount, 
 
   const {isShow, onShow, onHide} = useModal();
   const [printTitle, setPrintTitle] = useState(project.document.title || '照片黏貼表')
-  const [printFontSize, setPrintFontSize] = useState<PrintFontSize>('12')
+  const [printFontSize, setPrintFontSize] = useState<PrintFontSize>('20')
   const [printAlignVertical, setPrintAlignVertical] = useState<PrintAlignVertical>('center')
 
   const handlePrintPreview = () => {
@@ -100,11 +100,9 @@ export default function ModalOutput({project, setProject, sessionId, itemCount, 
                       value={printFontSize}
                       onChange={(event) => setPrintFontSize(event.target.value as PrintFontSize)}
                     >
-                      <option value='10'>小（10）</option>
-                      <option value='11'>偏小（11）</option>
-                      <option value='12'>普通（12）</option>
-                      <option value='13'>偏大（13）</option>
-                      <option value='14'>大（14）</option>
+                      <option value='16'>16（小）</option>
+                      <option value='20'>20（中）</option>
+                      <option value='24'>24（大）</option>
                     </select>
                   </label>
                 </div>

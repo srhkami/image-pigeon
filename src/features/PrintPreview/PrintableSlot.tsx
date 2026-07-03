@@ -9,7 +9,7 @@ type Props = {
   readonly slot: AutoCollageSlot
   readonly indexInPrint: number | null
   readonly item: ProjectItemViewModel | undefined
-  readonly fontSize: '10' | '11' | '12' | '13' | '14'
+  readonly fontSize: '16' | '20' | '24'
   readonly alignVertical: 'top' | 'center'
   readonly onImageLoaded: (itemId: string) => void
   readonly onImageErrored: (itemId: string) => void
@@ -104,7 +104,9 @@ export default function PrintableSlot({
         />
       </div>
       <div className={remarkStyleClass}>
-        <div className='print-slot-number'>{formatPrintImageNumber(indexInPrint ?? 0)}</div>
+        <div className='print-slot-number' style={{fontSize: `${fontSize}px`}}>
+          {formatPrintImageNumber(indexInPrint ?? 0)}
+        </div>
         <div
           className='print-slot-remark-text'
           style={{fontSize: `${fontSize}px`}}

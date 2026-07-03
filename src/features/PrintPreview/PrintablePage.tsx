@@ -9,7 +9,7 @@ type Props = {
   readonly totalPages: number
   readonly slotIndexMap: Record<string, number | null>
   readonly itemById: ReadonlyMap<string, ProjectItemViewModel>
-  readonly fontSize: '10' | '11' | '12' | '13' | '14'
+  readonly fontSize: '16' | '20' | '24'
   readonly alignVertical: 'top' | 'center'
   readonly onImageLoaded: (itemId: string) => void
   readonly onImageErrored: (itemId: string) => void
