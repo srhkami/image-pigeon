@@ -79,7 +79,7 @@ export default function PrintableSlot({
   if (!item) {
     return (
       <div className={slotClassName}>
-        <div className='print-slot-empty'>空格</div>
+        <div className='print-slot-empty'>空白</div>
       </div>
     )
   }
@@ -113,7 +113,7 @@ export default function PrintableSlot({
           className='print-slot-remark-text'
           title={item.remark || `圖片 ${slot.slotId}`}
         >
-          {item.remark || '未填備註'}
+          {item.remark || ''}
         </div>
       </div>
     </div>

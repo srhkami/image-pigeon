@@ -10,7 +10,7 @@ export type PrintPreviewOptions = {
 }
 
 export function formatPrintImageNumber(index: number): string {
-  return `編號${String(index).padStart(2, '0')}`
+  return `編號 ${String(index).padStart(2, '0')}`
 }
 
 export function buildPrintableSlotIndexMap(pages: readonly AutoCollagePage[]): Record<string, number | null> {
