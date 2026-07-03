@@ -2,6 +2,18 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '2.1.0',
+    date: '1150703',
+    logs: [
+      {color: "new", text: '新增全頁「預覽列印」流程，可在輸出檔案中先確認 A4 分頁後再列印。'},
+      {color: "info", text: '預覽列印設定改為獨立表單，樣式與 Word 輸出一致，並支援文件標題、文字對齊與字體大小設定。'},
+      {color: "info", text: '列印每一頁上方都會顯示文件標題，標題固定 24px 並加入上下外距。'},
+      {color: "info", text: '列印頁碼移至紙張下方中央，並以「目前頁 / 總頁數」格式顯示。'},
+      {color: "fix", text: '修正列印預覽與系統列印分頁不一致、內容裁切與多餘空白頁問題。'},
+      {color: "fix", text: '修正列印備註文字換行、靠左對齊與欄位高度。'},
+    ]
+  },
+  {
     version: '2.0.0',
     date: '1150702',
     logs: [

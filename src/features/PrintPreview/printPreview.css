@@ -75,8 +75,8 @@
 }
 
 .print-page-title h1 {
-  margin: 0;
-  font-size: 20px;
+  margin: 0.35rem 0 0.45rem;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
