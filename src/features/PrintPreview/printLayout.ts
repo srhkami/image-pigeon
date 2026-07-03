@@ -1,6 +1,6 @@
 import type {AutoCollagePage} from '@/features/ImagePreview/autoCollageLayout.ts'
 
-export type PrintFontSize = '16' | '20' | '24'
+export type PrintFontSize = '16' | '18' | '20'
 export type PrintAlignVertical = 'top' | 'center'
 
 export type PrintPreviewOptions = {

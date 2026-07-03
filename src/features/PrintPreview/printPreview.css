@@ -141,19 +141,25 @@
   gap: 0.25rem;
   border-top: 1px dashed color-mix(in oklab, var(--color-base-content) 24%, transparent);
   padding: 0.25rem 0.35rem;
-  line-height: 1.1;
+  line-height: 1.2;
+  flex: 0 0 auto;
 }
 
 .print-slot-number {
   font-weight: 700;
   color: color-mix(in oklab, var(--color-base-content) 88%, transparent);
+  font-size: var(--print-font-size);
 }
 
 .print-slot-remark-text {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   overflow: hidden;
-  min-height: 1.4rem;
+  width: 100%;
+  min-height: calc(var(--print-font-size) * 1.2 * 6);
+  font-size: var(--print-font-size);
+  line-height: 1.2;
+  text-align: right;
 }
 
 .print-slot-empty {
@@ -383,7 +389,7 @@
 
   .print-page {
     width: 210mm;
-    height: 297mm;
+    height: 296mm;
     box-sizing: border-box;
     max-width: none;
     border: none;
@@ -391,13 +397,8 @@
     page-break-inside: avoid;
     break-inside: avoid;
     border-radius: 0;
-    padding: 10mm 8mm 8mm;
+    padding: 12mm 8mm 10mm;
     margin: 0;
-  }
-
-  .print-page + .print-page {
-    page-break-before: always;
-    break-before: page;
   }
 
   @page {

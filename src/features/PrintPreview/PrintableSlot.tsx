@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react'
+import {CSSProperties, useEffect, useRef} from 'react'
 import {ProjectItemViewModel} from '@/types/project.ts'
 import {twMerge} from 'tailwind-merge'
 import clsx from 'clsx'
@@ -9,7 +9,7 @@ type Props = {
   readonly slot: AutoCollageSlot
   readonly indexInPrint: number | null
   readonly item: ProjectItemViewModel | undefined
-  readonly fontSize: '16' | '20' | '24'
+  readonly fontSize: '16' | '18' | '20'
   readonly alignVertical: 'top' | 'center'
   readonly onImageLoaded: (itemId: string) => void
   readonly onImageErrored: (itemId: string) => void
@@ -89,8 +89,10 @@ export default function PrintableSlot({
     clsx({'items-start': alignVertical === 'top', 'items-center': alignVertical === 'center'}),
   )
 
+  const slotStyle = {'--print-font-size': `${fontSize}px`} as CSSProperties
+
   return (
-    <div className={slotClassName}>
+    <div className={slotClassName} style={slotStyle}>
       <div className='print-slot-media'>
         <img
           ref={imageRef}
@@ -104,12 +106,11 @@ export default function PrintableSlot({
         />
       </div>
       <div className={remarkStyleClass}>
-        <div className='print-slot-number' style={{fontSize: `${fontSize}px`}}>
+        <div className='print-slot-number'>
           {formatPrintImageNumber(indexInPrint ?? 0)}
         </div>
         <div
           className='print-slot-remark-text'
-          style={{fontSize: `${fontSize}px`}}
           title={item.remark || `圖片 ${slot.slotId}`}
         >
           {item.remark || '未填備註'}

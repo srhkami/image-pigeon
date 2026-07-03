@@ -11,7 +11,7 @@ import Sidebar from "@/layout/Sidebar.tsx";
 
 const DEFAULT_PRINT_OPTIONS: PrintPreviewOptions = {
   title: '照片黏貼表',
-  fontSize: '20',
+  fontSize: '18',
   alignVertical: 'center',
 }
 

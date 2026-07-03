@@ -11,7 +11,7 @@ type Props = {
   readonly pages?: AutoCollagePage[]
   readonly slotIndexMap?: Record<string, number | null>
   readonly title: string
-  readonly fontSize: '16' | '20' | '24'
+  readonly fontSize: '16' | '18' | '20'
   readonly alignVertical: 'top' | 'center'
   readonly onImageLoaded: (itemId: string) => void
   readonly onImageErrored: (itemId: string) => void
