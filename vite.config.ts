@@ -21,5 +21,6 @@ export default defineConfig({
     watch: {
       ignored: ['**/web_cache/**'],
     },
+    port: 5195,
   },
 })

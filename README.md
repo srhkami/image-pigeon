@@ -2,6 +2,10 @@
 
 `Version` **2.1.0**
 
+### 開發者入口
+
+參與開發或由 coding agent 接續工作時，請先讀取 [AGENTS.md](AGENTS.md) 的操作規則，再從 [STATE.md](STATE.md) 取得目前工作線與 canonical plan。
+
 `What's New`
 - 新增「自動排版」功能，對應圖片方向自動決定輸出版型，並可混合輸出。
 - 新增「開啟/儲存專案」功能，可於下次接續編輯。

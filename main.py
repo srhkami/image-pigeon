@@ -17,7 +17,7 @@ from core.upload_imags import UploadImage
 DEBUG_MODE = True
 FASTAPI_HOST = '127.0.0.1'
 FASTAPI_PORT = 18765
-VITE_DEV_URL = 'http://localhost:5173'
+VITE_DEV_URL = 'http://localhost:5195'
 
 
 def get_root_path():
