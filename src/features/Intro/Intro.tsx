@@ -15,24 +15,20 @@ export default function Intro() {
               <Badge color='accent'>Step 1</Badge>
             </Col>
             <Col xs={9} className='text-lg font-bold flex items-center my-2'>
-              點擊左上角
-              <button className='btn btn-sm btn-outline mx-2'>
-                導入圖片
-              </button>
-              按鈕
+              請將圖片拖曳到畫面中
             </Col>
             <Col xs={3} className='text-lg font-bold flex items-center my-2'>
               <Badge color='accent'>Step 2</Badge>
             </Col>
             <Col xs={9} className='text-lg font-bold flex items-center my-2'>
-                預覽、排序、編輯圖片
+              預覽、排序、編輯圖片
             </Col>
             <Col xs={3} className='text-lg font-bold flex items-center my-2'>
               <Badge color='accent'>Step 3</Badge>
             </Col>
             <Col xs={9} className='text-lg font-bold flex items-center my-2'>
               <div className='col-span-3 text-lg font-bold flex items-center'>
-                點擊左下角
+                點擊
                 <button className='btn btn-sm mx-2 btn-outline'>
                   輸出檔案
                 </button>
@@ -78,14 +74,14 @@ export default function Intro() {
           <Row>
             <Col xs={6} className='px-1'>
               <Button style='outline' shape='block'
-              onClick={()=>window.open('https://pigeonhand.tw')}>
+                      onClick={() => window.open('https://pigeonhand.tw')}>
                 <img src='/Logo_PH.png' alt="" className='w-4 h-4'/>
                 鴿手
               </Button>
             </Col>
             <Col xs={6} className='px-1'>
               <Button style='outline' shape='block'
-                      onClick={()=>window.open('https://traffic.pigeonhand.tw')}>
+                      onClick={() => window.open('https://traffic.pigeonhand.tw')}>
                 <img src='/Logo_TP.png' alt="" className='w-5 h-5'/>
                 交通鴿手
               </Button>

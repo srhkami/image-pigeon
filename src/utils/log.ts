@@ -2,6 +2,20 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '2.2.0',
+    date:'1150730',
+    logs:[
+      {color:'new', text:'新增拖曳加入圖片的功能',}
+    ]
+  },
+  {
+    version: '2.1.1',
+    date:'1150730',
+    logs:[
+      {color:'fix', text:'修復備註欄因捲動無法儲存文字的問題',}
+    ]
+  },
+  {
     version: '2.1.0',
     date: '1150703',
     logs: [
