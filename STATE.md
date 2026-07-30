@@ -13,6 +13,10 @@ scope:
 parent_state: null
 workstreams: []
 recent_results:
+  - id: result-image-pigeon-wheel-remark-save-2026-07-29
+    path: docs/result/2026-07-29-wheel-remark-save-result.md
+    status: completed
+    completed_at: 2026-07-30
   - id: result-image-pigeon-project-state-v1-migration-2026-07-29
     path: docs/result/2026-07-29-project-state-v1-migration-result.md
     status: completed
@@ -21,7 +25,7 @@ recent_results:
     path: docs/result/2026-07-29-project-state-v1-trial-result.md
     status: completed
     completed_at: 2026-07-29
-last_reconciled: 2026-07-29
+last_reconciled: 2026-07-30
 ---
 
 # image-pigeon 專案狀態
@@ -30,7 +34,7 @@ last_reconciled: 2026-07-29
 
 本專案已切換至 Project-State v1。`STATE.md` 是目前工作線與下一步的唯一入口；架構、決策、治理、計畫與結果分別由 scoped `docs/` 保存。
 
-Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並完成 lifecycle closure。目前沒有未關閉 workstream；Git 歷史中的舊計畫標籤與既有 `.planning/` 草稿均未被匯入為目前工作。
+Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並完成 lifecycle closure。焦點式編輯器以滾輪切換圖片前保存備註的修正已通過回歸測試、lint、build 與獨立程式審查，並完成生命週期閉環。目前沒有未關閉 workstream；Git 歷史中的舊計畫標籤與既有 `.planning/` 草稿均未被匯入為目前工作。
 
 ## Scope map
 
@@ -44,6 +48,7 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## Recent results
 
+- `docs/result/2026-07-29-wheel-remark-save-result.md`
 - `docs/result/2026-07-29-project-state-v1-migration-result.md`
 - `docs/result/2026-07-29-project-state-v1-trial-result.md`
 

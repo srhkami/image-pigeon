@@ -23,6 +23,7 @@ import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
 import {getOrderedItemViewModels, reorderItem} from '@/state/projectState.ts'
 import CollagePagePreviewRail from '@/features/ImagePreview/CollagePagePreviewRail.tsx'
 import {buildAutoCollageLayout, findPageIndexByItemId} from '@/features/ImagePreview/autoCollageLayout.ts'
+import {activateItemByOffset} from '@/features/ImagePreview/wheelNavigation.ts'
 
 type Props = {
   readonly project: ProjectV2,
@@ -100,13 +101,14 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
   }, [activeItemId])
 
   const setActiveByOffset = useCallback((offset: number) => {
-    if (activeItemIndex < 0 || !viewModels.length) return false
-    const nextIndex = Math.min(viewModels.length - 1, Math.max(0, activeItemIndex + offset))
-    if (nextIndex === activeItemIndex) return false
-
-    setActiveItemId(viewModels[nextIndex]?.itemId ?? null)
-    return true
-  }, [activeItemIndex, setActiveItemId, viewModels])
+    return activateItemByOffset({
+      activeItemIndex,
+      itemIds: sortableItemIds,
+      offset,
+      activeElement: document.activeElement,
+      setActiveItemId,
+    })
+  }, [activeItemIndex, setActiveItemId, sortableItemIds])
 
   const handlePreviewWheel = (event: WheelEvent<HTMLDivElement>) => {
     if (isMoveMode || !viewModels.length || activeItemIndex < 0 || isEditableTarget(event.target)) {
