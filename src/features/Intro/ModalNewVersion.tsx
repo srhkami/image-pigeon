@@ -1,11 +1,16 @@
 import {MdNumbers} from "react-icons/md"
 import {HiOutlineClipboardList} from "react-icons/hi";
 import {VersionCheckData} from "@/utils/type.ts";
-import {Modal, ModalBody} from "@/component";
+import {Button, Modal, ModalBody, ModalFooter} from "@/component";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {AppVersion} from "@/utils/log.ts";
 import {useModal} from "@/hooks";
+import {
+  IGNORED_UPDATE_DATE_KEY,
+  ignoreLatestVersion,
+  shouldShowLatestVersion,
+} from "./newVersionDismissal.ts";
 
 const DISMISSED_VERSION_KEY = 'image-pigeon.dismissed-new-version'
 
@@ -33,14 +38,23 @@ export default function ModalNewVersion() {
     onHide()
   }
 
+  const handleIgnoreVersion = () => {
+    if (data && ignoreLatestVersion(localStorage, data.updated_at)) {
+      onHide()
+    }
+  }
+
   // 檢查新版本
   useEffect(() => {
     handleCheckVersion()
       .then(data => {
-        if (data.app_version !== AppVersion) {
-          if (sessionStorage.getItem(DISMISSED_VERSION_KEY) === data.app_version) {
-            return
-          }
+        if (shouldShowLatestVersion({
+          currentVersion: AppVersion,
+          latestVersion: data.app_version,
+          updatedAt: data.updated_at,
+          ignoredDate: localStorage.getItem(IGNORED_UPDATE_DATE_KEY),
+          sessionDismissedVersion: sessionStorage.getItem(DISMISSED_VERSION_KEY),
+        })) {
           setData(data);
           onShow();
         }
@@ -67,12 +81,13 @@ export default function ModalNewVersion() {
             {data?.whats_new}
           </div>
         </div>
-        <div className='flex justify-end'>
-          <a className='btn btn-sm btn-soft btn-info' href={data?.download_link} target='_blank'>
-            立即更新
-          </a>
-        </div>
       </ModalBody>
+      <ModalFooter className='gap-2'>
+        <Button size='sm' style='outline' color='neutral' className='mr-auto' onClick={handleIgnoreVersion}>忽略此版本</Button>
+        <a className='btn btn-sm btn-info' href={data?.download_link} target='_blank'>
+          立即更新
+        </a>
+      </ModalFooter>
     </Modal>
   )
 }

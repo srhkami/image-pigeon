@@ -5,7 +5,8 @@ export const CHANGELOG_LIST: Array<TVersionObject> = [
     version: '2.2.0',
     date:'1150730',
     logs:[
-      {color:'new', text:'新增拖曳加入圖片的功能',}
+      {color:'new', text:'新增拖曳加入圖片的功能'},
+      {color:'info', text:'加入忽略版本更新提示功能'}
     ]
   },
   {

@@ -3,6 +3,7 @@ import os.path
 import subprocess
 import sys
 import threading
+from pathlib import Path
 
 import webview
 
@@ -82,6 +83,30 @@ def normalize_dialog_path(selected_path):
     if isinstance(selected_path, str):
         return selected_path
     return selected_path[0] if len(selected_path) else None
+
+
+def resolve_dialog_directory() -> str:
+    """取得確實存在的檔案選擇器初始資料夾，避免依賴單一環境變數。"""
+    home_drive = os.environ.get('HOMEDRIVE', '')
+    home_path = os.environ.get('HOMEPATH', '')
+    candidates = [
+        os.environ.get('USERPROFILE'),
+        f'{home_drive}{home_path}' if home_drive and home_path else None,
+        os.environ.get('HOME'),
+    ]
+
+    try:
+        candidates.append(str(Path.home()))
+    except (KeyError, OSError, RuntimeError):
+        log().debug('無法取得使用者家目錄，改用應用程式路徑', exc_info=True)
+
+    candidates.extend((get_root_path(), os.getcwd()))
+
+    for candidate in candidates:
+        if candidate and Path(candidate).is_dir():
+            return str(Path(candidate))
+
+    return os.path.abspath(os.curdir)
 
 
 def open_file(path: str) -> None:
@@ -207,36 +232,46 @@ class Api:
         mode = data.get('mode')
         title = data.get('title', '照片黏貼表')
         selected_path = None
-        match mode:
-            case 'word':
-                selected_path = webview.windows[0].create_file_dialog(
-                    webview.FileDialog.SAVE,
-                    save_filename=f'{title}.docx',
-                    file_types=('WORD 文件 (*.docx)',)
-                )
-            case 'json':
-                selected_path = webview.windows[0].create_file_dialog(
-                    webview.FileDialog.SAVE,
-                    save_filename=f'{title}.json',
-                    file_types=('JSON 文件 (*.json)',)
-                )
-            case 'images':
-                selected_path = webview.windows[0].create_file_dialog(
-                    webview.FileDialog.FOLDER,
-                    allow_multiple=False
-                )
-            case 'project-save':
-                selected_path = webview.windows[0].create_file_dialog(
-                    webview.FileDialog.FOLDER,
-                    allow_multiple=False
-                )
-            case 'project-open':
-                selected_path = webview.windows[0].create_file_dialog(
-                    webview.FileDialog.FOLDER,
-                    allow_multiple=False
-                )
-            case _:
-                return Response(400, message='參數錯誤').to_dict()
+        dialog_directory = resolve_dialog_directory()
+        try:
+            match mode:
+                case 'word':
+                    selected_path = webview.windows[0].create_file_dialog(
+                        webview.FileDialog.SAVE,
+                        directory=dialog_directory,
+                        save_filename=f'{title}.docx',
+                        file_types=('WORD 文件 (*.docx)',)
+                    )
+                case 'json':
+                    selected_path = webview.windows[0].create_file_dialog(
+                        webview.FileDialog.SAVE,
+                        directory=dialog_directory,
+                        save_filename=f'{title}.json',
+                        file_types=('JSON 文件 (*.json)',)
+                    )
+                case 'images':
+                    selected_path = webview.windows[0].create_file_dialog(
+                        webview.FileDialog.FOLDER,
+                        directory=dialog_directory,
+                        allow_multiple=False
+                    )
+                case 'project-save':
+                    selected_path = webview.windows[0].create_file_dialog(
+                        webview.FileDialog.FOLDER,
+                        directory=dialog_directory,
+                        allow_multiple=False
+                    )
+                case 'project-open':
+                    selected_path = webview.windows[0].create_file_dialog(
+                        webview.FileDialog.FOLDER,
+                        directory=dialog_directory,
+                        allow_multiple=False
+                    )
+                case _:
+                    return Response(400, message='參數錯誤').to_dict()
+        except Exception:
+            log().exception('開啟檔案選擇視窗失敗', exc_info=True)
+            return Response(500, '無法開啟檔案選擇視窗，請重新啟動程式後再試').to_dict()
 
         # pywebview 在不同平台/版本可能回傳字串或路徑序列。
         file_path = normalize_dialog_path(selected_path)

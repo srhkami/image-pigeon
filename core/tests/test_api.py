@@ -1,8 +1,9 @@
 import unittest
+import os
 import sys
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
 
@@ -69,6 +70,37 @@ class ApiHealthTest(unittest.TestCase):
         )
         self.assertIsNone(main.normalize_dialog_path(None))
         self.assertIsNone(main.normalize_dialog_path([]))
+
+    def test_dialog_directory_falls_back_when_home_environment_is_missing(self):
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch("pathlib.Path.home", side_effect=RuntimeError("home unavailable")),
+        ):
+            directory = main.resolve_dialog_directory()
+
+        self.assertTrue(Path(directory).is_dir())
+
+    def test_all_file_dialog_modes_receive_an_explicit_directory(self):
+        window = MagicMock()
+        window.create_file_dialog.return_value = None
+
+        with patch.object(main.webview, "windows", [window]):
+            for mode in ("word", "json", "images", "project-save", "project-open"):
+                with self.subTest(mode=mode):
+                    main.Api().select_path({"mode": mode, "title": "測試"})
+                    _, kwargs = window.create_file_dialog.call_args
+                    self.assertTrue(kwargs["directory"])
+                    self.assertTrue(Path(kwargs["directory"]).is_dir())
+
+    def test_file_dialog_exception_returns_stable_error_response(self):
+        window = MagicMock()
+        window.create_file_dialog.side_effect = KeyError("HOMEPATH")
+
+        with patch.object(main.webview, "windows", [window]):
+            response = main.Api().select_path({"mode": "word", "title": "測試"})
+
+        self.assertEqual(response["status"], 500)
+        self.assertEqual(response["message"], "無法開啟檔案選擇視窗，請重新啟動程式後再試")
 
 
 if __name__ == "__main__":

@@ -180,6 +180,7 @@ export type VersionCheckData = {
   app_version: string,
   whats_new: string,
   download_link: string,
+  updated_at: string,
 }
 
 export type TVersionObject = {

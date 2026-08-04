@@ -15,7 +15,7 @@ export default function Intro() {
               <Badge color='accent'>Step 1</Badge>
             </Col>
             <Col xs={9} className='text-lg font-bold flex items-center my-2'>
-              請將圖片拖曳到畫面中
+              請將圖片拖曳到此處
             </Col>
             <Col xs={3} className='text-lg font-bold flex items-center my-2'>
               <Badge color='accent'>Step 2</Badge>
