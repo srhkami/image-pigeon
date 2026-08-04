@@ -1,4 +1,4 @@
-import {Dispatch, SetStateAction} from 'react'
+import {Dispatch, KeyboardEvent, SetStateAction} from 'react'
 import {CgMenuGridR} from 'react-icons/cg'
 import {useSortable} from '@dnd-kit/sortable'
 import {CSS} from '@dnd-kit/utilities'
@@ -38,17 +38,23 @@ export default function ImageCardForMove({
     willChange: isDragging ? 'transform' : undefined,
   }
 
-  const typeTag = viewModel.orientation === 'landscape'
-    ? {label: '橫向', style: 'badge-info'}
-    : viewModel.portraitSize === 'small'
-      ? {label: '直向小圖', style: 'badge-warning'}
-      : {label: '直向大圖', style: 'badge-success'}
+  const layoutTag = {
+    'stacked-2': {label: '上下', style: 'badge-info'},
+    'side-by-side-2': {label: '左右', style: 'badge-success'},
+    'grid-6': {label: '六張', style: 'badge-warning'},
+  }[viewModel.layoutPreference]
 
-  const summaryText = viewModel.remark.trim() || viewModel.originalName || '未命名'
+  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) {
+      return
+    }
+    event.preventDefault()
+    setActiveItemId(viewModel.itemId)
+  }
 
   const classes = twMerge(
-    'relative w-full rounded-xl border bg-base-100 shadow-sm p-2',
-    'flex items-center gap-2 cursor-pointer select-none transition-colors',
+    'relative w-full rounded-xl border bg-base-100 shadow-sm p-3',
+    'flex flex-wrap items-center gap-3 cursor-pointer select-none transition-colors',
     clsx({
       'border-accent/40 bg-accent/5 ring-2 ring-accent': isActive,
       'border-warning/40 opacity-90 shadow-lg z-20 bg-accent/10': isDragging,
@@ -63,7 +69,9 @@ export default function ImageCardForMove({
       style={style}
       className={classes}
       role='button'
+      tabIndex={0}
       onClick={() => setActiveItemId(viewModel.itemId)}
+      onKeyDown={handleCardKeyDown}
     >
       <div className='rounded-tr flex flex-col z-10'>
         <button
@@ -80,26 +88,21 @@ export default function ImageCardForMove({
 
       <span className='badge badge-outline'>#{index + 1}</span>
 
-      <figure className='aspect-video h-20 w-36 overflow-hidden rounded-lg bg-base-200/50 shrink-0'>
-        <div className='inset-0 flex items-center justify-center'
+      <figure className='aspect-video h-72 w-[32rem] max-w-full overflow-hidden rounded-lg bg-base-200/50'>
+        <div className='flex h-full w-full items-center justify-center'
              style={{
                transform: `rotate(${viewModel.rotation}deg)`,
                transformOrigin: 'center',
              }}>
           <img
             src={viewModel.previewUrl}
-            alt={summaryText}
-            className="object-cover w-full h-full"
+            alt={`圖片 ${index + 1}`}
+            className='object-contain w-full h-full'
           />
         </div>
       </figure>
 
-      <div className='flex-1 min-w-0 flex items-center justify-between'>
-        <span className={`badge ${typeTag.style}`}>{typeTag.label}</span>
-        <span className='text-sm text-base-content/70 truncate ml-3' title={summaryText}>
-          {summaryText}
-        </span>
-      </div>
+      <span className={`badge ${layoutTag.style}`}>{layoutTag.label}</span>
     </div>
   )
 }

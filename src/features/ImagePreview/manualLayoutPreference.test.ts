@@ -73,3 +73,23 @@ test('Word 輸出與預覽共用同一個自動分頁 builder', () => {
   assert.match(sourceText, /import \{AutoCollagePage, buildAutoCollageLayout\}/)
   assert.match(sourceText, /const pages = buildAutoCollageLayout\(viewModels\)/)
 })
+
+test('排序模式放大圖片並顯示目前排版偏好', () => {
+  const sourceText = readFileSync(new URL('./ImageCardForMove.tsx', import.meta.url), 'utf8')
+
+  assert.match(sourceText, /'stacked-2': \{label: '上下'/)
+  assert.match(sourceText, /'side-by-side-2': \{label: '左右'/)
+  assert.match(sourceText, /'grid-6': \{label: '六張'/)
+  assert.doesNotMatch(sourceText, /viewModel\.orientation/)
+  assert.doesNotMatch(sourceText, /viewModel\.portraitSize/)
+  assert.match(sourceText, /aspect-video h-72 w-\[32rem\]/)
+  assert.match(sourceText, /object-contain w-full h-full/)
+  assert.doesNotMatch(sourceText, /viewModel\.remark/)
+  assert.doesNotMatch(sourceText, /viewModel\.originalName/)
+  assert.doesNotMatch(sourceText, /summaryText/)
+  assert.match(sourceText, /tabIndex=\{0\}/)
+  assert.match(sourceText, /onKeyDown=/)
+  assert.match(sourceText, /flex flex-wrap items-center gap-3/)
+  assert.match(sourceText, /w-\[32rem\] max-w-full/)
+  assert.doesNotMatch(sourceText, /w-\[32rem\][^']*shrink-0/)
+})

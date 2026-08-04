@@ -13,6 +13,11 @@ scope:
 parent_state: null
 workstreams: []
 recent_results:
+  - id: result-image-pigeon-sort-mode-thumbnail-scale-2026-08-04
+    path: docs/result/2026-08-04-sort-mode-thumbnail-scale-result.md
+    status: completed
+    completed_at: 2026-08-04
+    note: source、27 項前端測試、lint、build、diff check 與獨立聚焦複審 PASS；browser UAT 未執行
   - id: result-image-pigeon-manual-layout-preference-2026-08-04
     path: docs/result/2026-08-04-manual-layout-preference-result.md
     status: partial
@@ -64,10 +69,11 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-目前沒有進行中的 workstream。「圖片方向與排版方式分離」已完成原始碼與自動驗證收束；瀏覽器、pywebview 與本機檔案 side effect 驗收仍未執行，詳見結果文件。
+目前沒有進行中的 workstream。排序模式圖片尺寸與排版標示調整已通過來源驗證及獨立聚焦複審；瀏覽器視覺驗收未執行，詳見結果文件。
 
 ## Recent results
 
+- `docs/result/2026-08-04-sort-mode-thumbnail-scale-result.md`
 - `docs/result/2026-08-04-ignore-update-version-result.md`
 - `docs/result/2026-08-04-file-dialog-home-fallback-result.md`
 - `docs/result/2026-08-04-manual-layout-preference-result.md`
