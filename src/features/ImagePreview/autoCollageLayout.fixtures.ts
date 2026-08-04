@@ -9,20 +9,17 @@ export type AutoCollageLayoutFixture = {
 
 const createLandscape = (itemId: string): AutoCollageSourceItem => ({
   itemId,
-  orientation: 'landscape',
-  portraitSize: 'large',
+  layoutPreference: 'stacked-2',
 })
 
 const createPortraitLarge = (itemId: string): AutoCollageSourceItem => ({
   itemId,
-  orientation: 'portrait',
-  portraitSize: 'large',
+  layoutPreference: 'side-by-side-2',
 })
 
 const createPortraitSmall = (itemId: string): AutoCollageSourceItem => ({
   itemId,
-  orientation: 'portrait',
-  portraitSize: 'small',
+  layoutPreference: 'grid-6',
 })
 
 export const AUTO_COLLAGE_LAYOUT_FIXTURES: AutoCollageLayoutFixture[] = [

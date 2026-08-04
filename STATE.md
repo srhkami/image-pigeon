@@ -13,6 +13,11 @@ scope:
 parent_state: null
 workstreams: []
 recent_results:
+  - id: result-image-pigeon-manual-layout-preference-2026-08-04
+    path: docs/result/2026-08-04-manual-layout-preference-result.md
+    status: partial
+    completed_at: 2026-08-04
+    note: 原始碼與自動驗證完成；browser、pywebview 與本機檔案 side effect 驗收未執行
   - id: result-image-pigeon-ignore-update-version-2026-08-04
     path: docs/result/2026-08-04-ignore-update-version-result.md
     status: completed
@@ -59,12 +64,13 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-目前沒有 active workstream。
+目前沒有進行中的 workstream。「圖片方向與排版方式分離」已完成原始碼與自動驗證收束；瀏覽器、pywebview 與本機檔案 side effect 驗收仍未執行，詳見結果文件。
 
 ## Recent results
 
 - `docs/result/2026-08-04-ignore-update-version-result.md`
 - `docs/result/2026-08-04-file-dialog-home-fallback-result.md`
+- `docs/result/2026-08-04-manual-layout-preference-result.md`
 - `docs/result/2026-07-29-wheel-remark-save-result.md`
 - `docs/result/2026-07-29-project-state-v1-migration-result.md`
 - `docs/result/2026-07-29-project-state-v1-trial-result.md`

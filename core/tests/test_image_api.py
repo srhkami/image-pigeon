@@ -48,6 +48,7 @@ class ImageApiTest(unittest.TestCase):
         self.assertEqual(len(data["assets"]), 1)
         self.assertEqual(len(data["items"]), 1)
         self.assertEqual(len(data["layoutPatch"]["appendItemOrder"]), 1)
+        self.assertEqual(data["items"][0]["layoutPreference"], "stacked-2")
 
         session_file = (
             self.base_dir

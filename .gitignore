@@ -28,3 +28,4 @@ web_cache/
 *.njsproj
 *.sln
 *.sw?
+/tests/

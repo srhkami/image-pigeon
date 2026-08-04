@@ -9,7 +9,7 @@ from io import BytesIO
 
 from PIL import Image, UnidentifiedImageError
 
-from .models import Asset, Item
+from .models import Asset, Item, derive_layout_preference
 from .session_store import get_image_path
 
 
@@ -99,7 +99,11 @@ def import_image_bytes_to_session(
         original_name=original_filename,
         size=len(webp_data),
     )
-    item = Item(id=item_id, assetId=asset_id)
+    item = Item(
+        id=item_id,
+        assetId=asset_id,
+        layoutPreference=derive_layout_preference(asset),
+    )
 
     return asset, item
 
@@ -150,7 +154,11 @@ def import_long_screen_bytes_to_session(
                     original_name=original_filename,
                     size=len(webp_data),
                 )
-                item = Item(id=item_id, assetId=asset_id)
+                item = Item(
+                    id=item_id,
+                    assetId=asset_id,
+                    layoutPreference=derive_layout_preference(asset),
+                )
                 results.append((asset, item))
 
             return results

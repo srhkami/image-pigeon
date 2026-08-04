@@ -1,6 +1,7 @@
 import {
   Asset,
   Item,
+  LayoutPreference,
   ProjectImportData,
   ProjectItemViewModel,
   ProjectV2,
@@ -79,6 +80,16 @@ const getEffectiveAssetDimensions = (asset: Asset, rotation: Item['rotation']) =
   }
 }
 
+export const getInitialLayoutPreference = (
+  asset: Asset,
+  rotation: Item['rotation'],
+  portraitSize: 'large' | 'small' = 'large',
+): LayoutPreference => {
+  const {width, height} = getEffectiveAssetDimensions(asset, rotation)
+  if (width >= height) return 'stacked-2'
+  return portraitSize === 'small' ? 'grid-6' : 'side-by-side-2'
+}
+
 export function applyImportResult(project: ProjectV2, importData: ProjectImportData): ProjectV2 {
   const defaultLayout = getDefaultLayout(project)
   const nextLayout: WordCompatibleGridLayout = {
@@ -120,11 +131,8 @@ export function getOrderedItemViewModels(project: ProjectV2, sessionId: string):
       const effectiveDimensions = getEffectiveAssetDimensions(asset, item.rotation)
       const orientation = effectiveDimensions.width >= effectiveDimensions.height ? 'landscape' : 'portrait'
       const portraitSize = item.portraitSize ?? 'large'
-      const collageKind = orientation === 'landscape'
-        ? 'landscape'
-        : portraitSize === 'large'
-          ? 'portrait-large'
-          : 'portrait-small'
+      const layoutPreference = item.layoutPreference
+        ?? getInitialLayoutPreference(asset, item.rotation, portraitSize)
 
       return {
         itemId: item.id,
@@ -135,7 +143,7 @@ export function getOrderedItemViewModels(project: ProjectV2, sessionId: string):
         crop: item.crop,
         orientation,
         portraitSize,
-        collageKind,
+        layoutPreference,
         assetWidth: effectiveDimensions.width,
         assetHeight: effectiveDimensions.height,
         assetSize: asset.size,
@@ -223,6 +231,19 @@ export function updateItemRotation(project: ProjectV2, itemId: string, rotation:
     ...project,
     items: project.items.map((item) => item.id === itemId
       ? {...item, rotation}
+      : item),
+  }
+}
+
+export function updateItemLayoutPreference(
+  project: ProjectV2,
+  itemId: string,
+  layoutPreference: LayoutPreference,
+): ProjectV2 {
+  return {
+    ...project,
+    items: project.items.map((item) => item.id === itemId
+      ? {...item, layoutPreference}
       : item),
   }
 }

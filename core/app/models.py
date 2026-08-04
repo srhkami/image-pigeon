@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Generic, Literal, TypeVar
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 T = TypeVar("T")
@@ -38,6 +38,9 @@ class Asset(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+LayoutPreference = Literal["stacked-2", "side-by-side-2", "grid-6"]
+
+
 class Item(BaseModel):
     id: str
     type: Literal["image"] = "image"
@@ -46,8 +49,29 @@ class Item(BaseModel):
     rotation: int = 0
     crop: Crop = Field(default_factory=Crop)
     portrait_size: Literal["large", "small"] = Field(default="large", alias="portraitSize")
+    layout_preference: LayoutPreference | None = Field(default=None, alias="layoutPreference")
 
     model_config = {"populate_by_name": True}
+
+
+def derive_layout_preference(
+    asset: Asset | None,
+    *,
+    rotation: int = 0,
+    portrait_size: Literal["large", "small"] = "large",
+) -> LayoutPreference:
+    if asset is None or asset.width <= 0 or asset.height <= 0:
+        return "side-by-side-2"
+
+    width, height = asset.width, asset.height
+    if rotation % 360 in {90, 270}:
+        width, height = height, width
+
+    if width >= height:
+        return "stacked-2"
+    if portrait_size == "small":
+        return "grid-6"
+    return "side-by-side-2"
 
 
 def _default_layout() -> list["WordCompatibleGridLayout"]:
@@ -76,6 +100,18 @@ class ProjectV2(BaseModel):
     layouts: list[WordCompatibleGridLayout] = Field(default_factory=_default_layout)
 
     model_config = ConfigDict(populate_by_name=True, protected_namespaces=())
+
+    @model_validator(mode="after")
+    def normalize_legacy_layout_preferences(self) -> "ProjectV2":
+        asset_by_id = {asset.id: asset for asset in self.assets}
+        for item in self.items:
+            if item.layout_preference is None:
+                item.layout_preference = derive_layout_preference(
+                    asset_by_id.get(item.asset_id),
+                    rotation=item.rotation,
+                    portrait_size=item.portrait_size,
+                )
+        return self
 
     @property
     def schema(self) -> str:

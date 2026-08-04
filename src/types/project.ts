@@ -6,6 +6,8 @@ export type Crop = {
   unit: 'ratio'
 }
 
+export type LayoutPreference = 'stacked-2' | 'side-by-side-2' | 'grid-6'
+
 export type Asset = {
   id: string
   file: string
@@ -24,6 +26,7 @@ export type Item = {
   rotation: 0 | 90 | 180 | 270
   crop: Crop
   portraitSize?: 'large' | 'small'
+  layoutPreference?: LayoutPreference
 }
 
 export type WordCompatibleGridLayout = {
@@ -73,7 +76,7 @@ export type ProjectItemViewModel = {
   crop: Crop
   orientation: 'landscape' | 'portrait'
   portraitSize: 'large' | 'small'
-  collageKind: 'landscape' | 'portrait-large' | 'portrait-small'
+  layoutPreference: LayoutPreference
   assetWidth: number
   assetHeight: number
   assetSize: number

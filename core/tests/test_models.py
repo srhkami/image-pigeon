@@ -74,6 +74,14 @@ class ModelContractTest(unittest.TestCase):
         self.assertEqual(dumped["portraitSize"], "small")
         self.assertEqual(loaded.portrait_size, "small")
 
+    def test_item_layout_preference_alias_roundtrip(self):
+        item = Item(id="item_001", assetId="asset_001", layoutPreference="grid-6")
+        dumped = item.model_dump(by_alias=True)
+        loaded = Item.model_validate(dumped)
+
+        self.assertEqual(dumped["layoutPreference"], "grid-6")
+        self.assertEqual(loaded.layout_preference, "grid-6")
+
     def test_project_load_old_json_without_portraitSize(self):
         legacy_payload = {
             "items": [{"id": "item_001", "assetId": "asset_001", "remark": "legacy"}],
@@ -83,3 +91,38 @@ class ModelContractTest(unittest.TestCase):
         project = ProjectV2.model_validate(legacy_payload)
         self.assertEqual(len(project.items), 1)
         self.assertEqual(project.items[0].portrait_size, "large")
+
+    def test_project_normalizes_legacy_layout_preference_from_effective_dimensions(self):
+        legacy_payload = {
+            "assets": [
+                {"id": "landscape", "file": "images/landscape.webp", "width": 300, "height": 200},
+                {"id": "portrait-large", "file": "images/portrait-large.webp", "width": 200, "height": 300},
+                {"id": "portrait-small", "file": "images/portrait-small.webp", "width": 200, "height": 300},
+                {"id": "rotated", "file": "images/rotated.webp", "width": 300, "height": 200},
+            ],
+            "items": [
+                {"id": "item-landscape", "assetId": "landscape"},
+                {"id": "item-large", "assetId": "portrait-large", "portraitSize": "large"},
+                {"id": "item-small", "assetId": "portrait-small", "portraitSize": "small"},
+                {"id": "item-rotated", "assetId": "rotated", "rotation": 90, "portraitSize": "small"},
+            ],
+        }
+
+        project = ProjectV2.model_validate(legacy_payload)
+
+        self.assertEqual(
+            [item.layout_preference for item in project.items],
+            ["stacked-2", "side-by-side-2", "grid-6", "grid-6"],
+        )
+
+    def test_project_preserves_explicit_layout_preference_during_legacy_normalization(self):
+        project = ProjectV2.model_validate({
+            "assets": [{"id": "asset_001", "file": "images/asset_001.webp", "width": 300, "height": 200}],
+            "items": [{
+                "id": "item_001",
+                "assetId": "asset_001",
+                "layoutPreference": "grid-6",
+            }],
+        })
+
+        self.assertEqual(project.items[0].layout_preference, "grid-6")

@@ -57,6 +57,17 @@ class ImageServiceTest(unittest.TestCase):
         self.assertEqual(item.id, f"item_{asset.id}")
         self.assertEqual(item.asset_id, asset.id)
         self.assertEqual(item.crop.width, 1)
+        self.assertEqual(item.layout_preference, "stacked-2")
+
+    def test_import_portrait_image_initializes_side_by_side_layout_preference(self):
+        asset, item = import_image_bytes_to_session(
+            self._make_image_bytes((800, 1200)),
+            session_id="session-portrait",
+            session_base_dir=self.base_dir,
+        )
+
+        self.assertLess(asset.width, asset.height)
+        self.assertEqual(item.layout_preference, "side-by-side-2")
 
     def test_import_jpg_bytes_is_resized_when_too_large(self):
         large_jpg = self._make_image_bytes((2400, 1200), image_format="JPEG")

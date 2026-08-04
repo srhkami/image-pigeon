@@ -85,6 +85,7 @@ class ProjectServiceTest(unittest.TestCase):
         self.assertEqual(stored["document"]["title"], "Phase 6A")
         self.assertNotIn("wordOptions", stored)
         self.assertNotIn("saveImages", stored)
+        self.assertEqual(stored["items"][0]["layoutPreference"], "side-by-side-2")
 
         target_image = target_folder / project.assets[0].file
         self.assertTrue(target_image.exists())
@@ -115,6 +116,7 @@ class ProjectServiceTest(unittest.TestCase):
         self.assertEqual(opened_project.items[0].rotation, 90)
         self.assertEqual(opened_project.items[0].crop.width, 0.8)
         self.assertEqual(opened_project.layouts[0].item_order, ["item_1"])
+        self.assertEqual(opened_project.items[0].layout_preference, "side-by-side-2")
 
         opened_image = get_image_path(opened_session_id, project.assets[0].id, base_dir=self.base_dir)
         self.assertTrue(opened_image.exists())
