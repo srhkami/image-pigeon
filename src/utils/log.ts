@@ -3,7 +3,7 @@ import {TVersionObject} from "@/utils/type.ts";
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
     version: '2.2.0',
-    date:'1150730',
+    date:'1150804',
     logs:[
       {color:'new', text:'新增拖曳加入圖片的功能'},
       {color:'info', text:'將圖片方向與排版方式拆分，現在可以自行指定每張圖片的排版方式'},

@@ -18,7 +18,7 @@ from core.save_docx import creat_docx, add_header, OutputWord
 from core.save_images import SaveAsImages, open_folder, save
 from core.upload_imags import UploadImage
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 FASTAPI_HOST = '127.0.0.1'
 FASTAPI_PORT = 18765
 VITE_DEV_URL = 'http://localhost:5195'
