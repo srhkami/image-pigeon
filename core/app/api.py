@@ -1,5 +1,7 @@
 from datetime import UTC, datetime
+import logging
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -17,6 +19,10 @@ from .image_service import (
 from .project_service import ProjectServiceError, open_project_folder, save_project_folder
 from .models import ProjectV2
 from .session_store import create_session, get_image_path, read_session, write_session
+from core import handle_log
+
+
+SLOW_REQUEST_MS = 1000
 
 
 class ProjectSaveRequest(BaseModel):
@@ -39,6 +45,26 @@ def create_app(
     session_base_dir: str | Path | None = None,
 ) -> FastAPI:
     app = FastAPI(title="image-pigeon")
+
+    @app.middleware("http")
+    async def diagnostic_request_summary(request, call_next):
+        started = perf_counter()
+        with handle_log.operation_context(request.headers.get("X-Request-ID")) as operation_id:
+            try:
+                response = await call_next(request)
+            except Exception as exc:
+                duration_ms = int((perf_counter() - started) * 1000)
+                route = getattr(request.scope.get("route"), "path", request.url.path)
+                handle_log.log_event(logging.ERROR, "api.unhandled_exception", operation_id=operation_id, method=request.method, route=route, duration_ms=duration_ms, error_type=type(exc).__name__)
+                raise
+
+            duration_ms = int((perf_counter() - started) * 1000)
+            route = getattr(request.scope.get("route"), "path", request.url.path)
+            if request.method == "POST" or not 200 <= response.status_code < 300 or duration_ms >= SLOW_REQUEST_MS:
+                level = logging.WARNING if response.status_code >= 400 or duration_ms >= SLOW_REQUEST_MS else logging.INFO
+                event = "api.response_failed" if response.status_code >= 500 else "api.request_completed"
+                handle_log.log_event(level, event, operation_id=operation_id, method=request.method, route=route, status=response.status_code, duration_ms=duration_ms)
+            return response
 
     @app.get("/api/health")
     def health() -> dict[str, Any]:
@@ -74,6 +100,7 @@ def create_app(
             target_session_id = create_session(base_dir=session_base_dir, project=project)
 
         created_assets: list[Any] = []
+        handle_log.log_event(logging.INFO, "image_import.started", item_count=len(files), quality=quality, min_size=min_size)
         created_items: list[Any] = []
         append_item_order: list[str] = []
         skipped: list[str] = []
@@ -289,6 +316,7 @@ def create_app(
                 session_base_dir=session_base_dir,
             )
         except ProjectServiceError as exc:
+            handle_log.log_event(logging.WARNING, "project.save_failed", stage="service", error_type=type(exc).__name__)
             return _project_service_error_response(exc)
 
         absolute_target_path = Path(payload.target_path).resolve()
@@ -309,6 +337,7 @@ def create_app(
                 session_base_dir=session_base_dir,
             )
         except ProjectServiceError as exc:
+            handle_log.log_event(logging.WARNING, "project.open_failed", stage="service", error_type=type(exc).__name__)
             return _project_service_error_response(exc)
 
         return {

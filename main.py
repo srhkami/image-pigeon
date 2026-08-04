@@ -1,24 +1,60 @@
 import json
+import logging
 import os.path
+import re
 import subprocess
 import sys
 import threading
+from time import perf_counter
 from pathlib import Path
 
 import webview
 
 from core.app.api import create_app
 from core.crop_image import LongScreenImage, crop_to_images
-from core.handle_log import log
+from core.handle_log import log, log_event, operation_context
 from core.handle_request import OutputBaseData, Response
 from core.save_docx import creat_docx, add_header, OutputWord
-from core.save_images import SaveAsImages, save
+from core.save_images import SaveAsImages, open_folder, save
 from core.upload_imags import UploadImage
 
 DEBUG_MODE = True
 FASTAPI_HOST = '127.0.0.1'
 FASTAPI_PORT = 18765
 VITE_DEV_URL = 'http://localhost:5195'
+
+FRONTEND_DIAGNOSTIC_FIELDS = {
+    'event', 'route', 'status', 'error_type', 'detail_code', 'duration_ms', 'operation_id',
+}
+FRONTEND_DIAGNOSTIC_EVENTS = {'frontend.request_failed', 'frontend.check_status_failed'}
+FRONTEND_DIAGNOSTIC_ROUTES = {
+    '/api/images/import', '/api/images/import-long-screen', '/api/project/save',
+    '/api/project/open', 'pywebview.api',
+}
+FRONTEND_DIAGNOSTIC_ERROR_TYPES = {
+    'network_error', 'non_json_response', 'http_error', 'invalid_response',
+}
+FRONTEND_DIAGNOSTIC_DETAIL_CODES = {
+    'fetch_failed', 'non_json', 'non_2xx', 'invalid_response', 'status_not_200',
+}
+FRONTEND_DIAGNOSTIC_UUID = re.compile(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+)
+
+
+def is_valid_frontend_diagnostic(payload) -> bool:
+    if not isinstance(payload, dict) or set(payload) != FRONTEND_DIAGNOSTIC_FIELDS:
+        return False
+    return (
+        payload['event'] in FRONTEND_DIAGNOSTIC_EVENTS
+        and payload['route'] in FRONTEND_DIAGNOSTIC_ROUTES
+        and payload['error_type'] in FRONTEND_DIAGNOSTIC_ERROR_TYPES
+        and payload['detail_code'] in FRONTEND_DIAGNOSTIC_DETAIL_CODES
+        and type(payload['status']) is int and 100 <= payload['status'] <= 599
+        and type(payload['duration_ms']) is int and 0 <= payload['duration_ms'] <= 86_400_000
+        and isinstance(payload['operation_id'], str)
+        and FRONTEND_DIAGNOSTIC_UUID.fullmatch(payload['operation_id']) is not None
+    )
 
 
 def get_root_path():
@@ -126,6 +162,22 @@ CACHE_DIR = os.path.join(get_root_path(), "web_cache")
 
 class Api:
 
+    def record_frontend_diagnostic(self, payload):
+        """接受已固定 schema 的 pywebview 前端診斷事件；不建立 HTTP telemetry endpoint。"""
+        if not is_valid_frontend_diagnostic(payload):
+            return Response(status=400, message='診斷事件已拒絕').to_dict()
+        log_event(
+            logging.ERROR,
+            payload['event'],
+            route=payload['route'],
+            status=payload['status'],
+            error_type=payload['error_type'],
+            detail_code=payload['detail_code'],
+            duration_ms=payload['duration_ms'],
+            operation_id=payload['operation_id'],
+        )
+        return Response(status=200, message='診斷事件已接受').to_dict()
+
     def upload_image(self, request):
         """
         將單張的上傳圖片壓縮後再傳回前端
@@ -158,70 +210,173 @@ class Api:
             return Response(500, '處理失敗，請回報作者').to_dict()
 
     def save_docx(self, request):
-        """
-        儲存圖片成docx檔
-        :param request: 情求的資料
-        :return:
-        """
+        """儲存圖片成 docx 檔，並將寫檔與作業系統開啟分成兩個階段。"""
         data = OutputWord(request)
-        log().info(f'【{data.title}】儲存Word開始執行')
-        log().info(json.dumps(data.to_dict(), ensure_ascii=False))
+        page_count = len(data.pages)
+        slot_count = sum(
+            len(page.get('slots', []))
+            for page in data.pages
+            if isinstance(page, dict) and isinstance(page.get('slots', []), list)
+        )
+        started_at = perf_counter()
+        with operation_context() as operation_id:
+            log_event(
+                logging.INFO,
+                'output.word_started',
+                operation_id=operation_id,
+                item_count=data.file_count,
+                page_count=page_count,
+                slot_count=slot_count,
+                mode='word',
+            )
+            try:
+                doc = creat_docx(data)
+                doc = add_header(doc, data.title)
+                doc.save(data.path)
+            except PermissionError:
+                log_event(
+                    logging.ERROR,
+                    'output.word_failed',
+                    operation_id=operation_id,
+                    stage='write',
+                    error_type='PermissionError',
+                    detail_code='write_permission_denied',
+                )
+                return Response(500, '請先關閉相同檔名之檔案').to_dict()
+            except Exception as error:
+                log_event(
+                    logging.ERROR,
+                    'output.word_failed',
+                    operation_id=operation_id,
+                    stage='write',
+                    error_type=type(error).__name__,
+                    detail_code='write_failed',
+                )
+                return Response(500, '處理失敗，請回報作者').to_dict()
 
-        doc = creat_docx(data)
-        doc = add_header(doc, data.title)
-
-        try:
-            doc.save(data.path)
-            log().info('儲存成功，執行完畢')
-            open_file(data.path)
+            duration_ms = int((perf_counter() - started_at) * 1000)
+            log_event(
+                logging.INFO,
+                'output.word_completed',
+                operation_id=operation_id,
+                item_count=data.file_count,
+                duration_ms=duration_ms,
+            )
+            try:
+                open_file(data.path)
+            except Exception as error:
+                log_event(
+                    logging.WARNING,
+                    'output.word_open_failed',
+                    operation_id=operation_id,
+                    stage='open',
+                    error_type=type(error).__name__,
+                    detail_code='open_failed',
+                )
+                return Response(200, '儲存成功，但無法自動開啟檔案').to_dict()
             return Response(200, '儲存成功').to_dict()
-        except PermissionError:
-            log().exception('有相同檔名未關閉', exc_info=True)
-            return Response(500, '請先關閉相同檔名之檔案').to_dict()
-        except Exception as e:
-            log().exception(str(e), exc_info=True)
-            return Response(500, '處理失敗，請回報作者').to_dict()
 
     def save_images(self, request):
-        """
-        直接儲存壓縮後的圖片
-        :param request:
-        :return:
-        """
+        """儲存壓縮後圖片，並將資料寫入與開啟資料夾分開處理。"""
         data = SaveAsImages(request)
-        log().info(f'【{data.title}】開始壓縮圖片')
-        log().info(json.dumps(data.to_dict(), ensure_ascii=False))
-        try:
-            save(data)
+        started_at = perf_counter()
+        with operation_context() as operation_id:
+            log_event(
+                logging.INFO,
+                'output.images_started',
+                operation_id=operation_id,
+                item_count=data.file_count,
+                mode='images',
+            )
+            try:
+                save(data)
+            except Exception as error:
+                log_event(
+                    logging.ERROR,
+                    'output.images_failed',
+                    operation_id=operation_id,
+                    stage='write',
+                    error_type=type(error).__name__,
+                    detail_code='write_failed',
+                )
+                return Response(500, '處理失敗，請回報作者').to_dict()
+
+            log_event(
+                logging.INFO,
+                'output.images_completed',
+                operation_id=operation_id,
+                item_count=data.file_count,
+                duration_ms=int((perf_counter() - started_at) * 1000),
+            )
+            try:
+                open_folder(data.path)
+            except Exception as error:
+                log_event(
+                    logging.WARNING,
+                    'output.images_open_failed',
+                    operation_id=operation_id,
+                    stage='open',
+                    error_type=type(error).__name__,
+                    detail_code='open_failed',
+                )
+                return Response(200, '儲存成功，但無法自動開啟檔案').to_dict()
             return Response(200, '儲存成功').to_dict()
-        except Exception as e:
-            log().exception(str(e), exc_info=True)
-            return Response(500, '處理失敗，請回報作者').to_dict()
 
     def save_json(self, request):
-        """
-        儲存JSON檔
-        :param request: 來自前端的圖片物件
-        :return:
-        """
+        """儲存 legacy JSON，並在成功後以獨立階段交由作業系統開啟。"""
         data = OutputBaseData(request)
-        log().info(f'【{data.title}】開始儲存JSON')
-        new_files = []
-        for file in data.files:
-            new_files.append({
-                'base64': file.get('base64'),
-                'remark': file.get('remark'),
-                'width': file.get('width'),
-                'height': file.get('height'),
-                'rotation': file.get('rotation'),
-            })
-        try:
-            with open(data.path, 'w', encoding="utf-8") as file:
-                json.dump({'images': new_files}, file, ensure_ascii=False)
+        started_at = perf_counter()
+        with operation_context() as operation_id:
+            log_event(
+                logging.INFO,
+                'output.json_started',
+                operation_id=operation_id,
+                item_count=data.file_count,
+                mode='json',
+            )
+            new_files = []
+            for file in data.files:
+                new_files.append({
+                    'base64': file.get('base64'),
+                    'remark': file.get('remark'),
+                    'width': file.get('width'),
+                    'height': file.get('height'),
+                    'rotation': file.get('rotation'),
+                })
+            try:
+                with open(data.path, 'w', encoding="utf-8") as file:
+                    json.dump({'images': new_files}, file, ensure_ascii=False)
+            except Exception as error:
+                log_event(
+                    logging.ERROR,
+                    'output.json_failed',
+                    operation_id=operation_id,
+                    stage='write',
+                    error_type=type(error).__name__,
+                    detail_code='write_failed',
+                )
+                return Response(500, '處理失敗，請回報作者').to_dict()
+
+            log_event(
+                logging.INFO,
+                'output.json_completed',
+                operation_id=operation_id,
+                item_count=data.file_count,
+                duration_ms=int((perf_counter() - started_at) * 1000),
+            )
+            try:
+                open_file(data.path)
+            except Exception as error:
+                log_event(
+                    logging.WARNING,
+                    'output.json_open_failed',
+                    operation_id=operation_id,
+                    stage='open',
+                    error_type=type(error).__name__,
+                    detail_code='open_failed',
+                )
+                return Response(200, '儲存成功，但無法自動開啟檔案').to_dict()
             return Response(200, '儲存成功').to_dict()
-        except Exception as e:
-            log().exception(str(e), exc_info=True)
-            return Response(500, str(e)).to_dict()
 
     def select_path(self, data):
         """
@@ -269,10 +424,18 @@ class Api:
                     )
                 case _:
                     return Response(400, message='參數錯誤').to_dict()
-        except Exception:
-            log().exception('開啟檔案選擇視窗失敗', exc_info=True)
+        except Exception as error:
+            log_event(
+                logging.ERROR,
+                'file_dialog.failed',
+                mode=mode if mode in {'word', 'json', 'images', 'project-save', 'project-open'} else 'invalid',
+                stage='dialog',
+                error_type=type(error).__name__,
+                detail_code='dialog_open_failed',
+            )
             return Response(500, '無法開啟檔案選擇視窗，請重新啟動程式後再試').to_dict()
 
+        log_event(logging.INFO, 'file_dialog.opened', mode=mode)
         # pywebview 在不同平台/版本可能回傳字串或路徑序列。
         file_path = normalize_dialog_path(selected_path)
 
@@ -286,9 +449,9 @@ class Api:
                 error_text = '已取消儲存專案'
             else:
                 error_text = '已取消儲存'
-            log().error(error_text)
+            log_event(logging.INFO, 'file_dialog.cancelled', mode=mode)
             return Response(400, error_text).to_dict()
-        log().info(f'選擇存檔位置：{file_path}')
+        log_event(logging.INFO, 'file_dialog.selected', mode=mode)
         return Response(200, file_path).to_dict()
 
 

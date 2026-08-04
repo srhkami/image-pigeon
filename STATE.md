@@ -11,8 +11,64 @@ scope:
   affected_projects:
     - image-pigeon
 parent_state: null
-workstreams: []
+workstreams:
+  - id: workstream-image-pigeon-diagnostic-logging-2026-08-04
+    title: 診斷記錄改善
+    status: partial
+    affected_projects:
+      - image-pigeon
+    affected_areas:
+      - logging
+      - fastapi
+      - session
+      - project-persistence
+      - pywebview
+      - output
+      - frontend-error-boundary
+    plans:
+      - id: plan-image-pigeon-diagnostic-logging-2026-08-04
+        path: docs/plans/2026-08-04-diagnostic-logging.md
+        role: implementation
+        execution_status: completed
+        current_checkpoints:
+          - plan_sanity_review_passed
+          - c0_to_c5_implemented
+          - macos_packaged_app_launch_verified
+          - closed_with_verification_gaps
+    blockers:
+      - 完整 Python suite 有既有 DEBUG_MODE URL 預期失敗
+      - 全量前端測試有 FocusImageCard 格式 regex 失敗
+      - Windows pywebview／打包版目標環境未驗收
+    approval_gates:
+      source_write: approved
+      automated_test: approved
+      offline_smoke: approved
+      frontend_bridge: approved
+      pywebview_uat: approved
+      packaged_app_uat: approved
+      commit: approved
+      push: closed
+    next_action: 已收束為 partial；若要取得完整 PASS，需在獨立切片處理既有測試失敗並於 Windows 目標環境驗收
+    shared_paths:
+      - core/handle_log.py
+      - main.py
+      - core/app/
+      - core/save_docx.py
+      - core/save_images.py
+      - core/tests/test_api.py
+      - src/services/apiClient.ts
+      - src/utils/handleError.ts
+      - src/features/Upload/ReadJson.tsx
+      - src/globak.d.ts
+      - src/services/diagnosticLog.ts
+      - tests/diagnosticLogging.test.ts
+    conflicts_with: []
 recent_results:
+  - id: result-image-pigeon-diagnostic-logging-2026-08-04
+    path: docs/result/2026-08-04-diagnostic-logging-result.md
+    status: partial
+    completed_at: 2026-08-04
+    note: C0–C5、聚焦測試、lint、build、打包與 macOS 啟動驗收完成；完整 suite 既有失敗與 Windows 驗收缺口如實保留
   - id: result-image-pigeon-sort-mode-thumbnail-scale-2026-08-04
     path: docs/result/2026-08-04-sort-mode-thumbnail-scale-result.md
     status: completed
@@ -69,11 +125,12 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-目前沒有進行中的 workstream。排序模式圖片尺寸與排版標示調整已通過來源驗證及獨立聚焦複審；瀏覽器視覺驗收未執行，詳見結果文件。
+「診斷記錄改善」已收束為 partial：C0–C5、聚焦測試、lint、build、macOS 打包版啟動驗收均完成；完整 suite 的既有失敗與 Windows 實機驗收缺口已記錄於 result。使用者已核准 commit；push 維持關閉。
 
 ## Recent results
 
 - `docs/result/2026-08-04-sort-mode-thumbnail-scale-result.md`
+- `docs/result/2026-08-04-diagnostic-logging-result.md`
 - `docs/result/2026-08-04-ignore-update-version-result.md`
 - `docs/result/2026-08-04-file-dialog-home-fallback-result.md`
 - `docs/result/2026-08-04-manual-layout-preference-result.md`

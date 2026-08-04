@@ -85,7 +85,6 @@ class SaveAsImages(OutputBaseData):
         :return:
         """
         image = SaveImage(self.files[index])  # 逐一轉化成python自訂物件
-        log().info(f'處理圖片：{index + 1}/{self.file_count} 完成')
         return image
 
     def to_dict(self):
@@ -103,7 +102,5 @@ def save(data: SaveAsImages):
         filename = f'{remark}.jpg' if data.is_remark_mode else f'{data.title}_{i + 1}.jpg'
         save_path = os.path.join(data.path, filename)
         img.save(save_path)
-        log().info(f'{filename} 儲存成功')
         # 主動呼叫前端增加數量
         webview.windows[0].evaluate_js(f"window.pywebview.updateProgress({i})")
-    open_folder(data.path)

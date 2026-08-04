@@ -3,11 +3,13 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
+import logging
 import json
 import shutil
 from uuid import uuid4
 
 from .models import ProjectV2
+from core import handle_log
 
 
 def get_session_dir(session_id: str, base_dir: str | Path | None = None) -> Path:
@@ -41,6 +43,7 @@ def create_session(
         updated_at=now,
     )
 
+    handle_log.log_event(logging.INFO, "session.created", project_schema=(project or ProjectV2()).schema, project_version=(project or ProjectV2()).version)
     return actual_session_id
 
 
@@ -109,7 +112,8 @@ def clean_expired_sessions(
         try:
             raw = json.loads(session_json.read_text(encoding="utf-8"))
             updated_at = datetime.fromisoformat(raw["updatedAt"])
-        except Exception:
+        except Exception as exc:
+            handle_log.log_event(logging.WARNING, "session.cleanup_skipped", stage="metadata", error_type=type(exc).__name__)
             continue
 
         if updated_at.tzinfo is None:

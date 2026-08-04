@@ -31,7 +31,6 @@ export default function ReadJson({setImages, onHide, setIsLoading}: Props) {
 
 
         const json = await file.text().then(JSON.parse);
-        console.log("JSON內容：", json);
         const images = json.images as Array<base64Image>;
 
 

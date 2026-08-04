@@ -9,6 +9,7 @@ export const CHANGELOG_LIST: Array<TVersionObject> = [
       {color:'info', text:'將圖片方向與排版方式拆分，現在可以自行指定每張圖片的排版方式'},
       {color:'info', text:'加入忽略版本更新提示功能'},
       {color:'info', text:'改善排序模式下的圖片大小'},
+      {color:'info', text:'改善 LOG 記錄功能'},
       {color:'fix', text:'嘗試修正部分環境下找不到 HOMEPATH 的問題'},
     ]
   },

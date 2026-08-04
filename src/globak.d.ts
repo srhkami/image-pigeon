@@ -6,6 +6,7 @@ import {
   OutputWord,
   SaveAsImages, base64Image
 } from "./utils/type.ts";
+import type {FrontendDiagnostic} from "./services/diagnosticLog.ts";
 
 export {};
 
@@ -14,6 +15,7 @@ declare global {
   interface Window {
     pywebview: {
       api: {
+        record_frontend_diagnostic(data: FrontendDiagnostic): Promise<Response<null>>,
         /** legacy: Phase 5B 改為 FastAPI multipart 上傳，僅保留舊版 pywebview 匯入相容 */
         upload_image(data: UploadImage): Promise<Response<base64Image>>
         /** legacy: Phase 5B 改為 FastAPI 長截圖 import API，僅保留舊版 pywebview 相容 */

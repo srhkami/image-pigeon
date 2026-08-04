@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+import logging
+from time import perf_counter
 import json
 import shutil
 
 from .models import ProjectV2
 from .session_store import create_session, get_image_path
+from core import handle_log
 
 
 class ProjectServiceError(RuntimeError):
@@ -94,7 +97,10 @@ def save_project_folder(
     *,
     session_base_dir: str | Path | None = None,
 ) -> ProjectV2:
+    started = perf_counter()
     project = _validate_project_payload(project_payload)
+    summary = {"project_schema": project.schema, "project_version": project.version, "asset_count": len(project.assets), "item_count": len(project.items), "order_count": sum(len(layout.item_order) for layout in project.layouts)}
+    handle_log.log_event(logging.INFO, "project.save_started", **summary)
 
     target_root = _resolve_project_root(target_path)
     if target_root.exists() and not target_root.is_dir():
@@ -124,6 +130,7 @@ def save_project_folder(
         encoding="utf-8",
     )
 
+    handle_log.log_event(logging.INFO, "project.save_completed", **summary, success_count=len(asset_file_pairs), duration_ms=int((perf_counter() - started) * 1000))
     return project
 
 
@@ -132,6 +139,8 @@ def open_project_folder(
     *,
     session_base_dir: str | Path | None = None,
 ) -> tuple[str, ProjectV2]:
+    started = perf_counter()
+    handle_log.log_event(logging.INFO, "project.open_started")
     project_root = _resolve_project_root(project_path)
     if not project_root.exists():
         raise ProjectNotFoundError(f"專案資料夾不存在: {project_path}")
@@ -156,4 +165,5 @@ def open_project_folder(
         target_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source_path, target_path)
 
+    handle_log.log_event(logging.INFO, "project.open_completed", project_schema=project.schema, project_version=project.version, asset_count=len(project.assets), item_count=len(project.items), order_count=sum(len(layout.item_order) for layout in project.layouts), success_count=len(project.assets), duration_ms=int((perf_counter() - started) * 1000))
     return session_id, project

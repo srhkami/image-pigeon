@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+import logging
 import math
+from time import perf_counter
 from typing import Any
 from uuid import uuid4
 
@@ -11,6 +13,7 @@ from PIL import Image, UnidentifiedImageError
 
 from .models import Asset, Item, derive_layout_preference
 from .session_store import get_image_path
+from core import handle_log
 
 
 class ImageImportError(ValueError):
@@ -71,6 +74,7 @@ def import_image_bytes_to_session(
     min_size: int = 1000,
     session_base_dir: str | Path | None = None,
 ) -> tuple[Asset, Item]:
+    started = perf_counter()
     quality, min_size = _validate_import_options(quality, min_size)
 
     try:
@@ -80,8 +84,10 @@ def import_image_bytes_to_session(
 
             webp_data, width, height = _compact_image(image, min_size=min_size, quality=quality)
     except UnidentifiedImageError as exc:
+        handle_log.log_event(logging.WARNING, "image_import.item_failed", stage="decode", error_type=type(exc).__name__)
         raise ImageImportError("檔案不是可辨識的圖片格式") from exc
     except Exception as exc:
+        handle_log.log_event(logging.ERROR, "image_import.item_failed", stage="process", error_type=type(exc).__name__)
         raise ImageImportError(f"圖片處理失敗: {exc}") from exc
 
     asset_id = str(uuid4())
@@ -89,6 +95,7 @@ def import_image_bytes_to_session(
     webp_path = get_image_path(session_id=session_id, asset_id=asset_id, base_dir=session_base_dir)
     webp_path.parent.mkdir(parents=True, exist_ok=True)
     webp_path.write_bytes(webp_data)
+    handle_log.log_event(logging.DEBUG, "image_import.item_completed", image_width=width, image_height=height, input_bytes=len(file_data), output_bytes=len(webp_data), quality=quality, min_size=min_size, duration_ms=int((perf_counter() - started) * 1000))
 
     asset = Asset(
         id=asset_id,
@@ -116,6 +123,7 @@ def import_long_screen_bytes_to_session(
     min_size: int = 1000,
     session_base_dir: str | Path | None = None,
 ) -> list[tuple[Asset, Item]]:
+    started = perf_counter()
     quality, min_size = _validate_import_options(quality, min_size)
 
     try:
@@ -144,6 +152,7 @@ def import_long_screen_bytes_to_session(
                 )
                 webp_path.parent.mkdir(parents=True, exist_ok=True)
                 webp_path.write_bytes(webp_data)
+                handle_log.log_event(logging.DEBUG, "long_screen_import.segment_completed", image_width=width, image_height=height, output_bytes=len(webp_data), quality=quality, min_size=min_size)
 
                 asset = Asset(
                     id=asset_id,
@@ -161,6 +170,7 @@ def import_long_screen_bytes_to_session(
                 )
                 results.append((asset, item))
 
+            handle_log.log_event(logging.DEBUG, "long_screen_import.split_completed", segment_count=len(results), input_bytes=len(file_data), duration_ms=int((perf_counter() - started) * 1000))
             return results
     except NotLongScreenshotError:
         raise
