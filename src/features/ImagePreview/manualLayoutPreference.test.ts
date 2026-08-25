@@ -60,18 +60,18 @@ test('焦點預覽只把刪除放在右上，排版選擇器與旋轉控制同�
   const sourceText = readFileSync(new URL('./FocusImageCard.tsx', import.meta.url), 'utf8')
 
   assert.match(sourceText, /aria-label='刪除圖片'/)
-  assert.match(sourceText, /flex items-center justify-between[^>]*><span className='badge badge-outline'>#\{index \+ 1\}<\/span>\{isActive && <button type='button' aria-label='刪除圖片'/)
+  assert.match(sourceText, /flex items-center justify-between[^>]*>\s*<span className='badge badge-outline'>#\{index \+ 1\}<\/span>\s*\{isActive &&\s*<button type='button' aria-label='刪除圖片'/)
   assert.doesNotMatch(sourceText, /badge-info'\}>\{orientation\}/)
   assert.match(sourceText, /ml-auto[^>]*>\{LAYOUT_OPTIONS\.map/)
   assert.doesNotMatch(sourceText, /LAYOUT_OPTIONS\.map[\s\S]*btn btn-xs/)
   assert.doesNotMatch(sourceText, /absolute bottom-2 right-2[^>]*>\{LAYOUT_OPTIONS\.map/)
 })
 
-test('Word 輸出與預覽共用同一個自動分頁 builder', () => {
-  const sourceText = readFileSync(new URL('../../state/projectOutputAdapter.ts', import.meta.url), 'utf8')
+test('Word exporter 與預覽共用同一個自動分頁 builder', () => {
+  const sourceText = readFileSync(new URL('../../services/browserWordExporter.ts', import.meta.url), 'utf8')
 
-  assert.match(sourceText, /import \{AutoCollagePage, buildAutoCollageLayout\}/)
-  assert.match(sourceText, /const pages = buildAutoCollageLayout\(viewModels\)/)
+  assert.match(sourceText, /import \{buildAutoCollageLayout, type AutoCollagePage\}/)
+  assert.match(sourceText, /const layout = buildAutoCollageLayout\(options\.items\)/)
 })
 
 test('排序模式放大圖片並顯示目前排版偏好', () => {

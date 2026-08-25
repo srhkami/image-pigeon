@@ -1,47 +1,47 @@
 import {SubmitHandler, useForm} from "react-hook-form";
 import {Dispatch, SetStateAction, useEffect, useState} from "react";
+import toast from "react-hot-toast";
 import {CustomImage} from "@/utils/type.ts";
 import {Button, Col, FormInputCol, Row} from "@/component";
 import {showToast} from "@/utils/handleToast.ts";
-import {importImages} from "@/services/imageApi.ts";
+import {browserAssetStore} from "@/services/browserAssetStore.ts";
 import {applyImportResult} from "@/state/projectState.ts";
 import {ProjectV2} from "@/types/project.ts";
-import {applyImportRemarks, toCustomImagesFromImportData} from "@/state/projectImageAdapter.ts";
+import {toCustomImagesFromImportData} from "@/state/projectImageAdapter.ts";
 import {SUPPORTED_IMAGE_FILE_ACCEPT} from "@/features/Upload/fileAccept.ts";
-import {notifyOptionalProgress} from "@/features/Upload/externalImageDrop.ts";
+import {formatImportSummary, importGeneralImages} from "@/features/Upload/browserImportAdapter.ts";
+import {throwIfAborted} from "@/services/browserRuntimeContract.ts";
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
   readonly defaultRemark: string,
-  readonly project: ProjectV2,
   readonly setProject: Dispatch<SetStateAction<ProjectV2>>,
-  readonly sessionId: string | null,
-  readonly setSessionId: Dispatch<SetStateAction<string | null>>,
   readonly onHide: () => void,
   readonly setIsLoading: (value: boolean) => void,
   readonly setCount: Dispatch<SetStateAction<number>>,
   readonly pendingFiles?: File[],
+  readonly beginImport: () => AbortSignal,
+  readonly finishImport: (signal: AbortSignal) => void,
 }
 
 export type FromValues = {
   files?: FileList,
   isFileNameMode: boolean,  // 將檔案名當作備註的模式
   min_size: number, // 最小尺寸
-  quality: '90' | '75' | '50', // 壓縮率
+  quality: '100' | '90' | '75' | '50', // 壓縮率
 }
 
 /* 新增多張圖片 */
 export default function UploadMultiple({
                                          setImages,
                                          defaultRemark,
-                                         project,
                                          setProject,
-                                         sessionId,
-                                         setSessionId,
                                          onHide,
                                          setIsLoading,
                                          setCount,
                                          pendingFiles = [],
+                                         beginImport,
+                                         finishImport,
                                        }: Props) {
 
   const {
@@ -58,13 +58,13 @@ export default function UploadMultiple({
   }, [pendingFiles])
 
   const parseQuality = (value: FromValues['quality']) => {
+    if (value === '100') return 100
     if (value === '50') return 50
     if (value === '75') return 75
     return 90
   }
 
   const omSubmit: SubmitHandler<FromValues> = async (formData) => {
-    const batchSize = 3
     const files = selectedFiles
 
     if (!files.length) {
@@ -72,62 +72,45 @@ export default function UploadMultiple({
       return
     }
 
-    showToast(
-      async () => {
-        setIsLoading(true);
+    const signal = beginImport()
+    setIsLoading(true)
+    const remarkMode = {
+      isFileNameMode: formData.isFileNameMode,
+      defaultRemark,
+    }
+    try {
+      const importData = await showToast(
+        async () => {
         setCount(files.length);
-        let done = 0  // 已完成數量
-        let nextProject = project
-        let nextSessionId: string | null = sessionId
-
         const quality = parseQuality(formData.quality)
-        const importedImages: Array<CustomImage> = []
+        return await importGeneralImages({
+          files,
+          quality,
+          minSize: formData.min_size,
+          remarkMode,
+          store: browserAssetStore,
+          signal,
+          onProgress: completed => setCount(completed),
+        })
+        },
+        {error: (err) => String(err)},
+      )
+      throwIfAborted(signal)
+      const importedImages = toCustomImagesFromImportData(importData, remarkMode)
 
-        for (let i = 0; i < files.length; i += batchSize) {
-          const batch = files.slice(i, i + batchSize)
+      setProject(currentProject => applyImportResult(currentProject, importData))
 
-          const res = await importImages({
-            files: batch,
-            quality,
-            minSize: formData.min_size,
-            sessionId: nextSessionId ?? undefined,
-          })
-
-          const remarkMode = {
-            isFileNameMode: formData.isFileNameMode,
-            defaultRemark,
-          }
-          const importDataWithRemarks = applyImportRemarks(res.data, remarkMode)
-
-          nextProject = applyImportResult(nextProject, importDataWithRemarks)
-
-          const adapted = toCustomImagesFromImportData(importDataWithRemarks, res.data.sessionId, remarkMode)
-
-          importedImages.push(...adapted)
-
-          const currentBatchDone = Math.max(res.data.items.length, batch.length)
-          done += currentBatchDone
-          nextSessionId = res.data.sessionId
-          notifyOptionalProgress(window.pywebview, done)
-        }
-
-        setProject(nextProject)
-        setSessionId(nextSessionId)
-
-        // 更新圖片狀態
-        setImages(prev => [...prev, ...importedImages])
-        // 重置
-        setIsLoading(false);
-        setSelectedFiles([])
-        reset();
-        onHide();
-      },
-      {success: '新增成功',}
-    )
-      .catch(err => {
-        console.log(err)
-        setIsLoading(false)
-      })
+      setImages(prev => [...prev, ...importedImages])
+      toast.success(formatImportSummary(importData))
+      setSelectedFiles([])
+      reset()
+      onHide()
+    } catch (err) {
+      console.log(err)
+    } finally {
+      finishImport(signal)
+      setIsLoading(false)
+    }
   }
 
   const filesRegistration = register('files')
@@ -157,14 +140,15 @@ export default function UploadMultiple({
             <option value='50'>較低</option>
             <option value='75'>預設</option>
             <option value='90'>較高</option>
+            <option value='100'>不壓縮</option>
           </select>
         </FormInputCol>
         <FormInputCol xs={6} label='壓縮最小尺寸' error={errors.min_size?.message}>
-          <input type='number' id='min_size' className="input w-full"
-                 {...register('min_size', {
-                   required: '此填寫此欄位',
-                   min: {value: 500, message: '不得低於500'},
-                 })}/>
+          <select id='min_size' className="select w-full" {...register('min_size', {valueAsNumber: true})}>
+            <option value='500'>500 px</option>
+            <option value='1000'>1000 px</option>
+            <option value='2000'>2000 px</option>
+          </select>
         </FormInputCol>
         <Col xs={12} className='mt-3 px-1'>
           <label className="label">

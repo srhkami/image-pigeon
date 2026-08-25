@@ -1,6 +1,35 @@
 import {useCallback, useEffect, useMemo, useState} from 'react'
 
-type ImageLoadState = 'loading' | 'loaded' | 'error'
+export type ImageLoadState = 'loading' | 'loaded' | 'error'
+
+type DerivedPrintImageReadiness = {
+  totalImages: number
+  loadedImages: number
+  erroredImages: number
+  isReady: boolean
+}
+
+export function derivePrintImageReadiness(
+  imageItemIds: readonly string[],
+  imageStates: Readonly<Record<string, ImageLoadState>>,
+): DerivedPrintImageReadiness {
+  const uniqueIds = [...new Set(imageItemIds)]
+  let loadedImages = 0
+  let erroredImages = 0
+
+  for (const itemId of uniqueIds) {
+    const state = imageStates[itemId] ?? 'loading'
+    if (state === 'loaded') loadedImages += 1
+    if (state === 'error') erroredImages += 1
+  }
+
+  return {
+    totalImages: uniqueIds.length,
+    loadedImages,
+    erroredImages,
+    isReady: uniqueIds.length === 0 || loadedImages + erroredImages === uniqueIds.length,
+  }
+}
 
 type PrintImageReadiness = {
   totalImages: number
@@ -62,30 +91,9 @@ export function usePrintImageReadiness(imageItemIds: readonly string[]): PrintIm
     setStateByItemId(itemId, 'error')
   }, [setStateByItemId])
 
-  const {totalImages, loadedImages, erroredImages} = useMemo(() => {
-    let loadedCount = 0
-    let erroredCount = 0
-
-    for (const state of Object.values(imageStates)) {
-      if (state === 'loaded') {
-        loadedCount += 1
-      }
-
-      if (state === 'error') {
-        erroredCount += 1
-      }
-    }
-
-    return {
-      totalImages: Object.keys(imageStates).length,
-      loadedImages: loadedCount,
-      erroredImages: erroredCount,
-    }
-  }, [imageStates])
-
-  const isReady = useMemo(
-    () => totalImages === 0 || Object.values(imageStates).every((state) => state !== 'loading'),
-    [totalImages, imageStates],
+  const {totalImages, loadedImages, erroredImages, isReady} = useMemo(
+    () => derivePrintImageReadiness(imageItemIds, imageStates),
+    [imageItemIds, imageStates],
   )
 
   return {

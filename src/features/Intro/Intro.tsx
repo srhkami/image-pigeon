@@ -3,7 +3,8 @@ import {MdNumbers} from "react-icons/md";
 import {AppVersionText} from "@/utils/log.ts";
 import ModalTip from "./ModalTip.tsx";
 import ModalFeedback from "./ModalFeedback.tsx";
-import {Badge, Button, Col, Row} from "@/component";
+import {Badge, Col, Row} from "@/component";
+import {EXTERNAL_NAVIGATION_URLS} from '@/services/browserExternalNavigation.ts'
 
 export default function Intro() {
   return (
@@ -64,8 +65,8 @@ export default function Intro() {
               {AppVersionText}
             </div>
             <div className='col-span-2 flex'>
-              <a className='btn btn-info btn-sm btn-outline ml-auto' target='_blank'
-                 href='https://drive.google.com/drive/folders/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm?usp=drive_link'>
+              <a className='btn btn-info btn-sm btn-outline ml-auto' target='_blank' rel='noopener noreferrer'
+                 href={EXTERNAL_NAVIGATION_URLS.releaseFolder}>
                 檢查新版
               </a>
             </div>
@@ -73,18 +74,18 @@ export default function Intro() {
           <div className='divider my-1 text-xs'>作者的網站</div>
           <Row>
             <Col xs={6} className='px-1'>
-              <Button style='outline' shape='block'
-                      onClick={() => window.open('https://pigeonhand.tw')}>
-                <img src='/Logo_PH.png' alt="" className='w-4 h-4'/>
+              <a className='btn btn-outline w-full' target='_blank' rel='noopener noreferrer'
+                 href={EXTERNAL_NAVIGATION_URLS.pigeonHand}>
+                <img src={`${import.meta.env.BASE_URL}Logo_PH.png`} alt="" className='w-4 h-4'/>
                 鴿手
-              </Button>
+              </a>
             </Col>
             <Col xs={6} className='px-1'>
-              <Button style='outline' shape='block'
-                      onClick={() => window.open('https://traffic.pigeonhand.tw')}>
-                <img src='/Logo_TP.png' alt="" className='w-5 h-5'/>
+              <a className='btn btn-outline w-full' target='_blank' rel='noopener noreferrer'
+                 href={EXTERNAL_NAVIGATION_URLS.trafficPigeonHand}>
+                <img src={`${import.meta.env.BASE_URL}Logo_TP.png`} alt="" className='w-5 h-5'/>
                 交通鴿手
-              </Button>
+              </a>
             </Col>
           </Row>
         </div>

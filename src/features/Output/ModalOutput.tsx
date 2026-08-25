@@ -12,12 +12,11 @@ import PrintPreviewOutput from '@/features/Output/PrintPreviewOutput.tsx'
 type Props = {
   readonly project: ProjectV2,
   readonly setProject: (project: ProjectV2) => void,
-  readonly sessionId: string | null,
   readonly itemCount: number,
   readonly onEnterPrintPreview: (options: PrintPreviewOptions) => void,
 }
 
-export default function ModalOutput({project, setProject, sessionId, itemCount, onEnterPrintPreview}: Props) {
+export default function ModalOutput({project, setProject, itemCount, onEnterPrintPreview}: Props) {
 
   const {isShow, onShow, onHide} = useModal();
 
@@ -39,7 +38,6 @@ export default function ModalOutput({project, setProject, sessionId, itemCount, 
             <div className="tab-content bg-base-100 border-base-300 p-6">
               <PrintPreviewOutput
                 project={project}
-                sessionId={sessionId}
                 itemCount={itemCount}
                 onCloseModal={onHide}
                 onEnterPrintPreview={onEnterPrintPreview}
@@ -47,15 +45,15 @@ export default function ModalOutput({project, setProject, sessionId, itemCount, 
             </div>
             <input type="radio" name="output_tabs" className="tab" aria-label="儲存專案"/>
             <div className="tab-content bg-base-100 border-base-300 p-6">
-              <SaveProject project={project} setProject={setProject} sessionId={sessionId} itemCount={itemCount}/>
+              <SaveProject project={project} setProject={setProject} itemCount={itemCount}/>
             </div>
             <input type="radio" name="output_tabs" className="tab" aria-label="另存WORD"/>
             <div className="tab-content bg-base-100 border-base-300 p-6">
-              <SaveWord project={project} sessionId={sessionId} itemCount={itemCount}/>
+              <SaveWord project={project} itemCount={itemCount}/>
             </div>
             <input type="radio" name="output_tabs" className="tab" aria-label="另存圖片"/>
             <div className="tab-content bg-base-100 border-base-300 p-6">
-              <SaveImages project={project} sessionId={sessionId} itemCount={itemCount}/>
+              <SaveImages project={project} itemCount={itemCount}/>
             </div>
           </div>
         </ModalBody>

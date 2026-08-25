@@ -5,6 +5,7 @@ import {useModal} from "@/hooks";
 import 'github-markdown-css/github-markdown.css';
 import {useEffect} from "react";
 import {AppVersion} from "@/utils/log.ts";
+import {isAllowedExternalNavigation} from '@/services/browserExternalNavigation.ts'
 
 export default function ModalReadme() {
 
@@ -28,7 +29,11 @@ export default function ModalReadme() {
       <Modal isShow={isShow} onHide={onHide} size='xl'>
         <ModalBody>
           <div className="prose">
-            <ReactMarkdown>{readmePath}</ReactMarkdown>
+            <ReactMarkdown components={{
+              a: ({href, children}) => href && isAllowedExternalNavigation(href)
+                ? <a href={href} target='_blank' rel='noopener noreferrer'>{children}</a>
+                : <span>{children}</span>,
+            }}>{readmePath}</ReactMarkdown>
           </div>
         </ModalBody>
         <ModalFooter>

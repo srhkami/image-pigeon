@@ -1,9 +1,16 @@
 import {useForm} from "react-hook-form";
 import {Dispatch, SetStateAction} from "react";
-import {base64Image, CustomImage} from "@/utils/type.ts";
+import {CustomImage} from "@/utils/type.ts";
 import {Button, Col, FormInputCol, Row} from "@/component";
 import {showToast} from "@/utils/handleToast.ts";
 import {LEGACY_JSON_FILE_ACCEPT} from "@/features/Upload/fileAccept.ts";
+import {ProjectV2} from '@/types/project.ts'
+import {migrateLegacyProjectJson} from '@/services/browserProjectArchive.ts'
+import {browserImageProcessor} from '@/services/browserImageProcessor.ts'
+import {browserAssetStore} from '@/services/browserAssetStore.ts'
+import {toCustomImagesFromProject} from '@/state/projectImageAdapter.ts'
+import {BROWSER_RUNTIME_LIMITS, BrowserOperationError} from '@/services/browserRuntimeContract.ts'
+import {browserProjectOperationCoordinator} from '@/services/browserProjectOperation.ts'
 
 type TFormValue = {
   files: FileList,
@@ -11,47 +18,49 @@ type TFormValue = {
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
+  readonly setProject: Dispatch<SetStateAction<ProjectV2>>,
   readonly onHide: () => void,
   readonly setIsLoading: (value: boolean) => void,
+  readonly beginImport: () => AbortSignal,
+  readonly finishImport: (signal: AbortSignal) => void,
 }
 
 /* 讀取JSON檔案 */
-export default function ReadJson({setImages, onHide, setIsLoading}: Props) {
+export default function ReadJson({setImages, setProject, onHide, setIsLoading, beginImport, finishImport}: Props) {
 
   const {register, handleSubmit, formState: {errors}} = useForm<TFormValue>();
 
   const omSubmit = async (formData: TFormValue) => {
+    const ownerSignal = beginImport()
+    const lease = browserProjectOperationCoordinator.begin(ownerSignal)
     showToast(
       async () => {
         setIsLoading(true);
 
         const file = formData.files[0];
 
-        if (!file) return;
-
-
-        const json = await file.text().then(JSON.parse);
-        const images = json.images as Array<base64Image>;
-
-
-        const imageObjs = await Promise.all(
-          images.map((item) => CustomImage.fromBase64(item))
-        );
-        if (!images) {
-          throw Error('沒有找到圖片')
+        if (!file) throw new BrowserOperationError('INVALID_PROJECT_SCHEMA', '請選擇 1.x JSON 檔案');
+        if (file.size > BROWSER_RUNTIME_LIMITS.legacyJson.maxFileBytes) {
+          throw new BrowserOperationError('RESOURCE_LIMIT_EXCEEDED', `1.x JSON 不得超過 ${BROWSER_RUNTIME_LIMITS.legacyJson.maxFileBytes} bytes`)
         }
-        // 更新圖片狀態
-        setImages(prev => [...prev, ...imageObjs]);
-        setIsLoading(false);
+
+        const migrated = await migrateLegacyProjectJson(await file.text(), {
+          process: browserImageProcessor.processLegacyImage,
+        }, lease.signal)
+        lease.assertCurrent()
+        browserAssetStore.replaceAll(migrated.assets)
+        setProject(migrated.project)
+        setImages(() => toCustomImagesFromProject(migrated.project, ''))
         onHide();
       },
       {
         success: '讀取成功',
         error: (err) => String(err),
       }
-    ).catch(err => {
-      console.log(err);
-      setIsLoading(false);
+    ).finally(() => {
+      lease.finish()
+      finishImport(ownerSignal)
+      setIsLoading(false)
     })
   }
 

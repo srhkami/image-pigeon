@@ -1,7 +1,7 @@
 import UploadMultiple from "./UploadMultiple.tsx";
 import UploadLongScreen from "./UploadLongScreen.tsx";
 import {CustomImage} from "@/utils/type.ts";
-import {Dispatch, SetStateAction, useState} from "react";
+import {Dispatch, SetStateAction, useCallback, useEffect, useRef, useState} from "react";
 import {useForm} from "react-hook-form";
 import {IoMdAlert} from "react-icons/io";
 import AlertLoading from "../../layout/AlertLoading.tsx";
@@ -16,7 +16,6 @@ type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
   readonly project: ProjectV2,
   readonly setProject: Dispatch<SetStateAction<ProjectV2>>,
-  readonly sessionId: string | null,
   readonly setSessionId: Dispatch<SetStateAction<string | null>>,
 }
 
@@ -25,11 +24,32 @@ type Props = {
  * @param setImages 設定圖片列表State的函數
  * @constructor
  */
-export default function ModalUpload({setImages, project, setProject, sessionId, setSessionId}: Props) {
+export default function ModalUpload({setImages, project, setProject, setSessionId}: Props) {
 
   const {isShow, onShow, onHide} = useModal()
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [count, setCount] = useState<number>(1);
+  const importControllerRef = useRef<AbortController | null>(null)
+
+  const beginImport = useCallback(() => {
+    importControllerRef.current?.abort()
+    const controller = new AbortController()
+    importControllerRef.current = controller
+    return controller.signal
+  }, [])
+
+  const finishImport = useCallback((signal: AbortSignal) => {
+    if (importControllerRef.current?.signal === signal) importControllerRef.current = null
+  }, [])
+
+  const handleHide = useCallback(() => {
+    importControllerRef.current?.abort()
+    importControllerRef.current = null
+    setIsLoading(false)
+    onHide()
+  }, [onHide])
+
+  useEffect(() => () => importControllerRef.current?.abort(), [])
 
   const {register, watch} = useForm({
     defaultValues: {
@@ -50,7 +70,7 @@ export default function ModalUpload({setImages, project, setProject, sessionId, 
         <LuImageUp/>
         導入圖片
       </Button>
-      <Modal isShow={isShow} onHide={onHide} closeButton>
+      <Modal isShow={isShow} onHide={handleHide} closeButton>
         <ModalHeader className='justify-center text-lg font-bold'>
           <LuImageUp className='mr-2'/>
           <span>導入圖片</span>
@@ -70,26 +90,28 @@ export default function ModalUpload({setImages, project, setProject, sessionId, 
           <div className='divider'></div>
           {
             isLoading ?
-              <AlertLoading count={count}/>
+              <div className='flex flex-col gap-3'>
+                <AlertLoading count={count}/>
+                <button type='button' className='btn btn-error btn-outline' onClick={handleHide}>取消處理</button>
+              </div>
               :
               <div className="tabs tabs-lift mx-auto">
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="一般圖片" defaultChecked/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadMultiple setImages={setImages} defaultRemark={remark}
-                                  onHide={onHide} setIsLoading={setIsLoading} setCount={setCount}
-                                  project={project} setProject={setProject}
-                                  sessionId={sessionId} setSessionId={setSessionId}/>
+                                  onHide={handleHide} setIsLoading={setIsLoading} setCount={setCount}
+                                  setProject={setProject} beginImport={beginImport} finishImport={finishImport}/>
                 </div>
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="長截圖分割"/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadLongScreen setImages={setImages} defaultRemark={remark}
-                                    onHide={onHide} setIsLoading={setIsLoading} setCount={setCount}
-                                    project={project} setProject={setProject}
-                                    sessionId={sessionId} setSessionId={setSessionId}/>
+                                    onHide={handleHide} setIsLoading={setIsLoading} setCount={setCount}
+                                    setProject={setProject} beginImport={beginImport} finishImport={finishImport}/>
                 </div>
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="讀取舊檔"/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
-                  <ReadJson setImages={setImages} onHide={onHide} setIsLoading={setIsLoading}/>
+                  <ReadJson setImages={setImages} setProject={setProject} onHide={handleHide}
+                            setIsLoading={setIsLoading} beginImport={beginImport} finishImport={finishImport}/>
                 </div>
               </div>
           }

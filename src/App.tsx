@@ -1,6 +1,6 @@
 import './App.css'
 import {Toaster} from "react-hot-toast";
-import {DragEvent, useState} from "react";
+import {DragEvent, useEffect, useState} from "react";
 import {CustomImage} from "./utils/type.ts";
 import {clearProjectItems, createEmptyProject, getOrderedItemViewModels} from "./state/projectState.ts";
 import {Nav} from "@/layout";
@@ -16,6 +16,11 @@ import {
   updateDragDepth,
 } from "@/features/Upload/externalImageDrop.ts";
 import {SUPPORTED_IMAGE_FILE_EXTENSIONS} from "@/features/Upload/fileAccept.ts";
+import {browserAssetStore} from "@/services/browserAssetStore.ts";
+import {
+  browserImportOperationCoordinator,
+  browserProjectOperationCoordinator,
+} from "@/services/browserProjectOperation.ts";
 
 const DEFAULT_PRINT_OPTIONS: PrintPreviewOptions = {
   title: '照片黏貼表',
@@ -34,6 +39,12 @@ function App() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [pendingImportFiles, setPendingImportFiles] = useState<File[]>([])
   const [dragDepth, setDragDepth] = useState(0)
+
+  useEffect(() => () => {
+    browserImportOperationCoordinator.cancel()
+    browserProjectOperationCoordinator.cancel()
+    browserAssetStore.clear()
+  }, [])
 
   const previewItems = getOrderedItemViewModels(project, sessionId ?? "")
   const projectItemCount = previewItems.length
@@ -100,7 +111,6 @@ function App() {
       <>
         <PrintPreviewView
           project={project}
-          sessionId={sessionId}
           title={printOptions.title}
           fontSize={printOptions.fontSize}
           alignVertical={printOptions.alignVertical}
@@ -129,7 +139,12 @@ function App() {
           setProject={setProject}
           sessionId={sessionId}
           setSessionId={setSessionId}
-          onClearProject={() => setProject(clearProjectItems)}
+          onClearProject={() => {
+            browserImportOperationCoordinator.cancel()
+            browserProjectOperationCoordinator.cancel()
+            browserAssetStore.clear()
+            setProject(clearProjectItems)
+          }}
           isMoveMode={isMoveMode}
           setIsMoveMode={setIsMoveMode}
           onPrintPreview={onEnterPrintPreview}

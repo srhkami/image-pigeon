@@ -13,7 +13,6 @@ type PrintPreviewForm = {
 
 type Props = {
   readonly project: ProjectV2
-  readonly sessionId: string | null
   readonly itemCount: number
   readonly onCloseModal: () => void
   readonly onEnterPrintPreview: (options: PrintPreviewOptions) => void
@@ -21,7 +20,6 @@ type Props = {
 
 export default function PrintPreviewOutput({
   project,
-  sessionId,
   itemCount,
   onCloseModal,
   onEnterPrintPreview,
@@ -52,7 +50,7 @@ export default function PrintPreviewOutput({
       <Col xs={12}>
         <Alert color='info'>
           <IoMdAlert className='text-lg'/>
-          會開啟全頁 A4 預覽，確認排版後可直接呼叫系統列印。
+          會開啟全頁 A4 預覽；可透過系統列印對話框另存 PDF。瀏覽器無法控制儲存路徑或繞過機關列印政策。
         </Alert>
       </Col>
       <FormInputCol xs={12} label='文件標題' error={errors.title?.message}>
@@ -80,7 +78,7 @@ export default function PrintPreviewOutput({
           color='primary'
           shape='block'
           onClick={handleSubmit(onPreview)}
-          disabled={itemCount === 0 || !sessionId}
+          disabled={itemCount === 0}
         >
           <FiPrinter/>
           開啟預覽列印

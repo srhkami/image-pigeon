@@ -7,6 +7,7 @@ import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
 import {removeItem, updateItemLayoutPreference, updateItemRemark, updateItemRotation} from '@/state/projectState.ts'
 import {Button} from '@/component'
 import type {FocusSwitchDirection} from '@/features/ImagePreview/FocusImageEditor.tsx'
+import {browserAssetStore} from '@/services/browserAssetStore.ts'
 
 type Props = {
   readonly viewModel: ProjectItemViewModel;
@@ -49,7 +50,14 @@ export default function FocusImageCard({
   useEffect(() => reset({remark: viewModel.remark}), [reset, viewModel.remark, viewModel.itemId])
   const getNextRotation = (value: 90 | -90) => ((viewModel.rotation + value) % 360 + 360) % 360 as 0 | 90 | 180 | 270
   const remove = () => {
-    setProject((prev) => removeItem(prev, viewModel.itemId));
+    setProject((prev) => {
+      const removedItem = prev.items.find(item => item.id === viewModel.itemId)
+      const nextProject = removeItem(prev, viewModel.itemId)
+      if (removedItem && !nextProject.items.some(item => item.assetId === removedItem.assetId)) {
+        browserAssetStore.delete(removedItem.assetId)
+      }
+      return nextProject
+    });
     setImages((prev) => prev.filter((item) => item.id !== viewModel.itemId))
   }
   const rotate = (value: 90 | -90) => {

@@ -3,7 +3,7 @@ import {HiOutlineClipboardList} from "react-icons/hi";
 import {VersionCheckData} from "@/utils/type.ts";
 import {Button, Modal, ModalBody, ModalFooter} from "@/component";
 import {useEffect, useState} from "react";
-import axios from "axios";
+import {checkBrowserVersion} from '@/services/browserVersionCheck.ts'
 import {AppVersion} from "@/utils/log.ts";
 import {useModal} from "@/hooks";
 import {
@@ -13,15 +13,6 @@ import {
 } from "./newVersionDismissal.ts";
 
 const DISMISSED_VERSION_KEY = 'image-pigeon.dismissed-new-version'
-
-/* 檢查新版本 */
-const handleCheckVersion = async () => {
-  const res = await axios({
-    method: 'GET',
-    url: 'https://api.pigeonhand.tw/web/apps/1/',
-  })
-  return res.data as VersionCheckData
-}
 
 /**
  * 檢查新版本的對話框
@@ -46,8 +37,9 @@ export default function ModalNewVersion() {
 
   // 檢查新版本
   useEffect(() => {
-    handleCheckVersion()
+    checkBrowserVersion()
       .then(data => {
+        if (!data) return
         if (shouldShowLatestVersion({
           currentVersion: AppVersion,
           latestVersion: data.app_version,
@@ -55,8 +47,8 @@ export default function ModalNewVersion() {
           ignoredDate: localStorage.getItem(IGNORED_UPDATE_DATE_KEY),
           sessionDismissedVersion: sessionStorage.getItem(DISMISSED_VERSION_KEY),
         })) {
-          setData(data);
-          onShow();
+          setData(data)
+          onShow()
         }
       })
   }, [onShow]);
@@ -84,7 +76,7 @@ export default function ModalNewVersion() {
       </ModalBody>
       <ModalFooter className='gap-2'>
         <Button size='sm' style='outline' color='neutral' className='mr-auto' onClick={handleIgnoreVersion}>忽略此版本</Button>
-        <a className='btn btn-sm btn-info' href={data?.download_link} target='_blank'>
+        <a className='btn btn-sm btn-info' href={data?.download_link} target='_blank' rel='noopener noreferrer'>
           立即更新
         </a>
       </ModalFooter>

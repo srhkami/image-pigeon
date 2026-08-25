@@ -42,7 +42,7 @@
 
 `Tip`
 
-如果您有任何問題或意見，歡迎到[鴿手](https://pigeonhand.tw/feedback/web?option=2)中回饋讓我知道！
+如果您有任何問題或意見，歡迎到[鴿手](https://pigeonhand.tw/feedback/web)中回饋讓我知道！
 
 ---
 

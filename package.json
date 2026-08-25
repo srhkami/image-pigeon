@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "test:frontend": "node --test tests/*.test.ts src/features/ImagePreview/*.test.ts",
-    "preview": "vite preview"
+    "test:frontend": "node --test tests/*.test.ts src/features/ImagePreview/*.test.ts src/features/PrintPreview/*.test.ts src/services/*.test.ts src/features/Upload/*.test.ts src/features/Output/*.test.ts",
+    "preview": "vite preview",
+    "verify:static": "node scripts/verify-static-build.mjs"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.8.1",
@@ -21,6 +22,8 @@
     "@types/node": "^25.9.5",
     "axios": "^1.19.0",
     "clsx": "^2.1.1",
+    "docx": "9.7.1",
+    "fflate": "0.8.3",
     "github-markdown-css": "^5.9.0",
     "install": "^0.13.0",
     "npm": "^11.19.0",

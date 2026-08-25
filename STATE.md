@@ -12,58 +12,99 @@ scope:
     - image-pigeon
 parent_state: null
 workstreams:
-  - id: workstream-image-pigeon-diagnostic-logging-2026-08-04
-    title: 診斷記錄改善
-    status: partial
+  - id: workstream-image-pigeon-pure-frontend-version-2026-08-18
+    title: 純前端版本
+    status: waiting_approval
     affected_projects:
       - image-pigeon
     affected_areas:
-      - logging
-      - fastapi
-      - session
+      - frontend-runtime
+      - browser-image-processing
       - project-persistence
-      - pywebview
       - output
-      - frontend-error-boundary
+      - static-hosting
+      - privacy-boundary
     plans:
-      - id: plan-image-pigeon-diagnostic-logging-2026-08-04
-        path: docs/plans/2026-08-04-diagnostic-logging.md
+      - id: plan-image-pigeon-pure-frontend-version-2026-08-18
+        path: docs/plans/2026-08-18-pure-frontend-version.md
         role: implementation
-        execution_status: completed
+        execution_status: partial
         current_checkpoints:
+          - branch_created
           - plan_sanity_review_passed
-          - c0_to_c5_implemented
-          - macos_packaged_app_launch_verified
-          - closed_with_verification_gaps
+          - c0_c3_completed
+          - c0_c3_automated_verification_passed
+          - c0_c3_local_browser_smoke_completed
+          - c0_c3_focused_rereview_passed
+          - c4_technical_verification_completed
+          - c4_focused_rereview_passed
+          - c4_source_completed_edge_uat_deferred_c10
+          - c5_automated_verification_passed
+          - c5_focused_rereview_passed
+          - c5_source_completed_browser_uat_deferred_c10
+          - c6_automated_verification_passed
+          - c6_focused_review_passed
+          - c6_source_completed_edge_uat_deferred_c10
+          - c7_docx_dependency_installed
+          - c7_source_candidate_automated_verification_passed
+          - c7_source_candidate_first_review_request_changes
+          - c7_source_candidate_remediation_completed
+          - c7_source_candidate_rereview_passed
+          - c7_word_compatibility_uat_macos_preflight_completed
+          - c7_word_compatibility_uat_target_windows_deferred_by_user
+          - c8_source_and_provisional_word_connection_approved
+          - c8_automated_verification_passed
+          - c8_first_integration_review_request_changes
+          - c8_response_boundary_remediation_completed
+          - c8_focused_rereview_passed
+          - c8_source_completed_target_windows_uat_deferred_c10
+          - c9_source_and_bounded_browser_network_verification_approved
+          - c9_automated_and_bounded_browser_verification_passed
+          - c9_first_integration_review_request_changes
+          - c9_first_review_request_changes_remediated
+          - c9_first_focused_rereview_request_changes
+          - c9_first_focused_rereview_request_changes_remediated
+          - c9_second_focused_rereview_request_changes
+          - c9_second_focused_rereview_request_changes_remediated
+          - c9_final_focused_rereview_passed
+          - c9_source_build_checkpoint_completed
+          - c10_approved
+          - c10_automated_regression_passed
+          - c10_target_windows_uat_skipped_by_user_no_pass
+          - c10_completed_partial
     blockers:
-      - 完整 Python suite 有既有 DEBUG_MODE URL 預期失敗
-      - 全量前端測試有 FocusImageCard 格式 regex 失敗
-      - Windows pywebview／打包版目標環境未驗收
+      - 目標 Windows 11／Edge／Microsoft 365 Word 五種版型與資源 UAT 依使用者決定先忽略，未執行且不得宣稱相容性 PASS
+      - 機關 Windows Microsoft Edge 的瀏覽器政策與 Canvas／下載能力尚未實機驗證
     approval_gates:
-      source_write: approved
-      automated_test: approved
-      offline_smoke: approved
-      frontend_bridge: approved
-      pywebview_uat: approved
-      packaged_app_uat: approved
-      commit: approved
+      planning_docs: approved
+      branch_create: completed
+      source_write: approved_consumed_c9_static_hosting_security_closed
+      dependency_install: approved_consumed_c7_docx
+      automated_test: completed_c10_regression
+      local_browser_smoke: completed_c0_c4_c9_bounded
+      browser_uat: closed_c10_target_windows_skipped_by_user_no_pass
+      word_compatibility_uat: closed_c10_target_windows_skipped_by_user_no_pass
+      deployment: closed
+      commit: closed
       push: closed
-    next_action: 已收束為 partial；若要取得完整 PASS，需在獨立切片處理既有測試失敗並於 Windows 目標環境驗收
+    next_action: 等待使用者決定是否採用純前端候選；commit、push、merge、ADR cutover 與正式部署仍各自關閉
     shared_paths:
-      - core/handle_log.py
-      - main.py
-      - core/app/
-      - core/save_docx.py
-      - core/save_images.py
-      - core/tests/test_api.py
-      - src/services/apiClient.ts
-      - src/utils/handleError.ts
-      - src/features/Upload/ReadJson.tsx
-      - src/globak.d.ts
-      - src/services/diagnosticLog.ts
-      - tests/diagnosticLogging.test.ts
+      - src/App.tsx
+      - src/types/project.ts
+      - src/state/
+      - src/services/
+      - src/features/Upload/
+      - src/features/Output/
+      - src/features/PrintPreview/
+      - package.json
+      - vite.config.ts
     conflicts_with: []
 recent_results:
+  - id: result-image-pigeon-pure-frontend-version-2026-08-18
+    path: docs/result/2026-08-18-pure-frontend-version-result.md
+    status: partial
+    completed_at: 2026-08-24
+    note: C0–C9 原始碼 checkpoint 與 C10 自動回歸已完成；使用者決定先忽略目標 Windows Edge／Microsoft 365 Word UAT，故結果維持 partial 且無相容性 PASS
   - id: result-image-pigeon-diagnostic-logging-2026-08-04
     path: docs/result/2026-08-04-diagnostic-logging-result.md
     status: partial
@@ -106,14 +147,14 @@ recent_results:
     path: docs/result/2026-07-29-project-state-v1-trial-result.md
     status: completed
     completed_at: 2026-07-29
-last_reconciled: 2026-08-04
+last_reconciled: 2026-08-24
 ---
 
 # image-pigeon 專案狀態
 
 ## 目前摘要
 
-本專案已切換至 Project-State v1。`STATE.md` 是目前工作線與下一步的唯一入口；架構、決策、治理、計畫與結果分別由 scoped `docs/` 保存。
+本專案已切換至 Project-State v1。`STATE.md` 是目前工作線與下一步的唯一入口；架構、決策、治理、計畫與結果分別由 scoped `docs/` 保存。純前端版本已在 `feat/pure-frontend` 完成 C0–C9 原始碼 checkpoint。使用者已核准 C10，108/108 前端測試、lint、TypeScript／Vite production build、正式產物探針與差異護欄均已通過；使用者決定先忽略 Windows 端，因此目標 Windows 11／Microsoft Edge／Microsoft 365 Word UAT 未執行，結果維持 `partial` 且不得擴張為相容性 PASS。正式部署、commit、push、merge 與 ADR cutover 尚未核准。
 
 Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並完成 lifecycle closure。焦點式編輯器以滾輪切換圖片前保存備註的修正已通過回歸測試、lint、build 與獨立程式審查，並完成生命週期閉環。「外部圖片拖放導入」已完成來源改動、15 項前端回歸、lint、build、scope guard、focused rereview `PASS` 與 Vite browser UAT；macOS pywebview UAT 已由使用者人工驗收成功（user-attested），工作線已收束。檔案選擇器已改為由應用程式提供可靠的初始資料夾，避免 Windows 缺少 `HOMEPATH` 時由 pywebview 拋出 `KeyError`；source 與自動驗證已完成，Windows GUI 實機確認留待問題環境更新。新版本提示已加入「忽略此版本」，以遠端更新日期的七碼民國日期保存於 LocalStorage；前端回歸、lint、build 與 Vite browser UAT 通過。Git 歷史中的舊計畫標籤與既有 `.planning/` 草稿均未被匯入為目前工作。
 
@@ -125,10 +166,11 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-「診斷記錄改善」已收束為 partial：C0–C5、聚焦測試、lint、build、macOS 打包版啟動驗收均完成；完整 suite 的既有失敗與 Windows 實機驗收缺口已記錄於 result。使用者已核准 commit；push 維持關閉。
+「純前端版本」目前為 `waiting_approval`：C0–C9 原始碼 checkpoint 已完成，C10 已獲使用者核准並完成 108/108 前端測試、lint、TypeScript／Vite production build、正式產物探針及 staged 護欄。使用者決定先忽略 Windows 端，因此目標 Windows 11／最新版 Microsoft Edge／Microsoft 365 Word 的一般匯入、舊資料夾匯入、圖片 ZIP、列印／PDF、Word 五種版型、壓力與 working set UAT 均未執行，不宣稱 Windows／Word 相容性 PASS。工作線現等待使用者決定是否採用純前端候選；commit、push、merge、ADR cutover 與正式部署仍各自關閉。此工作線仍保留 Python 原始碼作回退與輸出比對；圖片與專案不得上傳。既有 staged `tests/newVersionDismissal.test.ts` 維持原樣，未納入本工作線變更。
 
 ## Recent results
 
+- `docs/result/2026-08-18-pure-frontend-version-result.md`
 - `docs/result/2026-08-04-sort-mode-thumbnail-scale-result.md`
 - `docs/result/2026-08-04-diagnostic-logging-result.md`
 - `docs/result/2026-08-04-ignore-update-version-result.md`
@@ -140,6 +182,7 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 導航
 
+- 純前端版本計畫：`docs/plans/2026-08-18-pure-frontend-version.md`
 - Agent 操作與安全規則：`AGENTS.md`
 - 文件治理：`docs/governance.md`
 - 現行架構：`docs/architecture/current-architecture.md`
