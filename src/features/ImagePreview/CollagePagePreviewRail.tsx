@@ -35,17 +35,23 @@ export default function CollagePagePreviewRail({
     })
   }, [activePageIndex, pages])
 
-  if (!pages.length) {
-    return null
-  }
+  // if (!pages.length) {
+  //   return null
+  // }
 
   return (
-    <aside className='w-full min-h-0 lg:w-[24%] xl:w-[22%]'>
-      <div className='card card-compact bg-base-100 border border-base-300/50 h-full'>
-        <div className='card-body min-h-0 p-3'>
+    <aside className='m-3 p-4 w-50 rounded-lg border border-base-300 bg-base-100/70 min-h-0'>
+      {/*<div className='card card-compact bg-base-100 border border-base-300/50 h-full'>*/}
+
           <h3 className='card-title  flex justify-center items-center'>排版預覽</h3>
           <div className='divider my-0 mb-1'></div>
-          <div className='min-h-0 flex-1 overflow-y-auto pr-1 space-y-3'>
+          <div className='h-full flex-1 overflow-y-auto pr-1 space-y-3'>
+            {!pages.length &&
+            <div className='h-full flex justify-center items-center'>
+                <h1 className='text-xl opacity-50 text-center'>圖片排版 <br/>會顯示在此</h1>
+            </div>
+            }
+
             {pages.map((page, pageIndex) => {
               const isActivePage = pageIndex === activePageIndex
               const firstItemId = page.slots.find((slot) => slot.itemId)?.itemId ?? null
@@ -66,8 +72,7 @@ export default function CollagePagePreviewRail({
               )
             })}
           </div>
-        </div>
-      </div>
+      {/*</div>*/}
     </aside>
   )
 }

@@ -13,6 +13,11 @@ scope:
 parent_state: null
 workstreams: []
 recent_results:
+  - id: result-image-pigeon-wheel-sensitivity-2026-08-25
+    path: docs/result/2026-08-25-wheel-sensitivity-result.md
+    status: completed
+    completed_at: 2026-08-25
+    note: 滾輪累積門檻由 90 降至 45；聚焦 7/7、lint、build 與差異護欄通過，完整前端測試的兩項範圍外失敗如實保留，實際操作由使用者人工驗收完成（user-attested），commit／push／部署未核准
   - id: result-image-pigeon-retire-python-runtime-2026-08-25
     path: docs/result/2026-08-25-retire-python-runtime-result.md
     status: completed_with_known_test_gap
@@ -99,10 +104,11 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-目前沒有 active workstream。「純前端版本」已合併至 `dev` 與 `main`，舊格式、自動更新與 Python 執行階段均已依正式計畫退役；Python 退役候選已完成原始碼、依賴、打包資產、本機環境清理、自動化驗證及最後聚焦複審。完整前端測試為 97/98，唯一失敗是既有列印文案契約；lint、build、靜態產物探針與退役聚焦測試通過。目標 Windows 11／最新版 Microsoft Edge／Microsoft 365 Word UAT 仍未執行，不宣稱 Windows／Word 相容性 PASS。commit、push 與正式部署未因本輪退役獲得核准；圖片與專案不得上傳。
+目前沒有 active workstream。圖片預覽滾輪累積門檻已由 90 降至 45，聚焦滾輪測試 7/7、lint、build 與差異檢查通過；完整前端測試為 97/99，兩項範圍外失敗是既有列印文案契約及版本值 3.0.1 與舊測試期待 3.0.0 不一致。實際操作已由使用者人工驗收完成（user-attested），本工作線已收束；commit、push 與部署均未核准。
 
 ## Recent results
 
+- `docs/result/2026-08-25-wheel-sensitivity-result.md`
 - `docs/result/2026-08-25-retire-python-runtime-result.md`
 - `docs/result/2026-08-25-remove-automatic-update-result.md`
 - `docs/result/2026-08-25-image-editor-bugfixes-result.md`

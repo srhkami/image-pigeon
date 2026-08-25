@@ -67,7 +67,7 @@ export default function Sidebar({
 
   return (
     <aside
-      className='m-3 flex h-[calc(100%-1.5rem)] w-48 shrink-0 flex-col items-stretch gap-3 overflow-y-auto overscroll-contain rounded-lg border border-base-300 bg-base-100/70 p-4 backdrop-blur-lg'>
+      className='m-3 flex h-[calc(100%-1.5rem)] w-50 shrink-0 flex-col items-stretch gap-3 overflow-y-auto overscroll-contain rounded-lg border border-base-300 bg-base-100/70 p-4 backdrop-blur-lg'>
       <Button color='primary' onClick={onOpenImport}>
         <LuImageUp/>
         導入圖片

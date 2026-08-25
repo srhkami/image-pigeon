@@ -5,6 +5,17 @@ import test from 'node:test'
 import {activateItemByOffset, blurActiveElement} from '../src/features/ImagePreview/wheelNavigation.ts'
 import * as wheelNavigation from '../src/features/ImagePreview/wheelNavigation.ts'
 
+test('常見單階行模式滾輪位移可跨越切圖門檻', () => {
+  const sourceText = readFileSync(new URL('../src/features/ImagePreview/ImagePreview.tsx', import.meta.url), 'utf8')
+  const thresholdMatch = sourceText.match(/const WHEEL_THRESHOLD = (\d+)/)
+
+  assert.ok(thresholdMatch, '應定義滾輪切圖門檻')
+  const threshold = Number(thresholdMatch[1])
+  const commonSingleStepLineDelta = 3 * 16
+
+  assert.ok(commonSingleStepLineDelta >= threshold, `單階位移 ${commonSingleStepLineDelta} 應達到門檻 ${threshold}`)
+})
+
 test('切換焦點圖片前會讓目前輸入欄位失焦以提交備註', () => {
   let didBlur = false
 

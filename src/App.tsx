@@ -4,7 +4,7 @@ import {DragEvent, useEffect, useState} from "react";
 import {CustomImage} from "./utils/type.ts";
 import {clearProjectItems, createEmptyProject, getOrderedItemViewModels} from "./state/projectState.ts";
 import {Nav} from "@/layout";
-import {ImagePreview, Intro} from "@/features";
+import {ImagePreview} from "@/features";
 import {PrintPreviewView} from "@/features/PrintPreview";
 import {PrintPreviewOptions} from "@/features/PrintPreview/printLayout.ts";
 import Sidebar from "@/layout/Sidebar.tsx";
@@ -154,17 +154,18 @@ function App() {
           onCloseImport={onCloseImport}
         />
         <main className='min-w-0 flex-1 overflow-hidden'>
-          {!projectItemCount ? (
-            <Intro/>
-          ) : (
-            <ImagePreview
+          {/*{!projectItemCount ? (*/}
+          {/*  <Intro/>*/}
+          {/*) : (*/}
+          {/*  */}
+          {/*)}*/}
+          <ImagePreview
               project={project}
               setProject={setProject}
               sessionId={sessionId}
               setImages={setImages}
               isMoveMode={isMoveMode}
             />
-          )}
         </main>
       </div>
 

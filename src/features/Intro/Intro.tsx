@@ -9,23 +9,23 @@ import {EXTERNAL_NAVIGATION_URLS} from '@/services/browserExternalNavigation.ts'
 export default function Intro() {
   return (
     <div className='flex justify-center items-center'>
-      <div className="card bg-neutral text-neutral-content w-96 my-10">
+      <div className="card w-96 my-10 border-3 border-base-300 shadow-xl">
         <div className='card-body'>
           <Row>
             <Col xs={3} className='text-lg font-bold flex items-center my-2'>
-              <Badge color='accent'>Step 1</Badge>
+              <Badge color='info'>Step 1</Badge>
             </Col>
             <Col xs={9} className='text-lg font-bold flex items-center my-2'>
               請將圖片拖曳到此處
             </Col>
             <Col xs={3} className='text-lg font-bold flex items-center my-2'>
-              <Badge color='accent'>Step 2</Badge>
+              <Badge color='info'>Step 2</Badge>
             </Col>
             <Col xs={9} className='text-lg font-bold flex items-center my-2'>
               預覽、排序、編輯圖片
             </Col>
             <Col xs={3} className='text-lg font-bold flex items-center my-2'>
-              <Badge color='accent'>Step 3</Badge>
+              <Badge color='info'>Step 3</Badge>
             </Col>
             <Col xs={9} className='text-lg font-bold flex items-center my-2'>
               <div className='col-span-3 text-lg font-bold flex items-center'>
@@ -44,7 +44,7 @@ export default function Intro() {
             </Col>
           </Row>
           <div className='divider my-1 text-xs'>關於此軟體</div>
-          <div className='grid grid-cols-5 gap-2 font-bold text-gray-300'>
+          <div className='grid grid-cols-5 gap-2 font-bold'>
             <div className='flex justify-start items-center'>
               <BsFillPersonLinesFill className='mr-2'/>
               作者

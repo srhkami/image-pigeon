@@ -2,6 +2,7 @@ import {Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useSt
 import {CustomImage} from '@/utils/type.ts'
 import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
 import FocusImageCard from '@/features/ImagePreview/FocusImageCard.tsx'
+import {Intro} from "@/features";
 
 export type FocusSwitchDirection = 'previous' | 'next' | null
 
@@ -80,7 +81,7 @@ export default function FocusImageEditor({viewModels, activeItemId, setActiveIte
 
 
   if (activeItemIndex < 0 || !viewModels.length) {
-    return null
+    return <Intro/>
   }
 
   const visibleSlots = [-2, -1, 0, 1, 2].map((offset) => {

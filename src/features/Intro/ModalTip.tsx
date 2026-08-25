@@ -10,7 +10,7 @@ export default function ModalTip() {
 
   return (
     <>
-      <Button color='accent' style='outline' onClick={() => setIsShow(true)}>
+      <Button color='primary' onClick={() => setIsShow(true)}>
         主要功能介紹
       </Button>
       <Modal isShow={isShow} onHide={() => setIsShow(false)} closeButton>
