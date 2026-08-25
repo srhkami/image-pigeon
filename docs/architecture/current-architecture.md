@@ -3,7 +3,7 @@ type: architecture
 status: current
 canonical: true
 scope: image-pigeon
-verified_against_source_at: 2026-07-29
+verified_against_source_at: 2026-08-25
 ---
 
 # image-pigeon 現行架構
@@ -11,6 +11,8 @@ verified_against_source_at: 2026-07-29
 ## 定位
 
 image-pigeon 是 pywebview + React + Python 桌面工具。pywebview 保留桌面視窗、原生檔案／資料夾選擇與 storage path；FastAPI 負責本機資料 API 與 production React build serving。服務只綁定 `127.0.0.1`。
+
+`feat/pure-frontend` 同時保存尚待採用的純前端候選；候選的專案讀寫、圖片處理、資產生命週期與輸出已移至瀏覽器。下列 FastAPI／pywebview 說明是 repository 仍保留的桌面基線，不代表純前端候選仍會呼叫該 runtime。
 
 `pywebview-base` 只曾作參考，不是本 repository 的正式依賴或修改目標。
 
@@ -52,13 +54,13 @@ ProjectV2
 - `assets[].file` 指向相對圖片路徑。
 - `items[]` 保存 remark、rotation、crop 與 portraitSize。
 - 目前 layout type 是 `word-compatible-grid`，順序由 `itemOrder` 決定。
-- `.ipigeon/` 是資料夾格式，包含 `project.json` 與 `images/*.webp`。
+- 純前端候選的唯一專案交換格式是單一 `.ipigeon` ZIP archive，內含 `project.json` 與 `images/*.webp`；不支援獨立 1.x JSON 或 `.ipigeon/` 專案資料夾。
 
 ## Session 與專案
 
 - `core/app/session_store.py` 在 `web_cache/temp/sessions/<session-id>/` 保存 `session.json` 與 WebP。
 - Source 提供 24 小時過期 session 清理函式，但目前 `main.py` 啟動／關閉流程沒有呼叫它；這是實作缺口，不應從舊計畫文字推定為已接線。
-- 開啟專案時會建立新的 temp session；儲存專案時寫入目標 `.ipigeon/` 資料夾。
+- 舊桌面 FastAPI 路徑開啟專案時會建立新的 temp session，並仍保存舊資料夾實作；純前端候選不呼叫這條路徑，而是以瀏覽器資產儲存開啟／建立單一 `.ipigeon` archive。
 
 ## 前端狀態與排版
 
@@ -80,4 +82,4 @@ ProjectV2
 
 ## 驗證邊界
 
-本文件以 2026-07-29 工作樹 source 與 manifest 靜態核對。它不代表 packaged macOS／Windows runtime、列印對話框、完整 lint/build 或實機 UAT 已於本次治理遷移重新執行。
+本文件的桌面基線以 2026-07-29 source 為基礎，並於 2026-08-25 依純前端候選校正專案格式邊界。它不代表純前端候選已採用、packaged macOS／Windows runtime、列印對話框或實機 UAT 已重新執行。

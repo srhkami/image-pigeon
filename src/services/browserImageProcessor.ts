@@ -180,26 +180,6 @@ export const browserImageProcessor = {
     }
   },
 
-  async processLegacyImage(file: File, signal?: AbortSignal): Promise<ProcessedBrowserImage> {
-    const decoded = await decodeImage(file, signal)
-    try {
-      assertDecodedDimensions(decoded.width, decoded.height, 'general')
-      throwIfAborted(signal)
-      const canvas = createCanvas(decoded.width, decoded.height)
-      try {
-        const context = canvas.getContext('2d')
-        if (!context) throw new BrowserOperationError('CANVAS_OPERATION_FAILED', '瀏覽器無法取得 1.x 圖片 Canvas')
-        context.drawImage(decoded.source, 0, 0, decoded.width, decoded.height)
-        throwIfAborted(signal)
-        const blob = await encodeCanvas(canvas, 100, signal)
-        return {blob, width: decoded.width, height: decoded.height, mime: 'image/webp'}
-      } finally {
-        releaseCanvas(canvas)
-      }
-    } finally {
-      decoded.close()
-    }
-  },
 
   async processLongScreen(file: File, options: {
     quality: number

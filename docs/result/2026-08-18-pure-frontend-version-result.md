@@ -74,6 +74,8 @@ execution:
 
 # image-pigeon 純前端版本 C0–C10 部分執行結果
 
+> 後續決策（2026-08-25）：本結果記錄的舊 `.ipigeon/` 資料夾與 1.x JSON 相容功能，已由 `docs/plans/2026-08-25-retire-legacy-project-formats.md` 接續退場。下列內容保留當時實際執行證據，不代表目前版本仍提供舊格式支援。
+
 ## 結論
 
 本輪完成正式計畫 C0–C9 的原始碼 checkpoint，並依使用者核准執行 C10。C10 在目前 macOS arm64 工作區完成前端測試 108/108、lint、TypeScript／Vite production build、正式產物探針與差異護欄，全部 exit 0；既有 staged `tests/newVersionDismissal.test.ts` 路徑與 SHA-256 維持不變。當前執行主機沒有可操作的 Windows 11／Microsoft Edge／Microsoft 365 Word，使用者隨後明確決定先忽略 Windows 端；因此 C10 以部分完成收束，目標環境 UAT 未執行且沒有 Windows Edge／Word 相容性 PASS。

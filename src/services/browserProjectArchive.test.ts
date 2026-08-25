@@ -6,17 +6,12 @@ import {BrowserAssetStore} from './browserAssetStore.ts'
 import {BROWSER_RUNTIME_LIMITS, BrowserOperationError} from './browserRuntimeContract.ts'
 import {
   createProjectArchive,
-  migrateLegacyProjectJson,
   openProjectArchive,
-  openProjectFolder,
 } from './browserProjectArchive.ts'
 import type {ProjectV2} from '../types/project.ts'
 
 const encoder = new TextEncoder()
-const LEGACY_PNG_DATA_URL = 'data:image/png;base64,iVBORw0KGgo='
-const LEGACY_JPEG_DATA_URL = 'data:image/jpeg;base64,/9j/'
-const LEGACY_WEBP_DATA_URL = 'data:image/webp;base64,UklGRgAAAABXRUJQ'
-const LEGACY_BMP_DATA_URL = 'data:image/bmp;base64,Qk0='
+
 const WEBP_BYTES = new Uint8Array([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50])
 const inspectFixtureImage = async () => ({width: 2, height: 1})
 
@@ -235,150 +230,5 @@ test('archive 在取消時不繼續建立或開啟', async () => {
   await assert.rejects(
     () => openProjectArchive(new Blob(), controller.signal),
     (error: unknown) => error instanceof BrowserOperationError && error.code === 'OPERATION_CANCELLED',
-  )
-})
-
-test('現行 .ipigeon 資料夾依 webkitRelativePath 匯入相同 ProjectV2', async () => {
-  const projectFile = new File([JSON.stringify(projectFixture())], 'project.json', {type: 'application/json'})
-  const imageFile = new File([WEBP_BYTES], 'asset-1.webp', {type: 'image/webp'})
-  Object.defineProperty(projectFile, 'webkitRelativePath', {value: 'sample.ipigeon/project.json'})
-  Object.defineProperty(imageFile, 'webkitRelativePath', {value: 'sample.ipigeon/images/asset-1.webp'})
-
-  const opened = await openProjectFolder([projectFile, imageFile], undefined, inspectFixtureImage)
-
-  assert.deepEqual(opened.project, projectFixture())
-  assert.deepEqual(new Uint8Array(await opened.assets[0].blob.arrayBuffer()), WEBP_BYTES)
-})
-
-test('專案資料夾拒絕混合根目錄與 traversal 相對路徑', async () => {
-  const projectFile = new File([JSON.stringify(projectFixture())], 'project.json', {type: 'application/json'})
-  const imageFile = new File([WEBP_BYTES], 'asset-1.webp', {type: 'image/webp'})
-  Object.defineProperty(projectFile, 'webkitRelativePath', {value: 'first.ipigeon/project.json'})
-  Object.defineProperty(imageFile, 'webkitRelativePath', {value: 'second.ipigeon/images/asset-1.webp'})
-
-  await assert.rejects(
-    () => openProjectFolder([projectFile, imageFile]),
-    (error: unknown) => error instanceof BrowserOperationError && error.code === 'INVALID_PROJECT_ARCHIVE',
-  )
-
-  const traversal = new File([JSON.stringify(projectFixture())], 'project.json', {type: 'application/json'})
-  Object.defineProperty(traversal, 'webkitRelativePath', {value: '../project.json'})
-  await assert.rejects(
-    () => openProjectFolder([traversal]),
-    (error: unknown) => error instanceof BrowserOperationError && error.code === 'INVALID_PROJECT_ARCHIVE',
-  )
-})
-
-test('1.x JSON 全數驗證後才轉換成完整 ProjectV2', async () => {
-  const legacy = JSON.stringify({
-    title: '舊專案',
-    path: '/private/ignored',
-    images: [
-      {
-        id: 12,
-        file: '/private/ignored.png',
-        preview: 'blob:ignored',
-        base64: LEGACY_PNG_DATA_URL,
-        width: 2,
-        height: 1,
-        remark: '',
-        rotation: null,
-      },
-      {
-        base64: LEGACY_JPEG_DATA_URL,
-        width: 1,
-        height: 2,
-        remark: '第二張',
-        rotation: 90,
-      },
-      {
-        base64: LEGACY_WEBP_DATA_URL,
-        width: 3,
-        height: 1,
-        remark: '第三張',
-        rotation: 180,
-      },
-      {
-        base64: LEGACY_BMP_DATA_URL,
-        width: 2,
-        height: 1,
-        remark: '第四張',
-        rotation: 270,
-      },
-    ],
-  })
-  const seen: Array<{type: string; bytes: number}> = []
-  const migrated = await migrateLegacyProjectJson(legacy, {
-    process: async (file) => {
-      seen.push({type: file.type, bytes: file.size})
-      const dimensions: Record<string, readonly [number, number]> = {
-        'image/png': [2, 1],
-        'image/jpeg': [1, 2],
-        'image/webp': [3, 1],
-        'image/bmp': [2, 1],
-      }
-      const [width, height] = dimensions[file.type]
-      return {blob: new Blob([new Uint8Array([9])], {type: 'image/webp'}), width, height, mime: 'image/webp' as const}
-    },
-  })
-
-  assert.deepEqual(seen, [
-    {type: 'image/png', bytes: 8},
-    {type: 'image/jpeg', bytes: 3},
-    {type: 'image/webp', bytes: 12},
-    {type: 'image/bmp', bytes: 2},
-  ])
-  assert.equal(migrated.project.document.title, '舊專案')
-  assert.equal(migrated.project.assets.length, 4)
-  assert.deepEqual(migrated.project.items.map(item => [item.remark, item.rotation]), [
-    ['', 0],
-    ['第二張', 90],
-    ['第三張', 180],
-    ['第四張', 270],
-  ])
-  assert.deepEqual(migrated.project.layouts[0].itemOrder, migrated.project.items.map(item => item.id))
-  assert.equal(migrated.assets.length, 4)
-})
-
-test('1.x JSON 任一資料錯誤會整批拒絕且不呼叫 processor', async () => {
-  const invalidImages = [
-    {base64: 'not-a-data-url', width: 1, height: 1, remark: ''},
-    {base64: 'data:image/gif;base64,AQID', width: 1, height: 1, remark: ''},
-    {base64: 'data:image/png;base64,%%%%', width: 1, height: 1, remark: ''},
-    {base64: 'data:image/png;base64,/9j/', width: 1, height: 1, remark: ''},
-    {base64: LEGACY_PNG_DATA_URL, width: 0, height: 1, remark: ''},
-    {base64: LEGACY_PNG_DATA_URL, width: 1, height: 1, remark: 1},
-    {base64: LEGACY_PNG_DATA_URL, width: 1, height: 1, remark: '', rotation: 45},
-    {base64: LEGACY_PNG_DATA_URL, width: 1, height: 1, remark: '', rotation: ''},
-    {base64: LEGACY_PNG_DATA_URL, width: 1, height: 1, remark: '', rotation: '90'},
-  ]
-
-  for (const invalid of invalidImages) {
-    let calls = 0
-    await assert.rejects(
-      () => migrateLegacyProjectJson(JSON.stringify({images: [
-        {base64: LEGACY_PNG_DATA_URL, width: 1, height: 1, remark: ''},
-        invalid,
-      ]}), {process: async () => {
-        calls += 1
-        return {blob: new Blob(), width: 1, height: 1, mime: 'image/webp' as const}
-      }}),
-      (error: unknown) => error instanceof BrowserOperationError && error.code === 'INVALID_PROJECT_SCHEMA',
-    )
-    assert.equal(calls, 0)
-  }
-})
-
-test('1.x JSON 宣告尺寸與實際解碼不符時整批拒絕', async () => {
-  await assert.rejects(
-    () => migrateLegacyProjectJson(JSON.stringify({images: [
-      {base64: LEGACY_PNG_DATA_URL, width: 2, height: 1, remark: ''},
-    ]}), {process: async () => ({
-      blob: new Blob([new Uint8Array([1])], {type: 'image/webp'}),
-      width: 1,
-      height: 1,
-      mime: 'image/webp' as const,
-    })}),
-    (error: unknown) => error instanceof BrowserOperationError && error.code === 'INVALID_PROJECT_SCHEMA',
   )
 })

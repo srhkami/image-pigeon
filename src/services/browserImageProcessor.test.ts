@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict'
-import {readFileSync} from 'node:fs'
 import test from 'node:test'
 
 import {
@@ -71,12 +70,4 @@ test('synthetic 色帶列映射證明重疊、順序與尾端黑色 padding', ()
   assert.equal(colorAt(getLongScreenSourceRow(segments[2]!, 559)), 'band-4')
   assert.equal(colorAt(getLongScreenSourceRow(segments[2]!, 560)), 'black')
   assert.equal(colorAt(getLongScreenSourceRow(segments[2]!, 2119)), 'black')
-})
-
-test('1.x JSON 圖片轉換保留解碼尺寸並固定輸出 WebP quality 100', () => {
-  const source = readFileSync(new URL('./browserImageProcessor.ts', import.meta.url), 'utf8')
-
-  assert.match(source, /async processLegacyImage\(/)
-  assert.match(source, /encodeCanvas\(canvas, 100, signal\)/)
-  assert.match(source, /width: decoded\.width, height: decoded\.height, mime: 'image\/webp'/)
 })

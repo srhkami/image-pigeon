@@ -34,14 +34,13 @@ test('全部清除會取消一般圖片與長截圖匯入並阻止晚到狀態�
   }
 })
 
-test('開啟專案支援單檔與資料夾並在驗證完成後原子替換 store', () => {
+test('開啟專案只支援單一 .ipigeon 並在驗證完成後原子替換 store', () => {
   const source = readSource('./OpenProject.tsx')
   const appSource = readSource('../../App.tsx')
 
   assert.match(source, /accept=['"]\.ipigeon['"]/)
-  assert.match(source, /webkitdirectory/)
   assert.match(source, /openProjectArchive\(/)
-  assert.match(source, /openProjectFolder\(/)
+  assert.doesNotMatch(source, /webkitdirectory|openProjectFolder|開啟舊專案資料夾/)
   assert.match(source, /browserProjectOperationCoordinator\.begin\(\)/)
   assert.match(source, /lease\.assertCurrent\(\)/)
   assert.match(source, /browserAssetStore\.replaceAll\(opened\.assets\)/)
@@ -51,20 +50,17 @@ test('開啟專案支援單檔與資料夾並在驗證完成後原子替換 stor
   assert.doesNotMatch(source, /pywebview|openProject\(/)
 })
 
-test('1.x JSON 匯入完整替換 ProjectV2 與 asset store 而非只更新 legacy images state', () => {
-  const source = readSource('./ReadJson.tsx')
+test('導入圖片對話框不提供獨立 JSON 專案檔入口', () => {
+  const source = readSource('./ModalImport.tsx')
 
-  assert.match(source, /migrateLegacyProjectJson\(/)
-  assert.match(source, /browserImageProcessor\.processLegacyImage/)
-  assert.match(source, /browserAssetStore\.replaceAll\(migrated\.assets\)/)
-  assert.match(source, /setProject\(migrated\.project\)/)
-  assert.doesNotMatch(source, /CustomImage\.fromBase64/)
+  assert.doesNotMatch(source, /ReadJson|legacy-json|讀取舊檔/)
+  assert.match(source, /UploadMultiple/)
+  assert.match(source, /UploadLongScreen/)
 })
 
-test('專案儲存、開啟與 1.x 遷移都有取消與世代生命週期', () => {
+test('專案儲存與開啟都有取消與世代生命週期', () => {
   const saveSource = readSource('../Output/SaveProject.tsx')
   const openSource = readSource('./OpenProject.tsx')
-  const legacySource = readSource('./ReadJson.tsx')
   const modalSource = readSource('./ModalImport.tsx')
 
   assert.match(saveSource, /new AbortController\(\)/)
@@ -73,8 +69,4 @@ test('專案儲存、開啟與 1.x 遷移都有取消與世代生命週期', () 
   assert.match(modalSource, /operationRef\.current\?\.cancel\(\)/)
   assert.match(openSource, /operationRef\.current\?\.cancel\(\)/)
   assert.match(openSource, /lease\.assertCurrent\(\)/)
-  assert.match(legacySource, /const ownerSignal = beginImport\(\)/)
-  assert.match(legacySource, /browserProjectOperationCoordinator\.begin\(ownerSignal\)/)
-  assert.match(legacySource, /lease\.assertCurrent\(\)/)
-  assert.match(legacySource, /finishImport\(ownerSignal\)/)
 })

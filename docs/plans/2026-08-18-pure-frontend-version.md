@@ -33,6 +33,8 @@ approval_gates:
 
 # image-pigeon 純前端版本實作計畫
 
+> 後續決策（2026-08-25）：本計畫執行時曾要求並完成舊 `.ipigeon/` 資料夾與 1.x JSON 相容；產品之後決定自本版本起移除兩者。現行退場契約與執行狀態以 `docs/plans/2026-08-25-retire-legacy-project-formats.md` 為準；以下原始內容保留作歷史執行證據。
+
 ## 目標
 
 在獨立測試分支 `feat/pure-frontend` 建立不依賴 `.exe`、pywebview、FastAPI、uvicorn 或本機監聽連接埠的純前端版本。正式產物必須能部署為 HTTPS 靜態網站，圖片、專案與輸出檔案在使用者瀏覽器本機處理，不將圖片或專案內容上傳至伺服器；在此邊界內盡可能維持現有編輯、排版、列印、專案與輸出體驗。

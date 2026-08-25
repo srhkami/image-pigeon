@@ -4,7 +4,6 @@ import {IoMdAlert} from "react-icons/io";
 import AlertLoading from "../../layout/AlertLoading.tsx";
 import UploadMultiple from "@/features/Upload/UploadMultiple.tsx";
 import UploadLongScreen from "@/features/Upload/UploadLongScreen.tsx";
-import ReadJson from "@/features/Upload/ReadJson.tsx";
 import {Dispatch, SetStateAction, useCallback, useEffect, useRef, useState} from "react";
 import {useForm} from "react-hook-form";
 import {CustomImage} from "@/utils/type.ts";
@@ -22,7 +21,7 @@ type Props = {
   readonly onHide: () => void,
 }
 
-type ImportTab = 'multiple' | 'long-screen' | 'legacy-json'
+type ImportTab = 'multiple' | 'long-screen'
 
 export default function ModalImport({
   setImages,
@@ -115,12 +114,6 @@ export default function ModalImport({
                   <UploadLongScreen setImages={setImages} defaultRemark={remark}
                                     onHide={handleHide} setIsLoading={setIsLoading} setCount={setCount}
                                     setProject={setProject} beginImport={beginImport} finishImport={finishImport}/>
-                </div>
-                <input type="radio" name="my_tabs_3" className="tab" aria-label="讀取舊檔"
-                       checked={activeTab === 'legacy-json'} onChange={() => setActiveTab('legacy-json')}/>
-                <div className="tab-content bg-base-100 border-base-300 p-6">
-                  <ReadJson setImages={setImages} setProject={setProject} onHide={handleHide}
-                            setIsLoading={setIsLoading} beginImport={beginImport} finishImport={finishImport}/>
                 </div>
               </div>
           }

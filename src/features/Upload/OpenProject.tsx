@@ -3,7 +3,7 @@ import {Button} from '@/component'
 import {CustomImage} from '@/utils/type.ts'
 import {ProjectV2} from '@/types/project.ts'
 import {showToast} from '@/utils/handleToast.ts'
-import {openProjectArchive, openProjectFolder, type OpenedBrowserProject} from '@/services/browserProjectArchive.ts'
+import {openProjectArchive, type OpenedBrowserProject} from '@/services/browserProjectArchive.ts'
 import {browserAssetStore} from '@/services/browserAssetStore.ts'
 import {toCustomImagesFromProject} from '@/state/projectImageAdapter.ts'
 import {
@@ -22,7 +22,6 @@ type Props = {
 
 export default function OpenProject({setProject, setSessionId, setImages, itemCount}: Props) {
   const archiveInputRef = useRef<HTMLInputElement | null>(null)
-  const folderInputRef = useRef<HTMLInputElement | null>(null)
   const operationRef = useRef<BrowserProjectOperationLease | null>(null)
 
   useEffect(() => () => operationRef.current?.cancel(), [])
@@ -82,30 +81,11 @@ export default function OpenProject({setProject, setSessionId, setImages, itemCo
     if (file) runOpen(signal => openProjectArchive(file, signal))
   }
 
-  const onFolderChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? [])
-    event.target.value = ''
-    if (files.length) runOpen(signal => openProjectFolder(files, signal))
-  }
-
   return (
     <div className='flex flex-col gap-2'>
       <input ref={archiveInputRef} type='file' accept='.ipigeon' className='hidden' onChange={onArchiveChange}/>
-      <input
-        ref={(element) => {
-          folderInputRef.current = element
-          element?.setAttribute('webkitdirectory', '')
-        }}
-        type='file'
-        multiple
-        className='hidden'
-        onChange={onFolderChange}
-      />
       <Button color='primary' onClick={() => confirmThenSelect(archiveInputRef.current)}>
         <HiFolderOpen/> 開啟專案檔
-      </Button>
-      <Button color='primary' style='outline' onClick={() => confirmThenSelect(folderInputRef.current)}>
-        <HiFolderOpen/> 開啟舊專案資料夾
       </Button>
     </div>
   )

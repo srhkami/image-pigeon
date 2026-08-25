@@ -32,10 +32,6 @@ export const BROWSER_RUNTIME_LIMITS = {
     maxSourceBytes: 536_870_912,
     maxOutputBytes: 536_870_912,
   },
-  legacyJson: {
-    maxFileBytes: 536_870_912,
-    maxImages: 200,
-  },
 } as const
 
 export type BrowserOperationErrorCode =

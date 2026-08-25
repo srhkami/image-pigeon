@@ -15,8 +15,6 @@ const ZIP_CENTRAL_SIGNATURE = 0x02014b50
 const PROJECT_JSON_PATH = 'project.json'
 const ROTATIONS = new Set([0, 90, 180, 270])
 const LAYOUT_PREFERENCES = new Set<LayoutPreference>(['stacked-2', 'side-by-side-2', 'grid-6'])
-const LEGACY_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/bmp'])
-const BASE64_PATTERN = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
 
 type ArchiveLimits = typeof BROWSER_RUNTIME_LIMITS.projectArchive
 
@@ -28,17 +26,6 @@ type ArchiveAsset = {
 export type OpenedBrowserProject = {
   project: ProjectV2
   assets: ArchiveAsset[]
-}
-
-export type LegacyImageProcessResult = {
-  blob: Blob
-  width: number
-  height: number
-  mime: 'image/webp'
-}
-
-export type LegacyImageProcessor = {
-  process(file: File, signal?: AbortSignal): Promise<LegacyImageProcessResult>
 }
 
 export type ProjectImageInspector = (
@@ -53,14 +40,6 @@ type ZipEntryMetadata = {
   expandedSize: number
 }
 
-type LegacyImageInput = {
-  mime: string
-  bytes: Uint8Array
-  width: number
-  height: number
-  remark: string
-  rotation: Item['rotation']
-}
 
 const failArchive = (message: string, cause?: unknown): never => {
   throw new BrowserOperationError('INVALID_PROJECT_ARCHIVE', message, cause)
@@ -462,197 +441,4 @@ export async function openProjectArchive(
   if (!projectBytes) failArchive('專案檔缺少 project.json')
   const project = validateProject(parseJson(projectBytes as Uint8Array), limits)
   return validateProjectEntries(project, entries, limits, signal, inspectImage)
-}
-
-export async function openProjectFolder(
-  files: readonly File[],
-  signal?: AbortSignal,
-  inspectImage: ProjectImageInspector = inspectProjectImageInBrowser,
-): Promise<OpenedBrowserProject> {
-  const limits = BROWSER_RUNTIME_LIMITS.projectArchive
-  throwIfAborted(signal)
-  if (files.length === 0 || files.length > limits.maxEntries) failArchive('專案資料夾檔案數量不合法')
-  const entries = new Map<string, Uint8Array>()
-  let totalBytes = 0
-  let rootName: string | null = null
-  for (const file of files) {
-    throwIfAborted(signal)
-    if (!file.webkitRelativePath) failArchive('專案資料夾檔案缺少相對路徑')
-    const fullPath = canonicalizeArchivePath(file.webkitRelativePath)
-    const [entryRoot, ...entryParts] = fullPath.split('/')
-    if (!entryRoot.toLowerCase().endsWith('.ipigeon') || entryParts.length === 0) {
-      failArchive('請選擇完整的 .ipigeon 專案資料夾')
-    }
-    if (rootName === null) rootName = entryRoot
-    if (entryRoot !== rootName) failArchive('專案資料夾不得混合多個根目錄')
-    const canonicalPath = canonicalizeArchivePath(entryParts.join('/'))
-    if (entries.has(canonicalPath)) throw new BrowserOperationError('DUPLICATE_ARCHIVE_ENTRY', `專案資料夾包含重複項目：${canonicalPath}`)
-    if (canonicalPath === PROJECT_JSON_PATH && file.size > limits.maxProjectJsonBytes) {
-      throw new BrowserOperationError('RESOURCE_LIMIT_EXCEEDED', `project.json 不得超過 ${limits.maxProjectJsonBytes} bytes`)
-    }
-    if (canonicalPath !== PROJECT_JSON_PATH && file.size > limits.maxImageEntryBytes) {
-      throw new BrowserOperationError('RESOURCE_LIMIT_EXCEEDED', `圖片項目不得超過 ${limits.maxImageEntryBytes} bytes`)
-    }
-    totalBytes += file.size
-    if (totalBytes > limits.maxExpandedBytes) {
-      throw new BrowserOperationError('RESOURCE_LIMIT_EXCEEDED', `專案資料夾不得超過 ${limits.maxExpandedBytes} bytes`)
-    }
-    entries.set(canonicalPath, new Uint8Array(await file.arrayBuffer()))
-  }
-  const projectBytes = entries.get(PROJECT_JSON_PATH)
-  if (!projectBytes) failArchive('專案資料夾缺少 project.json')
-  const project = validateProject(parseJson(projectBytes as Uint8Array), limits)
-  return validateProjectEntries(project, entries, limits, signal, inspectImage)
-}
-
-function parseLegacyDataUrl(value: unknown): {mime: string; bytes: Uint8Array} {
-  if (typeof value !== 'string') failSchema('1.x 圖片缺少 base64 data URL')
-  const match = /^data:(image\/[a-z0-9.+-]+);base64,([A-Za-z0-9+/=]+)$/i.exec(value as string)
-  if (!match) failSchema('1.x 圖片 data URL、MIME 或 Base64 不合法')
-  const mime = match![1].toLowerCase()
-  const payload = match![2]
-  if (!LEGACY_MIME_TYPES.has(mime) || !BASE64_PATTERN.test(payload)) {
-    failSchema('1.x 圖片 data URL、MIME 或 Base64 不合法')
-  }
-  const padding = payload.endsWith('==') ? 2 : payload.endsWith('=') ? 1 : 0
-  const decodedSize = payload.length / 4 * 3 - padding
-  if (decodedSize > BROWSER_RUNTIME_LIMITS.projectArchive.maxImageEntryBytes) {
-    throw new BrowserOperationError('RESOURCE_LIMIT_EXCEEDED', '1.x 圖片解碼後超過單檔上限')
-  }
-  let binary: string
-  try {
-    binary = atob(payload)
-  } catch (error) {
-    return failSchema('1.x 圖片 Base64 解碼失敗', error)
-  }
-  const bytes = new Uint8Array(binary.length)
-  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index)
-  const hasPrefix = (prefix: readonly number[]) => prefix.every((byte, index) => bytes[index] === byte)
-  const matchesDeclaredMime = mime === 'image/png'
-    ? hasPrefix([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
-    : mime === 'image/jpeg'
-      ? hasPrefix([0xff, 0xd8, 0xff])
-      : mime === 'image/webp'
-        ? isWebPBytes(bytes)
-        : hasPrefix([0x42, 0x4d])
-  if (!matchesDeclaredMime) failSchema('1.x 圖片宣告 MIME 與實際檔案格式不符')
-  return {mime, bytes}
-}
-
-function validateLegacyJson(text: string): {title: string; images: LegacyImageInput[]} {
-  if (encoder.encode(text).byteLength > BROWSER_RUNTIME_LIMITS.legacyJson.maxFileBytes) {
-    throw new BrowserOperationError('RESOURCE_LIMIT_EXCEEDED', `1.x JSON 不得超過 ${BROWSER_RUNTIME_LIMITS.legacyJson.maxFileBytes} bytes`)
-  }
-  let raw: unknown
-  try {
-    raw = JSON.parse(text)
-  } catch (error) {
-    return failSchema('1.x JSON 格式損壞', error)
-  }
-  assertRecord(raw, '1.x JSON 必須是 object')
-  if (!Array.isArray(raw.images) || raw.images.length === 0
-    || raw.images.length > BROWSER_RUNTIME_LIMITS.legacyJson.maxImages) {
-    failSchema('1.x JSON 必須包含非空 images array')
-  }
-  const rawImages = raw.images as unknown[]
-  let totalBytes = 0
-  const images = rawImages.map((value): LegacyImageInput => {
-    assertRecord(value, '1.x images[] 必須是 object')
-    const {mime, bytes} = parseLegacyDataUrl(value.base64)
-    totalBytes += bytes.byteLength
-    if (totalBytes > BROWSER_RUNTIME_LIMITS.assetStore.maxBytes) {
-      throw new BrowserOperationError('RESOURCE_LIMIT_EXCEEDED', '1.x 圖片解碼後合計超過資源上限')
-    }
-    if (!isPositiveInteger(value.width) || !isPositiveInteger(value.height)
-      || value.width > BROWSER_RUNTIME_LIMITS.generalImage.maxDimension
-      || value.height > BROWSER_RUNTIME_LIMITS.longScreen.maxHeight
-      || value.width * value.height > BROWSER_RUNTIME_LIMITS.longScreen.maxPixels) {
-      failSchema('1.x 圖片宣告尺寸不合法')
-    }
-    if (typeof value.remark !== 'string' || value.remark.length > 10_000) failSchema('1.x 圖片 remark 不合法')
-    let rotation = 0
-    if (value.rotation !== undefined && value.rotation !== null) {
-      const candidate = value.rotation
-      if (typeof candidate !== 'number' || !ROTATIONS.has(candidate)) {
-        failSchema('1.x 圖片 rotation 不合法')
-      }
-      rotation = candidate as number
-    }
-    return {
-      mime,
-      bytes,
-      width: Number(value.width),
-      height: Number(value.height),
-      remark: value.remark as string,
-      rotation: rotation as Item['rotation'],
-    }
-  })
-  return {
-    title: typeof raw.title === 'string' && raw.title.trim() ? raw.title : '照片黏貼表',
-    images,
-  }
-}
-
-export async function migrateLegacyProjectJson(
-  text: string,
-  processor: LegacyImageProcessor,
-  signal?: AbortSignal,
-): Promise<OpenedBrowserProject> {
-  throwIfAborted(signal)
-  const legacy = validateLegacyJson(text)
-  const assets: Asset[] = []
-  const items: Item[] = []
-  const archiveAssets: ArchiveAsset[] = []
-  let totalBytes = 0
-
-  for (const [index, image] of legacy.images.entries()) {
-    throwIfAborted(signal)
-    const file = new File([image.bytes], `legacy-${index + 1}`, {type: image.mime})
-    const processed = await processor.process(file, signal)
-    throwIfAborted(signal)
-    if (processed.mime !== 'image/webp' || processed.blob.type !== 'image/webp'
-      || processed.width !== image.width || processed.height !== image.height) {
-      failSchema(`1.x 圖片實際解碼尺寸或輸出 MIME 不符：第 ${index + 1} 張`)
-    }
-    totalBytes += processed.blob.size
-    if (totalBytes > BROWSER_RUNTIME_LIMITS.assetStore.maxBytes) {
-      throw new BrowserOperationError('RESOURCE_LIMIT_EXCEEDED', '1.x 圖片轉換後合計超過資源上限')
-    }
-    const assetId = crypto.randomUUID()
-    const itemId = crypto.randomUUID()
-    const asset: Asset = {
-      id: assetId,
-      file: `images/${assetId}.webp`,
-      mime: 'image/webp',
-      width: processed.width,
-      height: processed.height,
-      originalName: null,
-      size: processed.blob.size,
-    }
-    const portraitSize = 'large' as const
-    assets.push(asset)
-    items.push({
-      id: itemId,
-      type: 'image',
-      assetId,
-      remark: image.remark,
-      rotation: image.rotation,
-      crop: {x: 0, y: 0, width: 1, height: 1, unit: 'ratio'},
-      portraitSize,
-      layoutPreference: deriveLayoutPreference(asset, image.rotation, portraitSize),
-    })
-    archiveAssets.push({id: assetId, blob: processed.blob})
-  }
-
-  return {
-    project: {
-      schema: 'image-pigeon.project',
-      version: 2,
-      document: {title: legacy.title},
-      assets,
-      items,
-      layouts: [{id: 'layout_word_default', type: 'word-compatible-grid', itemOrder: items.map(item => item.id)}],
-    },
-    assets: archiveAssets,
-  }
 }

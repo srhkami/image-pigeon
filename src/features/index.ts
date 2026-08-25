@@ -6,5 +6,4 @@ export {default as ModalFeedback} from './Intro/ModalFeedback.tsx';
 export {default as ModalTip} from './Intro/ModalTip.tsx';
 export {default as ModalNewVersion} from './Intro/ModalNewVersion.tsx';
 export {default as Output} from './Output/ModalOutput.tsx';
-export {default as Upload} from './Upload/ModalUpload.tsx';
 export {default as OpenProject} from './Upload/OpenProject.tsx';
