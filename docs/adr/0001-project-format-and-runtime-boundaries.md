@@ -1,14 +1,17 @@
 ---
 type: adr
 id: adr-image-pigeon-project-format-and-runtime-boundaries-0001
-status: accepted
+status: superseded
 canonical: true
 scope: image-pigeon
 decided_at: 2026-06-30
 reconciled_at: 2026-08-25
+superseded_by: docs/adr/0002-pure-frontend-runtime-boundary.md
 ---
 
 # ADR-0001：專案格式與 runtime 邊界
+
+> 本決策已由 `docs/adr/0002-pure-frontend-runtime-boundary.md` 取代。以下內容保留為 2.x 桌面架構的歷史決策與證據，不代表現行執行階段仍使用 Python、FastAPI 或 pywebview。
 
 ## 背景
 

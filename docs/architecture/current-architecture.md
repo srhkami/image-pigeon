@@ -10,35 +10,32 @@ verified_against_source_at: 2026-08-25
 
 ## 定位
 
-image-pigeon 是 pywebview + React + Python 桌面工具。pywebview 保留桌面視窗、原生檔案／資料夾選擇與 storage path；FastAPI 負責本機資料 API 與 production React build serving。服務只綁定 `127.0.0.1`。
+image-pigeon 3.0 已合併至 `dev` 與 `main`，作為後續主要更新基線；現行產品是 React + Vite 純前端應用。圖片匯入、壓縮、長截圖切割、專案管理、圖片 ZIP、Word 與列印都在使用者瀏覽器內完成；正式部署只需要以 HTTPS 靜態主機提供 `dist/`。
 
-`feat/pure-frontend` 同時保存尚待採用的純前端候選；候選的專案讀寫、圖片處理、資產生命週期與輸出已移至瀏覽器。自動更新提示與遠端版本 API 已退場，正式前端原始碼不得透過 `fetch`／XMLHttpRequest 發出背景請求；固定外部網站只在使用者明確點擊後導覽。下列 FastAPI／pywebview 說明是 repository 仍保留的桌面基線，不代表純前端候選仍會呼叫該 runtime。
+Python 原始碼、Python 測試、套件環境及 PyInstaller 打包資產已正式退役。現行執行階段不使用 Python、FastAPI、uvicorn、pywebview、本機監聽連接埠、資料庫或可寫入伺服器目錄。舊桌面架構與驗證證據保留在 ADR-0001、歷史計畫及結果文件，但不再是現行原始碼或回退基線。
 
-`pywebview-base` 只曾作參考，不是本 repository 的正式依賴或修改目標。
+## 執行拓樸
 
-## Runtime 拓樸
+```text
+HTTPS 靜態主機
+  └── dist/（HTML、CSS、JavaScript、圖示與圖片）
+        │
+        ▼
+使用者瀏覽器
+  ├── React UI 與 ProjectV2 metadata
+  ├── BrowserAssetStore：asset id → Blob + object URL
+  ├── Canvas：圖片解碼、縮放、旋轉與長截圖切割
+  ├── .ipigeon archive：project.json + images/*.webp
+  ├── 圖片 ZIP exporter
+  ├── DOCX exporter
+  └── window.print()／系統 PDF
+```
 
-- `main.py` 啟動 uvicorn thread，建立 pywebview 視窗，並以 `js_api=Api()` 保留原生 bridge 與部分 legacy 相容方法。
-- 開發模式載入 Vite dev server；production 模式由 FastAPI serve `dist/`。
-- `core/app/api.py` 建立 FastAPI app，提供 health、圖片、session asset 與 project API。
-- 開發伺服器 URL 與 Vite port 必須保持一致；目前工作樹對這兩個值另有使用者未提交變更，本文件不把該差異納入治理成果。
+開發使用 Vite dev server；production build 由 `pnpm run build` 產生。`vite.config.ts` 使用相對 `base`，使同一份產物可部署於 HTTPS 網站根目錄或子路徑。
 
-## FastAPI API
+## ProjectV2 與資產生命週期
 
-目前 source-defined endpoints：
-
-- `GET /api/health`
-- `POST /api/images/import`
-- `POST /api/images/import-long-screen`
-- `GET /api/sessions/{session_id}/assets/{asset_id}/image`
-- `POST /api/project/save`
-- `POST /api/project/open`
-
-圖片以 `multipart/form-data` 與 FastAPI `UploadFile` 匯入。session 使用 filesystem，不使用資料庫。
-
-## ProjectV2
-
-後端模型定義於 `core/app/models.py`，前端型別定義於 `src/types/project.ts`：
+前端型別定義於 `src/types/project.ts`：
 
 ```text
 ProjectV2
@@ -50,36 +47,42 @@ ProjectV2
 └── layouts[]
 ```
 
-- Session/project 圖片以 WebP 保存。
-- `assets[].file` 指向相對圖片路徑。
-- `items[]` 保存 remark、rotation、crop 與 portraitSize。
-- 目前 layout type 是 `word-compatible-grid`，順序由 `itemOrder` 決定。
-- 純前端候選的唯一專案交換格式是單一 `.ipigeon` ZIP archive，內含 `project.json` 與 `images/*.webp`；不支援獨立 1.x JSON 或 `.ipigeon/` 專案資料夾。
+- React state 保存 metadata，不長期保存 Base64 圖片。
+- 圖片 Blob 由 `src/services/browserAssetStore.ts` 管理。
+- 預覽以 `URL.createObjectURL()` 建立；替換、刪除、清空、開啟其他專案與卸載時回收 URL。
+- `assets[].file` 指向 archive 內相對的 `images/<asset-id>.webp`。
+- `items[]` 保存備註、旋轉、裁切、直向尺寸與排版偏好。
+- `layouts[]` 使用 `word-compatible-grid`；輸出順序由 `itemOrder` 決定。
 
-## Session 與專案
+## 圖片處理
 
-- `core/app/session_store.py` 在 `web_cache/temp/sessions/<session-id>/` 保存 `session.json` 與 WebP。
-- Source 提供 24 小時過期 session 清理函式，但目前 `main.py` 啟動／關閉流程沒有呼叫它；這是實作缺口，不應從舊計畫文字推定為已接線。
-- 舊桌面 FastAPI 路徑開啟專案時會建立新的 temp session，並仍保存舊資料夾實作；純前端候選不呼叫這條路徑，而是以瀏覽器資產儲存開啟／建立單一 `.ipigeon` archive。
+- `src/services/browserImageProcessor.ts` 使用瀏覽器解碼與 Canvas 處理一般圖片及長截圖。
+- 正式處理遵守固定檔案數、位元組、像素、段數與 asset store 上限。
+- 一般圖片允許單張略過、整批完成後一次提交；長截圖以來源檔案為最小原子單位。
+- 取消、超限或失敗時回收暫存 Blob／object URL，不提交半成品。
 
-## 前端狀態與排版
+## 專案封存
 
-- `src/App.tsx` 以 ProjectV2 與 `sessionId` 作主要狀態，並用 `editor | print-preview` 切換視圖，不使用 router。
-- `src/features/ImagePreview/autoCollageLayout.ts` 依既有順序產生五種 template：
-  - `landscape-2`
-  - `portrait-large-2`
-  - `portrait-small-6`
-  - `mixed-landscape1-small3`
-  - `mixed-small3-landscape1`
-- 一般編輯使用焦點式編輯區；排序模式是獨立小圖列表；右側顯示頁面縮圖預覽。
+- 唯一專案交換格式是單一 `.ipigeon` ZIP archive。
+- 根目錄必須有 `project.json`，圖片位於 `images/*.webp`。
+- `src/services/browserProjectArchive.ts` 在解壓前檢查項目數、宣告大小、壓縮比與路徑，並驗證 manifest、資產集合、WebP 內容及實際尺寸。
+- 專案開啟採 all-or-nothing；完整驗證後才原子替換 project state 與 asset store。
+- 不支援獨立 1.x JSON 或 `.ipigeon/` 專案資料夾。
 
-## 輸出
+## 輸出與列印
 
-- Word 輸出位於 `core/save_docx.py`。
-- 圖片輸出位於 `core/save_images.py`，預設面向 JPG 輸出流程。
-- 列印預覽位於 `src/features/PrintPreview/`，重用自動拼貼 pages/slots，透過 `window.print()` 開啟系統列印流程。
-- 目前沒有後端 PDF renderer，也沒有 `/api/export/pdf`。
+- 圖片輸出：`src/services/browserImageZip.ts` 依 canonical order 產生 JPEG 並封裝成單一 ZIP 下載。
+- Word 輸出：`src/services/browserWordExporter.ts` 與 `browserWordProjectAdapter.ts` 產生 DOCX Blob 並下載。
+- 列印：`src/features/PrintPreview/` 重用五種自動拼貼版型，透過 `window.print()` 開啟系統列印流程；PDF 由使用者在系統列印對話框另存。
+- 專案、ZIP 與 DOCX 皆由本機 Blob URL 下載，不經應用程式後端。
+
+## 網路與隱私邊界
+
+- 正式前端不發出背景 `fetch`／XMLHttpRequest，也不提供圖片、專案或輸出上傳 API。
+- 應用程式只讀取使用者明確選定的檔案。
+- 固定外部網站入口集中於 `src/services/browserExternalNavigation.ts`，只在使用者明確點擊後開啟，且不攜帶應用程式資料。
+- `scripts/verify-static-build.mjs` 會驗證靜態資產引用並拒絕退役 runtime 與網路 sink。
 
 ## 驗證邊界
 
-本文件的桌面基線以 2026-07-29 source 為基礎，並於 2026-08-25 依純前端候選校正專案格式邊界。它不代表純前端候選已採用、packaged macOS／Windows runtime、列印對話框或實機 UAT 已重新執行。
+前端契約測試、lint、TypeScript／Vite production build 與靜態產物探針是目前自動化驗證主線。目標 Windows 11／Microsoft Edge／Microsoft 365 Word 的完整 UAT 仍未執行；現行架構採用與 source/build 通過不得擴張為該環境相容性 PASS。

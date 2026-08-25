@@ -16,7 +16,7 @@
 ## 工作語言
 
 - 文件、計畫、結果報告、提交訊息預設使用繁體中文與台灣用語。
-- 技術名詞可保留英文，例如 FastAPI、pywebview、React、Vite、session、manifest。
+- 技術名詞可保留英文，例如 React、Vite、Blob、Canvas、manifest。
 
 ## 規劃與執行治理
 
@@ -33,12 +33,12 @@
 - 需要 side effect、runtime、外部服務、資料庫、production、deploy、commit 或 push 時，必須取得各自明確核准；一般 source-write 核准不會隱含開啟其他 gate。
 - 不得讀取、列印或提交 secrets；除非使用者明確要求，避開 `.env` 與 credential files。
 - 不 commit、push 或 rewrite history，除非使用者明確要求。
-- Python 的 Pillow／python-docx 工作若進入 async FastAPI path，避免長時間阻塞 event loop；必要時使用同步 endpoint 或 threadpool。
+
 
 ## 修改與驗證
 
 - 前端套件與指令優先使用 `pnpm`。
-- 預設驗證命令：`pnpm run lint`、`pnpm run build`；依實際變更增加 Python tests 或 focused checks。
+- 預設驗證命令：`pnpm run lint`、`pnpm run build`；依實際變更增加前端測試或聚焦檢查。
 - 文件專用變更至少驗證 frontmatter、路徑／連結、stale authority、tracked/untracked status、`git diff --check` 與 staged-file guard。
 - 驗證結果只證明實際執行的範圍；不得把 source review、文件 review 或 user-attested UAT 擴張成未執行的 runtime PASS。
 - 完成工作後寫入同 scope result，校正 plan lifecycle，最後更新或關閉 STATE workstream。

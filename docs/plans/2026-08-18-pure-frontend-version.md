@@ -1,17 +1,17 @@
 ---
 type: plan
 id: plan-image-pigeon-pure-frontend-version-2026-08-18
-status: active
+status: completed
 canonical: true
 scope: image-pigeon
 created_at: 2026-08-18
 branch:
   name: feat/pure-frontend
   base: dev
-  status: created
+  status: merged_to_dev_and_main
 execution:
   status: partial
-  current_checkpoint: c10_completed_partial_target_windows_skipped_by_user
+  current_checkpoint: adopted_with_target_windows_uat_unexecuted
 result: docs/result/2026-08-18-pure-frontend-version-result.md
 review:
   type: plan_sanity
@@ -36,6 +36,8 @@ approval_gates:
 > 後續決策（2026-08-25）：本計畫執行時曾要求並完成舊 `.ipigeon/` 資料夾與 1.x JSON 相容；產品之後決定自本版本起移除兩者。現行退場契約與執行狀態以 `docs/plans/2026-08-25-retire-legacy-project-formats.md` 為準；以下原始內容保留作歷史執行證據。
 >
 > 後續決策（2026-08-25）：純前端候選不再自動檢查更新。所有要求保留新版本提示、版本 API、固定版本 GET、更新下載入口或對 `api.pigeonhand.tw` 開放 `connect-src` 的條款均已由本決策取代；正式前端不得發出背景 `fetch`／XMLHttpRequest，靜態同源資產讀取與使用者明確點擊的固定外部導覽不屬自動更新。下列舊條款保留作原始執行契約與歷史脈絡，不代表目前功能仍存在。
+>
+> 採用與退役決策（2026-08-25）：3.0 純前端版本已合併至 `dev` 與 `main`，成為後續主要更新基線；原先暫留作回退與輸出比對的 Python、FastAPI、pywebview 來源、測試、依賴與桌面打包資產依 `docs/plans/2026-08-25-retire-python-runtime.md` 正式退役。此採用決策不改變目標 Windows 11／Microsoft Edge／Microsoft 365 Word UAT 未執行的證據邊界。
 
 ## 目標
 
