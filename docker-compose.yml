@@ -1,0 +1,23 @@
+services:
+  react-pigeon-traffic:
+    image: nginx:alpine
+    container_name: react-pigeon-image
+    restart: unless-stopped
+    volumes:
+      # 將編譯後的檔案掛載進 Nginx
+      - ./dist:/usr/share/nginx/html
+      # ⚠️ 重要：掛載自訂設定以支援 React 路由
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    deploy:
+      resources:
+        reservations:
+          memory: 64M
+        limits:
+          memory: 256M
+    networks:
+      - shared_link
+
+networks:
+  shared_link:
+    external: true
+    name: shared_network
