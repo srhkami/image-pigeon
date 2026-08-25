@@ -47,6 +47,24 @@ test('排版演算法保留六張空 slot 與穩定 page、slot id', () => {
   )
 })
 
+test('六張後接上下時，上下圖片固定放在混合版型的底部橫圖位置', () => {
+  const pages = buildAutoCollageLayout([
+    source('grid-01', 'grid-6'),
+    source('stacked-01', 'stacked-2'),
+  ])
+
+  assert.equal(pages[0]?.template, 'mixed-small3-landscape1')
+  assert.deepEqual(
+    pages[0]?.slots.map((slot) => [slot.role, slot.itemId]),
+    [
+      ['mixed-small-bottom-left', 'grid-01'],
+      ['mixed-small-bottom-middle', null],
+      ['mixed-small-bottom-right', null],
+      ['mixed-landscape-bottom', 'stacked-01'],
+    ],
+  )
+})
+
 test('前端狀態以已保存 layoutPreference 為權威，旋轉不覆寫它', () => {
   const sourceText = readFileSync(new URL('../../state/projectState.ts', import.meta.url), 'utf8')
 

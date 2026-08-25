@@ -4,7 +4,7 @@ import {DragEvent, useEffect, useState} from "react";
 import {CustomImage} from "./utils/type.ts";
 import {clearProjectItems, createEmptyProject, getOrderedItemViewModels} from "./state/projectState.ts";
 import {Nav} from "@/layout";
-import {ImagePreview, Intro, ModalNewVersion} from "@/features";
+import {ImagePreview, Intro} from "@/features";
 import {PrintPreviewView} from "@/features/PrintPreview";
 import {PrintPreviewOptions} from "@/features/PrintPreview/printLayout.ts";
 import Sidebar from "@/layout/Sidebar.tsx";
@@ -168,8 +168,6 @@ function App() {
         </main>
       </div>
 
-      {/*對話框*/}
-      <ModalNewVersion/>
       {dragDepth > 0 && <ExternalImageDropOverlay/>}
       {/*快速彈窗*/}
       <Toaster

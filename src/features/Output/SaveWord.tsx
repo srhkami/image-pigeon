@@ -67,19 +67,29 @@ export default function SaveWord({project, itemCount}: Props) {
   }
 
   return <Row>
-    <Col xs={12}><Alert color='info'><IoMdAlert className='text-lg'/>會依照右側預覽排版，直接由瀏覽器下載 Word 文件。</Alert></Col>
+    <Col xs={12}><Alert color='info'><IoMdAlert className='text-lg'/>會生成一個 WORD 檔提供下載</Alert></Col>
     <FormInputCol xs={12} label='文件標題 / 檔案名稱' error={errors.title?.message}>
       <input type='text' className='input w-full' disabled={isLoading} {...register('title')}/>
     </FormInputCol>
     <FormInputCol xs={6} label='說明文字對齊' error={errors.alignVertical?.message}>
-      <select className='select w-full' disabled={isLoading} {...register('alignVertical')}><option value='top'>垂直置頂</option><option value='center'>垂直置中</option></select>
+      <select className='select w-full' disabled={isLoading} {...register('alignVertical')}>
+        <option value='top'>垂直置頂</option>
+        <option value='center'>垂直置中</option>
+      </select>
     </FormInputCol>
     <FormInputCol xs={6} label='字體大小' error={errors.fontSize?.message}>
-      <select className='select w-full' disabled={isLoading} {...register('fontSize')}>{['10', '11', '12', '13', '14'].map(size => <option key={size} value={size}>{size}</option>)}</select>
+      <select className='select w-full'
+              disabled={isLoading} {...register('fontSize')}>{['10', '11', '12', '13', '14'].map(size => <option
+        key={size} value={size}>{size}</option>)}</select>
     </FormInputCol>
     <Col xs={12} className='mt-6'>
-      {isLoading ? <div className='space-y-3'><div className='text-center'>正在建立 Word 文件（{progress}/{itemCount}）</div><progress className='progress progress-info w-full' value={progress} max={itemCount}/><Button color='warning' shape='block' onClick={() => controllerRef.current?.abort()}>取消</Button></div>
-        : <Button color='success' shape='block' disabled={itemCount === 0} onClick={handleSubmit(onSave)}><FaRegFileWord/>下載 Word</Button>}
+      {isLoading ? <div className='space-y-3'>
+          <div className='text-center'>正在建立 Word 文件（{progress}/{itemCount}）</div>
+          <progress className='progress progress-info w-full' value={progress} max={itemCount}/>
+          <Button color='warning' shape='block' onClick={() => controllerRef.current?.abort()}>取消</Button></div>
+        :
+        <Button color='success' shape='block' disabled={itemCount === 0} onClick={handleSubmit(onSave)}><FaRegFileWord/>下載
+          Word</Button>}
     </Col>
   </Row>
 }

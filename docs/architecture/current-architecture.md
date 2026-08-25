@@ -12,7 +12,7 @@ verified_against_source_at: 2026-08-25
 
 image-pigeon 是 pywebview + React + Python 桌面工具。pywebview 保留桌面視窗、原生檔案／資料夾選擇與 storage path；FastAPI 負責本機資料 API 與 production React build serving。服務只綁定 `127.0.0.1`。
 
-`feat/pure-frontend` 同時保存尚待採用的純前端候選；候選的專案讀寫、圖片處理、資產生命週期與輸出已移至瀏覽器。下列 FastAPI／pywebview 說明是 repository 仍保留的桌面基線，不代表純前端候選仍會呼叫該 runtime。
+`feat/pure-frontend` 同時保存尚待採用的純前端候選；候選的專案讀寫、圖片處理、資產生命週期與輸出已移至瀏覽器。自動更新提示與遠端版本 API 已退場，正式前端原始碼不得透過 `fetch`／XMLHttpRequest 發出背景請求；固定外部網站只在使用者明確點擊後導覽。下列 FastAPI／pywebview 說明是 repository 仍保留的桌面基線，不代表純前端候選仍會呼叫該 runtime。
 
 `pywebview-base` 只曾作參考，不是本 repository 的正式依賴或修改目標。
 

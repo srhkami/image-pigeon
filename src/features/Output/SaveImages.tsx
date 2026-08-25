@@ -69,7 +69,7 @@ export default function SaveImages({project, itemCount}: Props) {
       <Col xs={12}>
         <Alert color='info'>
           <IoMdAlert className='text-lg'/>
-          將經壓縮、排序及旋轉後的圖片合併為單一 ZIP 下載；瀏覽器不會選擇或自動開啟資料夾。
+          將壓縮、排序後的圖片合併為單一 ZIP 檔下載，此功能不會保留排版，只會保存圖片。
         </Alert>
       </Col>
       <FormInputCol xs={12} label='預設名稱' error={errors.title?.message}>
@@ -92,10 +92,10 @@ export default function SaveImages({project, itemCount}: Props) {
           將每張圖片的備註當作檔名儲存
         </label>
         {isRemarkMode &&
-          <Alert color='warning'>
-            <IoMdAlert className='text-lg'/>
-            重複備註會自動加上穩定序號；空備註改用預設名稱，換行與檔名非法字元會以底線取代。
-          </Alert>
+            <Alert color='warning'>
+                <IoMdAlert className='text-lg'/>
+                重複備註會自動加上穩定序號；空備註改用預設名稱，換行與檔名非法字元會以底線取代。
+            </Alert>
         }
       </FormInputCol>
       <Col xs={12} className='mt-6'>

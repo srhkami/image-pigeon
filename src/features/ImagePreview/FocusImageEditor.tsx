@@ -11,9 +11,10 @@ type Props = {
   readonly setActiveItemId: Dispatch<SetStateAction<string | null>>
   readonly setProject: Dispatch<SetStateAction<ProjectV2>>
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>
+  readonly onRemoveItem: (itemId: string) => void
 }
 
-export default function FocusImageEditor({viewModels, activeItemId, setActiveItemId, setProject, setImages}: Props) {
+export default function FocusImageEditor({viewModels, activeItemId, setActiveItemId, setProject, setImages, onRemoveItem}: Props) {
   const previousActiveItemIndexRef = useRef<number | null>(null)
   const [switchDirection, setSwitchDirection] = useState<FocusSwitchDirection>(null)
 
@@ -104,6 +105,7 @@ export default function FocusImageEditor({viewModels, activeItemId, setActiveIte
                 index={viewModelIndex}
                 setProject={setProject}
                 setImages={setImages}
+                onRemoveItem={onRemoveItem}
                 isActive={viewModelIndex === activeItemIndex}
                 onActivate={() => setActiveItemId(viewModel.itemId)}
               />

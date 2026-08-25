@@ -4,10 +4,9 @@ import {CustomImage} from '@/utils/type.ts'
 import {FaArrowRotateLeft, FaArrowRotateRight, FaXmark} from 'react-icons/fa6'
 import clsx from 'clsx'
 import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
-import {removeItem, updateItemLayoutPreference, updateItemRemark, updateItemRotation} from '@/state/projectState.ts'
+import {updateItemLayoutPreference, updateItemRemark, updateItemRotation} from '@/state/projectState.ts'
 import {Button} from '@/component'
 import type {FocusSwitchDirection} from '@/features/ImagePreview/FocusImageEditor.tsx'
-import {browserAssetStore} from '@/services/browserAssetStore.ts'
 
 type Props = {
   readonly viewModel: ProjectItemViewModel;
@@ -17,6 +16,7 @@ type Props = {
   readonly index: number;
   readonly setProject: Dispatch<SetStateAction<ProjectV2>>;
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>;
+  readonly onRemoveItem: (itemId: string) => void;
   readonly onActivate: () => void;
   readonly isActive: boolean
 }
@@ -43,23 +43,13 @@ export default function FocusImageCard({
                                          index,
                                          setProject,
                                          setImages,
+                                         onRemoveItem,
                                          onActivate,
                                          isActive
                                        }: Props) {
   const {register, getValues, reset} = useForm<RemarkForm>({defaultValues: {remark: viewModel.remark}})
   useEffect(() => reset({remark: viewModel.remark}), [reset, viewModel.remark, viewModel.itemId])
   const getNextRotation = (value: 90 | -90) => ((viewModel.rotation + value) % 360 + 360) % 360 as 0 | 90 | 180 | 270
-  const remove = () => {
-    setProject((prev) => {
-      const removedItem = prev.items.find(item => item.id === viewModel.itemId)
-      const nextProject = removeItem(prev, viewModel.itemId)
-      if (removedItem && !nextProject.items.some(item => item.assetId === removedItem.assetId)) {
-        browserAssetStore.delete(removedItem.assetId)
-      }
-      return nextProject
-    });
-    setImages((prev) => prev.filter((item) => item.id !== viewModel.itemId))
-  }
   const rotate = (value: 90 | -90) => {
     const rotation = getNextRotation(value);
     setProject((prev) => updateItemRotation(prev, viewModel.itemId, rotation));
@@ -82,7 +72,7 @@ export default function FocusImageCard({
                     className='btn btn-circle btn-sm btn-error'
                     onClick={(event) => {
                       event.stopPropagation();
-                      remove()
+                      onRemoveItem(viewModel.itemId)
                     }}>
                 <FaXmark/>
             </button>}

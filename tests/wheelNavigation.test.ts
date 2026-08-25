@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
 import test from 'node:test'
 
 import {activateItemByOffset, blurActiveElement} from '../src/features/ImagePreview/wheelNavigation.ts'
+import * as wheelNavigation from '../src/features/ImagePreview/wheelNavigation.ts'
 
 test('切換焦點圖片前會讓目前輸入欄位失焦以提交備註', () => {
   let didBlur = false
@@ -61,4 +63,20 @@ test('已在清單邊界時不會讓備註欄位失焦', () => {
 
   assert.equal(didSwitch, false)
   assert.equal(didBlur, false)
+})
+
+test('刪除目前圖片後優先聚焦下一張，最後一張則回到前一張', () => {
+  const getActiveItemIdAfterRemoval = Reflect.get(wheelNavigation, 'getActiveItemIdAfterRemoval')
+  assert.equal(typeof getActiveItemIdAfterRemoval, 'function')
+
+  assert.equal(getActiveItemIdAfterRemoval(['item-1', 'item-2', 'item-3'], 'item-2'), 'item-3')
+  assert.equal(getActiveItemIdAfterRemoval(['item-1', 'item-2', 'item-3'], 'item-3'), 'item-2')
+  assert.equal(getActiveItemIdAfterRemoval(['item-1'], 'item-1'), null)
+})
+
+test('焦點預覽刪除流程會在移除專案項目前決定鄰近焦點', () => {
+  const sourceText = readFileSync(new URL('../src/features/ImagePreview/ImagePreview.tsx', import.meta.url), 'utf8')
+
+  assert.match(sourceText, /setActiveItemId\(getActiveItemIdAfterRemoval\(sortableItemIds, itemId\)\)/)
+  assert.match(sourceText, /onRemoveItem=\{handleRemoveItem\}/)
 })

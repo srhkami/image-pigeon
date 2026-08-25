@@ -94,9 +94,9 @@ test('replaceAll 容量失敗時完整保留既有資產', () => {
 
 test('刪除、全部清除與 App 卸載都接上 URL 回收', () => {
   const appSource = readFileSync(new URL('../App.tsx', import.meta.url), 'utf8')
-  const cardSource = readFileSync(new URL('../features/ImagePreview/FocusImageCard.tsx', import.meta.url), 'utf8')
+  const previewSource = readFileSync(new URL('../features/ImagePreview/ImagePreview.tsx', import.meta.url), 'utf8')
 
   assert.match(appSource, /useEffect\(\(\) => \(\) => \{\s*browserImportOperationCoordinator\.cancel\(\)\s*browserProjectOperationCoordinator\.cancel\(\)\s*browserAssetStore\.clear\(\)\s*\}, \[\]\)/)
   assert.match(appSource, /onClearProject=\{\(\) => \{\s*browserImportOperationCoordinator\.cancel\(\)\s*browserProjectOperationCoordinator\.cancel\(\)\s*browserAssetStore\.clear\(\)/)
-  assert.match(cardSource, /browserAssetStore\.delete\(removedItem\.assetId\)/)
+  assert.match(previewSource, /browserAssetStore\.delete\(removedItem\.assetId\)/)
 })

@@ -34,11 +34,9 @@ function assertLocalReference(reference, owner, additionalRoots = []) {
 }
 
 const allowedExternalUrls = [
-  /^https:\/\/api\.pigeonhand\.tw\/web\/apps\/1\/$/,
   /^https:\/\/line\.me\/ti\/p\/mvI1aBkiy6$/,
   /^https:\/\/pigeonhand\.tw(?:\/feedback\/web)?$/,
   /^https:\/\/traffic\.pigeonhand\.tw$/,
-  /^https:\/\/drive\.google\.com\/drive\/folders\/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm\?usp=drive_link$/,
   /^https:\/\/github\.com\/srhkami\/image-pigeon\.git$/,
 ]
 const metadataExternalUrls = [
@@ -86,7 +84,7 @@ for (const path of textFiles) {
 
   if (/\.js$/i.test(path)) {
     for (const match of content.matchAll(/\b(?:fetch|WebSocket|EventSource|importScripts|Worker|SharedWorker|import)\s*(?:\?\.)?\(\s*(["'`])((?:https?:)?\/\/[^"'`]*)\1/gi)) {
-      assert.equal(match[2], 'https://api.pigeonhand.tw/web/apps/1/', `JavaScript 含未允許的外部請求：${match[2]}`)
+      assert.fail(`JavaScript 含未允許的外部請求：${match[2]}`)
     }
     for (const match of content.matchAll(/\b(?:sendBeacon|open)\s*(?:\?\.)?\([^)]*?(["'`])((?:https?:)?\/\/[^"'`]*)\1/gi)) {
       assert.fail(`JavaScript 含未允許的外部請求：${match[2]}`)
@@ -114,6 +112,7 @@ const forbidden = [
   'requestJson',
   'save_docx',
   'save_images',
+  'api.pigeonhand.tw/web/apps/1/',
 ]
 for (const value of forbidden) {
   const hits = textFiles.filter(path => readFileSync(path, 'utf8').includes(value))

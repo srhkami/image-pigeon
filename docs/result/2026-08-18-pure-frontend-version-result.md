@@ -75,6 +75,8 @@ execution:
 # image-pigeon 純前端版本 C0–C10 部分執行結果
 
 > 後續決策（2026-08-25）：本結果記錄的舊 `.ipigeon/` 資料夾與 1.x JSON 相容功能，已由 `docs/plans/2026-08-25-retire-legacy-project-formats.md` 接續退場。下列內容保留當時實際執行證據，不代表目前版本仍提供舊格式支援。
+>
+> 後續決策（2026-08-25）：本結果記錄的版本 API、更新提示與固定版本 GET 已由 `docs/result/2026-08-25-remove-automatic-update-result.md` 接續退場。下列 C0／C8／C9 內容保留當時實際執行證據，不代表目前正式前端仍會自動檢查更新或連線至版本 API。
 
 ## 結論
 

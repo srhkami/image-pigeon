@@ -92,15 +92,17 @@ workstreams:
           - version_3_0_0_precommit_review_request_changes_deleg_493eabc3
           - version_3_0_0_focused_re_review_passed_deleg_0e7228f1
           - version_3_0_0_release_commit_completed_440bdcd
+          - version_3_0_0_image_editor_bugfixes_completed
+          - version_3_0_0_automatic_update_removed
     blockers:
       - 目標 Windows 11／Edge／Microsoft 365 Word 五種版型與資源 UAT 依使用者決定先忽略，未執行且不得宣稱相容性 PASS
       - 機關 Windows Microsoft Edge 的瀏覽器政策與 Canvas／下載能力尚未實機驗證
     approval_gates:
       planning_docs: approved
       branch_create: completed
-      source_write: approved_consumed_retire_legacy_project_formats
+      source_write: approved_consumed_remove_automatic_update
       dependency_install: approved_consumed_c7_docx
-      automated_test: completed_104_frontend_version_3_0_0_regression
+      automated_test: completed_remove_update_scoped_full_95_of_96_unrelated_print_copy_failure
       local_browser_smoke: completed_c0_c4_c9_bounded
       browser_uat: closed_c10_target_windows_skipped_by_user_no_pass
       word_compatibility_uat: closed_c10_target_windows_skipped_by_user_no_pass
@@ -124,6 +126,16 @@ workstreams:
       - tests/versionMetadata.test.ts
     conflicts_with: []
 recent_results:
+  - id: result-image-pigeon-remove-automatic-update-2026-08-25
+    path: docs/result/2026-08-25-remove-automatic-update-result.md
+    status: completed
+    completed_at: 2026-08-25
+    note: 自動更新提示、版本 API、忽略版本狀態與外部網路例外已退場；聚焦 10/10、lint、build、static、瀏覽器同源資源煙霧驗證及差異護欄通過，完整 suite 的 1 項範圍外列印文案失敗如實保留
+  - id: result-image-pigeon-image-editor-bugfixes-2026-08-25
+    path: docs/result/2026-08-25-image-editor-bugfixes-result.md
+    status: completed
+    completed_at: 2026-08-25
+    note: 刪除目前圖片改為選擇鄰近圖片，六張後接上下的反向混合版型位置已修正；19 項聚焦回歸、lint、build 與 diff check 通過，完整 suite 的 1 項範圍外文案契約失敗如實保留
   - id: result-image-pigeon-retire-legacy-project-formats-2026-08-25
     path: docs/result/2026-08-25-retire-legacy-project-formats-result.md
     status: completed
@@ -183,9 +195,9 @@ last_reconciled: 2026-08-25
 
 ## 目前摘要
 
-本專案已切換至 Project-State v1。`STATE.md` 是目前工作線與下一步的唯一入口；架構、決策、治理、計畫與結果分別由 scoped `docs/` 保存。純前端版本候選已於 `feat/pure-frontend` 提交基線 `0a18b73`；提交前 109/109 前端測試、lint、TypeScript／Vite production build、正式產物探針、差異護欄與聚焦複審均通過。獨立 JSON 與 `.ipigeon/` 專案資料夾相容已依 `docs/plans/2026-08-25-retire-legacy-project-formats.md` 完成退場，退場後 103/103 前端測試、lint、build、static、差異護欄及最終聚焦複審通過，目前唯一候選格式為單檔 `.ipigeon` archive。3.0.0 版本 metadata、內建與根目錄更新日誌、README 已完成，最新 104/104 前端測試、lint、build、static 與差異護欄通過；提交前第一輪複審 finding 已修正，聚焦複審 `deleg_0e7228f1` 通過。3.0.0 版本交付已建立本機提交 `440bdcd`。目標 Windows 11／Microsoft Edge／Microsoft 365 Word UAT 仍未執行，不得擴張為相容性 PASS；正式部署、push、merge 與純前端候選採用尚未核准。
+本專案已切換至 Project-State v1。`STATE.md` 是目前工作線與下一步的唯一入口；架構、決策、治理、計畫與結果分別由 scoped `docs/` 保存。純前端版本候選已於 `feat/pure-frontend` 提交基線 `0a18b73`；提交前 109/109 前端測試、lint、TypeScript／Vite production build、正式產物探針、差異護欄與聚焦複審均通過。獨立 JSON 與 `.ipigeon/` 專案資料夾相容已依 `docs/plans/2026-08-25-retire-legacy-project-formats.md` 完成退場，退場後 103/103 前端測試、lint、build、static、差異護欄及最終聚焦複審通過，目前唯一候選格式為單檔 `.ipigeon` archive。3.0.0 版本 metadata、內建與根目錄更新日誌、README 已完成，最新 104/104 前端測試、lint、build、static 與差異護欄通過；提交前第一輪複審 finding 已修正，聚焦複審 `deleg_0e7228f1` 通過。3.0.0 版本交付已建立本機提交 `440bdcd`。其後發現的圖片刪除焦點與「六張 → 上下」混合排版問題已完成小範圍修正；自動更新提示、版本 API 與相關外部網路例外也已完成退場，證據分別記錄於 `docs/result/2026-08-25-image-editor-bugfixes-result.md` 與 `docs/result/2026-08-25-remove-automatic-update-result.md`。目標 Windows 11／Microsoft Edge／Microsoft 365 Word UAT 仍未執行，不得擴張為相容性 PASS；正式部署、push、merge 與純前端候選採用尚未核准。
 
-Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並完成 lifecycle closure。焦點式編輯器以滾輪切換圖片前保存備註的修正已通過回歸測試、lint、build 與獨立程式審查，並完成生命週期閉環。「外部圖片拖放導入」已完成來源改動、15 項前端回歸、lint、build、scope guard、focused rereview `PASS` 與 Vite browser UAT；macOS pywebview UAT 已由使用者人工驗收成功（user-attested），工作線已收束。檔案選擇器已改為由應用程式提供可靠的初始資料夾，避免 Windows 缺少 `HOMEPATH` 時由 pywebview 拋出 `KeyError`；source 與自動驗證已完成，Windows GUI 實機確認留待問題環境更新。新版本提示已加入「忽略此版本」，以遠端更新日期的七碼民國日期保存於 LocalStorage；前端回歸、lint、build 與 Vite browser UAT 通過。Git 歷史中的舊計畫標籤與既有 `.planning/` 草稿均未被匯入為目前工作。
+Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並完成 lifecycle closure。焦點式編輯器以滾輪切換圖片前保存備註的修正已通過回歸測試、lint、build 與獨立程式審查，並完成生命週期閉環。「外部圖片拖放導入」已完成來源改動、15 項前端回歸、lint、build、scope guard、focused rereview `PASS` 與 Vite browser UAT；macOS pywebview UAT 已由使用者人工驗收成功（user-attested），工作線已收束。檔案選擇器已改為由應用程式提供可靠的初始資料夾，避免 Windows 缺少 `HOMEPATH` 時由 pywebview 拋出 `KeyError`；source 與自動驗證已完成，Windows GUI 實機確認留待問題環境更新。新版本提示曾加入以遠端更新日期保存的忽略機制，該提示、遠端 API 與儲存狀態現已隨純前端版本決策退場；README 彈窗版本化保存仍未實作。Git 歷史中的舊計畫標籤與既有 `.planning/` 草稿均未被匯入為目前工作。
 
 ## Scope map
 
@@ -195,10 +207,12 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-「純前端版本」目前為 `waiting_approval`：候選基線已提交為 `0a18b73`，3.0.0 版本交付已提交為 `440bdcd`；舊格式退場已完成並由 `docs/result/2026-08-25-retire-legacy-project-formats-result.md` 記錄，候選只保留單一 `.ipigeon` archive。3.0.0 更新日誌、README、內建版本 metadata 與回歸測試已完成；第一輪提交前複審 finding 已修正，聚焦複審 `deleg_0e7228f1` 通過。目標 Windows 11／最新版 Microsoft Edge／Microsoft 365 Word UAT 仍未執行，不宣稱 Windows／Word 相容性 PASS。push、merge、候選採用與正式部署仍各自關閉；此工作線仍保留 Python 原始碼作回退與輸出比對，圖片與專案不得上傳。
+「純前端版本」目前為 `waiting_approval`：候選基線已提交為 `0a18b73`，3.0.0 版本交付已提交為 `440bdcd`；舊格式退場已完成並由 `docs/result/2026-08-25-retire-legacy-project-formats-result.md` 記錄，候選只保留單一 `.ipigeon` archive。3.0.0 更新日誌、README、內建版本 metadata 與回歸測試已完成；自動更新提示與版本 API 已退場，正式前端不再發出背景外部 API 請求。第一輪提交前複審 finding 已修正，聚焦複審 `deleg_0e7228f1` 通過。目標 Windows 11／最新版 Microsoft Edge／Microsoft 365 Word UAT 仍未執行，不宣稱 Windows／Word 相容性 PASS。push、merge、候選採用與正式部署仍各自關閉；此工作線仍保留 Python 原始碼作回退與輸出比對，圖片與專案不得上傳。
 
 ## Recent results
 
+- `docs/result/2026-08-25-remove-automatic-update-result.md`
+- `docs/result/2026-08-25-image-editor-bugfixes-result.md`
 - `docs/result/2026-08-25-retire-legacy-project-formats-result.md`
 - `docs/result/2026-08-18-pure-frontend-version-result.md`
 - `docs/result/2026-08-04-sort-mode-thumbnail-scale-result.md`

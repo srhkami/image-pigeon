@@ -50,7 +50,7 @@ export default function PrintPreviewOutput({
       <Col xs={12}>
         <Alert color='info'>
           <IoMdAlert className='text-lg'/>
-          會開啟全頁 A4 預覽；可透過系統列印對話框另存 PDF。瀏覽器無法控制儲存路徑或繞過機關列印政策。
+          不用匯出 WORD，直接透過瀏覽器預覽並列印
         </Alert>
       </Col>
       <FormInputCol xs={12} label='文件標題' error={errors.title?.message}>

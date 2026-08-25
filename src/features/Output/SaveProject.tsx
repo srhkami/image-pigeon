@@ -74,7 +74,7 @@ export default function SaveProject({project, itemCount, setProject}: Props) {
       <Col xs={12}>
         <Alert color='info'>
           <IoMdAlert className='text-lg'/>
-          儲存單一貼圖小鴿手專案檔（.ipigeon），包含壓縮後圖片與設定，可於之後使用「開啟專案」繼續編輯。
+          儲存單一貼圖小鴿手專案檔（.ipigeon），包含壓縮後圖片與設定，可於之後使用「開啟專案」繼續編輯
         </Alert>
       </Col>
       <FormInputCol xs={12} label='專案名稱' error={errors.projectName?.message}>

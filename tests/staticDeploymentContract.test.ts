@@ -45,7 +45,7 @@ test('HTML 不載入第三方字型、腳本或樣式', () => {
   assert.doesNotMatch(html, /<(?:script|link)[^>]+https?:\/\//i)
 })
 
-test('正式來源唯一 fetch 是固定版本檢查，沒有 XMLHttpRequest', () => {
+test('正式來源沒有 fetch 或 XMLHttpRequest', () => {
   const fetchFiles: string[] = []
   const xhrFiles: string[] = []
   for (const url of productionSources()) {
@@ -53,7 +53,7 @@ test('正式來源唯一 fetch 是固定版本檢查，沒有 XMLHttpRequest', (
     if (/\bfetch\b/.test(source)) fetchFiles.push(url.pathname)
     if (/\bXMLHttpRequest\b/.test(source)) xhrFiles.push(url.pathname)
   }
-  assert.deepEqual(fetchFiles.map(path => path.split('/').at(-1)), ['browserVersionCheck.ts'])
+  assert.deepEqual(fetchFiles, [])
   assert.deepEqual(xhrFiles, [])
 })
 
@@ -85,13 +85,12 @@ test('部署文件涵蓋靜態主機、快取、壓縮、HTTPS、CSP 與零上�
     'Cache-Control',
     'HTTPS',
     'Content-Security-Policy',
-    "connect-src 'self' https://api.pigeonhand.tw",
+    "connect-src 'self'",
     "font-src 'self'",
     'file://',
     'Python',
     'Node',
     '零上傳',
-    'VERSION_CHECK_URL',
   ]) assert.match(doc, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `文件缺少：${required}`)
   assert.match(doc, /尾端斜線/)
   assert.match(doc, /使用者明確點擊/)
@@ -104,14 +103,13 @@ test('既有外部導覽集中於明確允許清單並隔離 opener', () => {
   for (const expected of [
     'https://line.me/ti/p/mvI1aBkiy6',
     'https://pigeonhand.tw/feedback/web',
-    'https://drive.google.com/drive/folders/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm?usp=drive_link',
     'https://pigeonhand.tw',
     'https://traffic.pigeonhand.tw',
     'https://github.com/srhkami/image-pigeon.git',
   ]) assert.match(policy, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
   assert.doesNotMatch(sources, /window\.open\(/)
   assert.doesNotMatch(sources, /href=['"]https?:\/\//)
-  assert.equal(sources.match(/rel=['"]noopener noreferrer['"]/g)?.length, 6)
+  assert.equal(sources.match(/rel=['"]noopener noreferrer['"]/g)?.length, 5)
 })
 
 test('產物探針拒絕第三方資源、絕對路徑、缺檔與未 hash 執行資產', () => {

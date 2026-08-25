@@ -65,14 +65,14 @@ pnpm run build
 正式環境必須使用 HTTPS，HTTP 應導向 HTTPS。建議由靜態主機回傳以下標頭：
 
 ```text
-Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self' https://api.pigeonhand.tw; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 Referrer-Policy: no-referrer
 X-Content-Type-Options: nosniff
 Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
 Cross-Origin-Opener-Policy: same-origin
 ```
 
-內容安全政策（Content Security Policy, CSP）的 `connect-src 'self' https://api.pigeonhand.tw` 只允許同源讀取與既有版本 API。`font-src 'self'`、`script-src 'self'` 與 `style-src 'self'` 禁止第三方字型、腳本及樣式；目前版本不載入 Google Fonts，使用瀏覽器／作業系統字型。`style-src` 保留 `'unsafe-inline'` 是因既有 React UI 使用行內 style 屬性；不得擴張成第三方樣式來源。
+內容安全政策（Content Security Policy, CSP）的 `connect-src 'self'` 只允許同源讀取，不允許背景連線到外部 API。`font-src 'self'`、`script-src 'self'` 與 `style-src 'self'` 禁止第三方字型、腳本及樣式；目前版本不載入 Google Fonts，使用瀏覽器／作業系統字型。`style-src` 保留 `'unsafe-inline'` 是因既有 React UI 使用行內 style 屬性；不得擴張成第三方樣式來源。
 
 若主機以子路徑提供應用程式，CSP 請以 HTTP response header 設定，不要新增會改變 URL 解譯的 `<base>` 標籤。
 
@@ -83,10 +83,9 @@ Cross-Origin-Opener-Policy: same-origin
 - 一般圖片與長截圖在瀏覽器以 Blob／Canvas 處理。
 - `.ipigeon` 專案、圖片 ZIP 及 Word DOCX 都由 `URL.createObjectURL()` 建立本機下載，不從應用伺服器下載使用者內容。
 - 列印／PDF 使用瀏覽器列印功能。
-- 應用程式不得對圖片、專案或輸出內容發出 POST、PUT、PATCH、DELETE 或其他上傳請求。
-- 唯一預期的自動跨來源資料請求是 `VERSION_CHECK_URL`：`GET https://api.pigeonhand.tw/web/apps/1/`，不帶 body、credentials 或專案 header；失敗時靜默停用提示，不影響主功能。
-- 使用者明確點擊「立即更新」、聯繫作者、回饋表單、既有新版資料夾、鴿手、交通鴿手或功能介紹中的原始碼連結後開啟外站，屬受控外部導覽，不是背景 `fetch`／XMLHttpRequest。這些固定入口集中於 `browserExternalNavigation.ts`，新分頁一律使用 `noopener noreferrer`；導覽不包含專案、圖片、備註或應用程式狀態。
-- 版本 API 回傳的「立即更新」網址必須先通過 HTTP(S) 執行階段驗證；此外不得加入動態外部導覽、分析、telemetry、追蹤像素或遠端資源。
+- 應用程式不得發出任何背景 `fetch`／XMLHttpRequest，也不得對圖片、專案或輸出內容發出 POST、PUT、PATCH、DELETE 或其他上傳請求。
+- 使用者明確點擊聯繫作者、回饋表單、鴿手、交通鴿手或功能介紹中的原始碼連結後開啟外站，屬受控外部導覽。這些固定入口集中於 `browserExternalNavigation.ts`，新分頁一律使用 `noopener noreferrer`；導覽不包含專案、圖片、備註或應用程式狀態。
+- 不得加入動態外部導覽、分析、telemetry、追蹤像素或遠端資源。
 - `blob:`／object URL 是瀏覽器本機資料讀取，不是網路傳輸。
 
 這個零上傳邊界不代表瀏覽器不會取得靜態資產；HTML、CSS、JavaScript、Logo 及圖片等同源 GET 是正常的靜態主機流量。
@@ -97,7 +96,7 @@ Cross-Origin-Opener-Policy: same-origin
 2. 確認無尾端斜線的子路徑會 301／308 導向尾端有斜線的網址，且 `dist/index.html` 的 JavaScript、CSS、Logo 路徑可在該 HTTPS 子路徑解析。
 3. 確認靜態資產 MIME、`Cache-Control`、`Content-Encoding`、`Vary`、CSP 與其他安全標頭。
 4. 對不存在的 `/assets/*` 確認回傳 `404`，不是 `index.html`。
-5. 在網路面板或有界攔截器執行匯入、編輯、專案儲存／開啟、圖片 ZIP、Word 及列印預覽；只允許同源靜態 GET、固定版本 GET 與本機 `blob:` 讀取。
+5. 在網路面板或有界攔截器執行匯入、編輯、專案儲存／開啟、圖片 ZIP、Word 及列印預覽；只允許同源靜態 GET 與本機 `blob:` 讀取，不得出現背景外部 API 請求。
 6. 確認沒有 Python／Node runtime、本機監聽連接埠、資料庫或可寫入伺服器目錄。
 7. 目標 Windows 11／Microsoft Edge／Microsoft 365 Word 的完整 UAT 仍依 C10 執行；其他平台成功不得替代該證據。
 
