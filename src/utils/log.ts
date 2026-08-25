@@ -6,11 +6,7 @@ export const CHANGELOG_LIST: Array<TVersionObject> = [
     date: '1150825',
     logs: [
       {color: 'new', text: '全面改為純前端處理，圖片、專案與輸出皆在本機瀏覽器完成。'},
-      {color: 'new', text: '可直接下載 Word、圖片 ZIP 與單一 `.ipigeon` 專案檔。'},
-      {color: 'new', text: '新增全頁 A4 列印預覽，可透過系統列印對話框列印或另存 PDF。'},
-      {color: 'info', text: '專案格式統一為單一 `.ipigeon` 壓縮檔。'},
-      {color: 'info', text: '停止支援 1.x 獨立 JSON 與舊 `.ipigeon/` 專案資料夾。'},
-      {color: 'fix', text: '改善取消、全部清除、資源回收與專案安全驗證。'},
+      {color: 'info', text: '專案格式統一為單一 `.ipigeon` 壓縮檔，停止支援 1.x 獨立 JSON 與舊 `.ipigeon/` 專案資料夾。'},
     ],
   },
   {

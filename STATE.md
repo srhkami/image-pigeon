@@ -72,22 +72,42 @@ workstreams:
           - c10_automated_regression_passed
           - c10_target_windows_uat_skipped_by_user_no_pass
           - c10_completed_partial
+      - id: plan-image-pigeon-retire-legacy-project-formats-2026-08-25
+        path: docs/plans/2026-08-25-retire-legacy-project-formats.md
+        role: implementation
+        execution_status: completed
+        result: docs/result/2026-08-25-retire-legacy-project-formats-result.md
+        current_checkpoints:
+          - baseline_committed_0a18b73
+          - source_and_docs_approved
+          - plan_authored
+          - legacy_project_formats_removed
+          - automated_verification_passed
+          - first_review_request_changes
+          - review_finding_remediated
+          - second_review_request_changes
+          - canonical_format_docs_reconciled
+          - focused_re_review_passed
+          - legacy_project_format_retirement_completed
+          - version_3_0_0_precommit_review_request_changes_deleg_493eabc3
+          - version_3_0_0_focused_re_review_passed_deleg_0e7228f1
+          - version_3_0_0_release_commit_completed_440bdcd
     blockers:
       - 目標 Windows 11／Edge／Microsoft 365 Word 五種版型與資源 UAT 依使用者決定先忽略，未執行且不得宣稱相容性 PASS
       - 機關 Windows Microsoft Edge 的瀏覽器政策與 Canvas／下載能力尚未實機驗證
     approval_gates:
       planning_docs: approved
       branch_create: completed
-      source_write: approved_consumed_c9_static_hosting_security_closed
+      source_write: approved_consumed_retire_legacy_project_formats
       dependency_install: approved_consumed_c7_docx
-      automated_test: completed_c10_regression
+      automated_test: completed_104_frontend_version_3_0_0_regression
       local_browser_smoke: completed_c0_c4_c9_bounded
       browser_uat: closed_c10_target_windows_skipped_by_user_no_pass
       word_compatibility_uat: closed_c10_target_windows_skipped_by_user_no_pass
       deployment: closed
-      commit: closed
+      commit: completed_version_3_0_0_440bdcd
       push: closed
-    next_action: 等待使用者決定是否採用純前端候選；commit、push、merge、ADR cutover 與正式部署仍各自關閉
+    next_action: 等待使用者決定是否採用純前端候選；push、merge、部署或目標 Windows UAT 仍需各自核准
     shared_paths:
       - src/App.tsx
       - src/types/project.ts
@@ -98,8 +118,17 @@ workstreams:
       - src/features/PrintPreview/
       - package.json
       - vite.config.ts
+      - README.md
+      - CHANGELOG.md
+      - src/utils/log.ts
+      - tests/versionMetadata.test.ts
     conflicts_with: []
 recent_results:
+  - id: result-image-pigeon-retire-legacy-project-formats-2026-08-25
+    path: docs/result/2026-08-25-retire-legacy-project-formats-result.md
+    status: completed
+    completed_at: 2026-08-25
+    note: 獨立 JSON 與 `.ipigeon/` 專案資料夾相容已退場；103 項前端測試、lint、build、static、差異護欄與最終聚焦複審 PASS，未執行 Windows／Word UAT
   - id: result-image-pigeon-pure-frontend-version-2026-08-18
     path: docs/result/2026-08-18-pure-frontend-version-result.md
     status: partial
@@ -147,14 +176,14 @@ recent_results:
     path: docs/result/2026-07-29-project-state-v1-trial-result.md
     status: completed
     completed_at: 2026-07-29
-last_reconciled: 2026-08-24
+last_reconciled: 2026-08-25
 ---
 
 # image-pigeon 專案狀態
 
 ## 目前摘要
 
-本專案已切換至 Project-State v1。`STATE.md` 是目前工作線與下一步的唯一入口；架構、決策、治理、計畫與結果分別由 scoped `docs/` 保存。純前端版本已在 `feat/pure-frontend` 完成 C0–C9 原始碼 checkpoint。使用者已核准 C10，108/108 前端測試、lint、TypeScript／Vite production build、正式產物探針與差異護欄均已通過；使用者決定先忽略 Windows 端，因此目標 Windows 11／Microsoft Edge／Microsoft 365 Word UAT 未執行，結果維持 `partial` 且不得擴張為相容性 PASS。正式部署、commit、push、merge 與 ADR cutover 尚未核准。
+本專案已切換至 Project-State v1。`STATE.md` 是目前工作線與下一步的唯一入口；架構、決策、治理、計畫與結果分別由 scoped `docs/` 保存。純前端版本候選已於 `feat/pure-frontend` 提交基線 `0a18b73`；提交前 109/109 前端測試、lint、TypeScript／Vite production build、正式產物探針、差異護欄與聚焦複審均通過。獨立 JSON 與 `.ipigeon/` 專案資料夾相容已依 `docs/plans/2026-08-25-retire-legacy-project-formats.md` 完成退場，退場後 103/103 前端測試、lint、build、static、差異護欄及最終聚焦複審通過，目前唯一候選格式為單檔 `.ipigeon` archive。3.0.0 版本 metadata、內建與根目錄更新日誌、README 已完成，最新 104/104 前端測試、lint、build、static 與差異護欄通過；提交前第一輪複審 finding 已修正，聚焦複審 `deleg_0e7228f1` 通過。3.0.0 版本交付已建立本機提交 `440bdcd`。目標 Windows 11／Microsoft Edge／Microsoft 365 Word UAT 仍未執行，不得擴張為相容性 PASS；正式部署、push、merge 與純前端候選採用尚未核准。
 
 Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並完成 lifecycle closure。焦點式編輯器以滾輪切換圖片前保存備註的修正已通過回歸測試、lint、build 與獨立程式審查，並完成生命週期閉環。「外部圖片拖放導入」已完成來源改動、15 項前端回歸、lint、build、scope guard、focused rereview `PASS` 與 Vite browser UAT；macOS pywebview UAT 已由使用者人工驗收成功（user-attested），工作線已收束。檔案選擇器已改為由應用程式提供可靠的初始資料夾，避免 Windows 缺少 `HOMEPATH` 時由 pywebview 拋出 `KeyError`；source 與自動驗證已完成，Windows GUI 實機確認留待問題環境更新。新版本提示已加入「忽略此版本」，以遠端更新日期的七碼民國日期保存於 LocalStorage；前端回歸、lint、build 與 Vite browser UAT 通過。Git 歷史中的舊計畫標籤與既有 `.planning/` 草稿均未被匯入為目前工作。
 
@@ -166,10 +195,11 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-「純前端版本」目前為 `waiting_approval`：C0–C9 原始碼 checkpoint 已完成，C10 已獲使用者核准並完成 108/108 前端測試、lint、TypeScript／Vite production build、正式產物探針及 staged 護欄。使用者決定先忽略 Windows 端，因此目標 Windows 11／最新版 Microsoft Edge／Microsoft 365 Word 的一般匯入、舊資料夾匯入、圖片 ZIP、列印／PDF、Word 五種版型、壓力與 working set UAT 均未執行，不宣稱 Windows／Word 相容性 PASS。工作線現等待使用者決定是否採用純前端候選；commit、push、merge、ADR cutover 與正式部署仍各自關閉。此工作線仍保留 Python 原始碼作回退與輸出比對；圖片與專案不得上傳。既有 staged `tests/newVersionDismissal.test.ts` 維持原樣，未納入本工作線變更。
+「純前端版本」目前為 `waiting_approval`：候選基線已提交為 `0a18b73`，3.0.0 版本交付已提交為 `440bdcd`；舊格式退場已完成並由 `docs/result/2026-08-25-retire-legacy-project-formats-result.md` 記錄，候選只保留單一 `.ipigeon` archive。3.0.0 更新日誌、README、內建版本 metadata 與回歸測試已完成；第一輪提交前複審 finding 已修正，聚焦複審 `deleg_0e7228f1` 通過。目標 Windows 11／最新版 Microsoft Edge／Microsoft 365 Word UAT 仍未執行，不宣稱 Windows／Word 相容性 PASS。push、merge、候選採用與正式部署仍各自關閉；此工作線仍保留 Python 原始碼作回退與輸出比對，圖片與專案不得上傳。
 
 ## Recent results
 
+- `docs/result/2026-08-25-retire-legacy-project-formats-result.md`
 - `docs/result/2026-08-18-pure-frontend-version-result.md`
 - `docs/result/2026-08-04-sort-mode-thumbnail-scale-result.md`
 - `docs/result/2026-08-04-diagnostic-logging-result.md`
@@ -182,6 +212,7 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 導航
 
+- 舊專案格式退場計畫：`docs/plans/2026-08-25-retire-legacy-project-formats.md`
 - 純前端版本計畫：`docs/plans/2026-08-18-pure-frontend-version.md`
 - Agent 操作與安全規則：`AGENTS.md`
 - 文件治理：`docs/governance.md`
