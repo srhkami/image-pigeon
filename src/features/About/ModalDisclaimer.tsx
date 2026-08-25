@@ -14,7 +14,7 @@ export default function ModalDisclaimer({isShow, setIsShow}: Props) {
       </ModalHeader>
       <ModalBody>
         <p className='text-start indent-7'>
-          本程式使用 Python + React 編寫而成，除自動檢測更新功能外，其餘功能均不連網，不涉及任何上傳資訊至網際網路的功能。
+          本程式為 React 純前端應用，不會自動連線到外部 API，也不涉及任何上傳資訊至網際網路的功能。
         </p>
         <p className='text-start indent-7'>
           本程式操作資料的功能，只限於將使用者自行選擇的檔案，進行讀取、複製、壓縮、另存新檔等操作，不涉及任何刪除、修改原檔案的功能。

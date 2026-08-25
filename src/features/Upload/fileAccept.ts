@@ -8,5 +8,3 @@ export const SUPPORTED_IMAGE_FILE_EXTENSIONS = new Set([
 ])
 
 export const SUPPORTED_IMAGE_FILE_ACCEPT = Array.from(SUPPORTED_IMAGE_FILE_EXTENSIONS).join(',')
-
-export const LEGACY_JSON_FILE_ACCEPT = '.json'

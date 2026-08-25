@@ -2,6 +2,7 @@ import {useState} from "react";
 import QRcode from '../../assets/line_qrcode.jpg'
 import {Button, Modal, ModalHeader} from "@/component";
 import { MdFeedback } from "react-icons/md";
+import {EXTERNAL_NAVIGATION_URLS} from '@/services/browserExternalNavigation.ts'
 
 export default function ModalFeedback() {
 
@@ -19,7 +20,7 @@ export default function ModalFeedback() {
         </ModalHeader>
         <div className='flex'>
           <div className='flex-2/5 p-3'>
-            <a href="https://line.me/ti/p/mvI1aBkiy6" className="" target='_blank'>
+            <a href={EXTERNAL_NAVIGATION_URLS.lineContact} className="" target='_blank' rel='noopener noreferrer'>
               <img src={QRcode} alt="QR code"/>
             </a>
           </div>
@@ -28,7 +29,7 @@ export default function ModalFeedback() {
             <div className='divider'></div>
             或者到「鴿手」中
             <a className='link link-info'
-               href="https://pigeonhand.tw/feedback/web" target='_blank'>
+               href={EXTERNAL_NAVIGATION_URLS.feedbackForm} target='_blank' rel='noopener noreferrer'>
               填寫表單
             </a>
             回覆

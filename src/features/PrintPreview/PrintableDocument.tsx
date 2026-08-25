@@ -7,7 +7,6 @@ import {ProjectItemViewModel} from '@/types/project.ts'
 
 type Props = {
   readonly project: ProjectV2
-  readonly sessionId: string
   readonly pages?: AutoCollagePage[]
   readonly slotIndexMap?: Record<string, number | null>
   readonly title: string
@@ -19,7 +18,6 @@ type Props = {
 
 export default function PrintableDocument({
   project,
-  sessionId,
   pages: providedPages,
   slotIndexMap: providedSlotIndexMap,
   title,
@@ -28,7 +26,7 @@ export default function PrintableDocument({
   onImageLoaded,
   onImageErrored,
 }: Props) {
-  const orderedItems = getOrderedItemViewModels(project, sessionId)
+  const orderedItems = getOrderedItemViewModels(project)
   const itemById = new Map<string, ProjectItemViewModel>(orderedItems.map((item) => [item.itemId, item]))
 
   const pages = providedPages ?? buildAutoCollageLayout(orderedItems)

@@ -28,4 +28,5 @@ web_cache/
 *.njsproj
 *.sln
 *.sw?
-/tests/
+/tests/*
+!/tests/staticDeploymentContract.test.ts

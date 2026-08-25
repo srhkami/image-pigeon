@@ -4,31 +4,28 @@ import {IoMdAlert} from "react-icons/io";
 import AlertLoading from "../../layout/AlertLoading.tsx";
 import UploadMultiple from "@/features/Upload/UploadMultiple.tsx";
 import UploadLongScreen from "@/features/Upload/UploadLongScreen.tsx";
-import ReadJson from "@/features/Upload/ReadJson.tsx";
-import {Dispatch, SetStateAction, useEffect, useState} from "react";
+import {Dispatch, SetStateAction, useCallback, useEffect, useRef, useState} from "react";
 import {useForm} from "react-hook-form";
 import {CustomImage} from "@/utils/type.ts";
 import {ProjectV2} from "@/types/project.ts";
+import {
+  browserImportOperationCoordinator,
+  type BrowserProjectOperationLease,
+} from "@/services/browserProjectOperation.ts";
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>,
-  readonly project: ProjectV2,
   readonly setProject: Dispatch<SetStateAction<ProjectV2>>,
-  readonly sessionId: string | null,
-  readonly setSessionId: Dispatch<SetStateAction<string | null>>,
   readonly isShow: boolean,
   readonly pendingFiles?: File[],
   readonly onHide: () => void,
 }
 
-type ImportTab = 'multiple' | 'long-screen' | 'legacy-json'
+type ImportTab = 'multiple' | 'long-screen'
 
 export default function ModalImport({
   setImages,
-  project,
   setProject,
-  sessionId,
-  setSessionId,
   isShow,
   pendingFiles = [],
   onHide,
@@ -37,6 +34,30 @@ export default function ModalImport({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [count, setCount] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<ImportTab>('multiple')
+  const operationRef = useRef<BrowserProjectOperationLease | null>(null)
+
+  const beginImport = useCallback(() => {
+    operationRef.current?.cancel()
+    const lease = browserImportOperationCoordinator.begin()
+    operationRef.current = lease
+    return lease.signal
+  }, [])
+
+  const finishImport = useCallback((signal: AbortSignal) => {
+    if (operationRef.current?.signal === signal) {
+      operationRef.current.finish()
+      operationRef.current = null
+    }
+  }, [])
+
+  const handleHide = useCallback(() => {
+    operationRef.current?.cancel()
+    operationRef.current = null
+    setIsLoading(false)
+    onHide()
+  }, [onHide])
+
+  useEffect(() => () => operationRef.current?.cancel(), [])
 
   const {register, watch} = useForm({
     defaultValues: {
@@ -53,7 +74,7 @@ export default function ModalImport({
 
   return (
     <>
-      <Modal isShow={isShow} onHide={onHide} closeButton>
+      <Modal isShow={isShow} onHide={handleHide} closeButton>
         <ModalHeader className='justify-center text-lg font-bold'>
           <LuImageUp className='mr-2'/>
           <span>導入圖片</span>
@@ -73,30 +94,26 @@ export default function ModalImport({
           <div className='divider'></div>
           {
             isLoading ?
-              <AlertLoading count={count}/>
+              <div className='flex flex-col gap-3'>
+                <AlertLoading count={count}/>
+                <button type='button' className='btn btn-error btn-outline' onClick={handleHide}>取消處理</button>
+              </div>
               :
               <div className="tabs tabs-lift mx-auto">
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="一般圖片"
                        checked={activeTab === 'multiple'} onChange={() => setActiveTab('multiple')}/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadMultiple setImages={setImages} defaultRemark={remark}
-                                  onHide={onHide} setIsLoading={setIsLoading} setCount={setCount}
-                                  project={project} setProject={setProject}
-                                  sessionId={sessionId} setSessionId={setSessionId}
-                                  pendingFiles={pendingFiles}/>
+                                  onHide={handleHide} setIsLoading={setIsLoading} setCount={setCount}
+                                  setProject={setProject}
+                                  pendingFiles={pendingFiles} beginImport={beginImport} finishImport={finishImport}/>
                 </div>
                 <input type="radio" name="my_tabs_3" className="tab" aria-label="長截圖分割"
                        checked={activeTab === 'long-screen'} onChange={() => setActiveTab('long-screen')}/>
                 <div className="tab-content bg-base-100 border-base-300 p-6">
                   <UploadLongScreen setImages={setImages} defaultRemark={remark}
-                                    onHide={onHide} setIsLoading={setIsLoading} setCount={setCount}
-                                    project={project} setProject={setProject}
-                                    sessionId={sessionId} setSessionId={setSessionId}/>
-                </div>
-                <input type="radio" name="my_tabs_3" className="tab" aria-label="讀取舊檔"
-                       checked={activeTab === 'legacy-json'} onChange={() => setActiveTab('legacy-json')}/>
-                <div className="tab-content bg-base-100 border-base-300 p-6">
-                  <ReadJson setImages={setImages} onHide={onHide} setIsLoading={setIsLoading}/>
+                                    onHide={handleHide} setIsLoading={setIsLoading} setCount={setCount}
+                                    setProject={setProject} beginImport={beginImport} finishImport={finishImport}/>
                 </div>
               </div>
           }

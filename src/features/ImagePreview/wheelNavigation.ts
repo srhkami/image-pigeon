@@ -8,6 +8,12 @@ export function blurActiveElement(activeElement: unknown): void {
   }
 }
 
+export function getActiveItemIdAfterRemoval(itemIds: readonly string[], removedItemId: string): string | null {
+  const removedIndex = itemIds.indexOf(removedItemId)
+  if (removedIndex < 0) return null
+  return itemIds[removedIndex + 1] ?? itemIds[removedIndex - 1] ?? null
+}
+
 type ActivateItemByOffsetOptions = {
   activeItemIndex: number
   itemIds: readonly string[]

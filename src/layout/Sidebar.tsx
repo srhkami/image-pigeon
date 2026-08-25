@@ -33,7 +33,6 @@ export default function Sidebar({
                                   itemCount,
                                   project,
                                   setProject,
-                                  sessionId,
                                   setSessionId,
                                   onClearProject,
                                   isMoveMode,
@@ -75,10 +74,7 @@ export default function Sidebar({
       </Button>
       <ModalImport
         setImages={setImages}
-        project={project}
         setProject={setProject}
-        sessionId={sessionId}
-        setSessionId={setSessionId}
         isShow={isImportModalOpen}
         pendingFiles={pendingImportFiles}
         onHide={onCloseImport}
@@ -107,7 +103,6 @@ export default function Sidebar({
       <ModalOutput
         project={project}
         setProject={setProject}
-        sessionId={sessionId}
         itemCount={itemCount}
         onEnterPrintPreview={onPrintPreview}
       />

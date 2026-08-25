@@ -49,7 +49,6 @@ export type ProjectV2 = {
 }
 
 export type ProjectImportData = {
-  sessionId: string
   assets: Asset[]
   items: Item[]
   layoutPatch: {
@@ -58,13 +57,6 @@ export type ProjectImportData = {
   segments?: number
   skipped?: string[]
   errors?: Array<{ filename: string; message: string }>
-}
-
-export type ProjectImportResponse = {
-  status: number
-  message: string
-  data: ProjectImportData
-  detail?: string
 }
 
 export type ProjectItemViewModel = {
@@ -83,24 +75,4 @@ export type ProjectItemViewModel = {
   mime: string
   originalName: string | null
   previewUrl: string
-}
-
-export type ProjectSaveResponse = {
-  status: number
-  message: string
-  data: {
-    path: string
-    project: ProjectV2
-  }
-  detail?: string
-}
-
-export type ProjectOpenResponse = {
-  status: number
-  message: string
-  data: {
-    sessionId: string
-    project: ProjectV2
-  }
-  detail?: string
 }

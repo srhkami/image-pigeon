@@ -59,7 +59,8 @@ export function buildAutoCollageLayout(viewModels: readonly AutoCollageSourceIte
       const count = consecutive(viewModels, pointer, 'grid-6', 6)
       const nextAfter = viewModels[pointer + count]
       if (count <= 3 && nextAfter?.layoutPreference === 'stacked-2') {
-        add('mixed-small3-landscape1', ROLES.mixedGridStacked, padded([...viewModels.slice(pointer, pointer + count).map((item) => item.itemId), nextAfter.itemId], 4), count + 1)
+        const gridItemIds = viewModels.slice(pointer, pointer + count).map((item) => item.itemId)
+        add('mixed-small3-landscape1', ROLES.mixedGridStacked, [...padded(gridItemIds, 3), nextAfter.itemId], count + 1)
       } else add('portrait-small-6', ROLES.grid, padded(viewModels.slice(pointer, pointer + count).map((item) => item.itemId), 6), count)
       continue
     }

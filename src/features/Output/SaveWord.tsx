@@ -1,100 +1,95 @@
-import {Alert, Button, Col, FormInputCol, Row} from "@/component";
-import {SubmitHandler, useForm} from "react-hook-form";
-import {OutputWord} from "@/utils/type.ts";
-import {showToast} from "@/utils/handleToast.ts";
-import {checkStatus} from "@/utils/handleError.ts";
-import {useState} from "react";
-import {AlertLoading} from "@/layout";
-import {FaRegFileWord} from "react-icons/fa6";
-import {IoMdAlert} from "react-icons/io";
+import {useEffect, useRef, useState} from 'react'
+import {SubmitHandler, useForm} from 'react-hook-form'
+import {FaRegFileWord} from 'react-icons/fa6'
+import {IoMdAlert} from 'react-icons/io'
+
+import {Alert, Button, Col, FormInputCol, Row} from '@/component'
+import {browserAssetStore} from '@/services/browserAssetStore.ts'
+import {normalizeImageExportFilename} from '@/services/browserImageZip.ts'
+import {createBrowserWordBlob} from '@/services/browserWordExporter.ts'
+import {createBrowserWordItems} from '@/services/browserWordProjectAdapter.ts'
+import {throwIfAborted} from '@/services/browserRuntimeContract.ts'
 import {ProjectV2} from '@/types/project.ts'
-import {
-  buildAutoCollageWordPayloadParts,
-} from '@/state/projectOutputAdapter.ts'
+import {showToast} from '@/utils/handleToast.ts'
 
 type Props = {
-  readonly project: ProjectV2;
-  readonly sessionId: string | null;
-  readonly itemCount: number;
+  readonly project: ProjectV2
+  readonly itemCount: number
 }
 
-export default function SaveWord({project, sessionId, itemCount}: Props) {
+type FormValues = {
+  title: string
+  alignVertical: 'top' | 'center'
+  fontSize: '10' | '11' | '12' | '13' | '14'
+}
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+export default function SaveWord({project, itemCount}: Props) {
+  const [isLoading, setIsLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const controllerRef = useRef<AbortController | null>(null)
+  const {register, handleSubmit, formState: {errors}} = useForm<FormValues>({
+    defaultValues: {title: '照片黏貼表', alignVertical: 'center', fontSize: '12'},
+  })
+  useEffect(() => () => controllerRef.current?.abort(), [])
 
-  const {
-    register,
-    handleSubmit,
-    formState: {errors}
-  } = useForm<OutputWord>({defaultValues: {title: '照片黏貼表'}});
-
-  const onSave: SubmitHandler<OutputWord> = (formData) => {
-    setIsLoading(true);
-    showToast(
-      async () => {
-        if (!sessionId) {
-          throw new Error('尚未建立圖片 session，請先重新匯入圖片')
-        }
-
-        const outputPayload = await buildAutoCollageWordPayloadParts(project, sessionId)
-
-        const res1 = await window.pywebview.api.select_path({mode: 'word', title: formData.title});
-        checkStatus(res1);
-        const data: OutputWord = {
-          ...formData,
-          ...outputPayload,
-          layoutMode: 'auto-collage-v1',
-          path: res1.message,
-        }
-        const res2 = await window.pywebview.api.save_docx(data);
-        checkStatus(res2);
-      },
-      {success: '儲存成功', error: (err => String(err))}
-    )
-      .finally(() => setIsLoading(false))
+  const onSave: SubmitHandler<FormValues> = formData => {
+    controllerRef.current?.abort()
+    const controller = new AbortController()
+    controllerRef.current = controller
+    setProgress(0)
+    setIsLoading(true)
+    showToast(async () => {
+      const items = await createBrowserWordItems(project, browserAssetStore, {
+        signal: controller.signal,
+        onProgress: completed => setProgress(completed),
+      })
+      throwIfAborted(controller.signal)
+      const {blob} = await createBrowserWordBlob({
+        title: formData.title.trim() || '照片黏貼表',
+        alignVertical: formData.alignVertical,
+        fontSize: Number(formData.fontSize),
+        items,
+      })
+      throwIfAborted(controller.signal)
+      const url = URL.createObjectURL(blob)
+      try {
+        const anchor = document.createElement('a')
+        anchor.href = url
+        anchor.download = `${normalizeImageExportFilename(formData.title) || '照片黏貼表'}.docx`
+        anchor.click()
+      } finally {
+        URL.revokeObjectURL(url)
+      }
+    }, {success: 'Word 文件下載成功', error: error => String(error)}).finally(() => {
+      if (controllerRef.current === controller) controllerRef.current = null
+      setIsLoading(false)
+    })
   }
 
-
-  return (
-    <Row>
-      <Col xs={12}>
-        <Alert color='info'>
-          <IoMdAlert className='text-lg'/>
-          此功能可儲存WORD文件，會依照右側預覽畫面排版。
-        </Alert>
-      </Col>
-      <FormInputCol xs={12} label='文件標題 / 檔案名稱' error={errors.title?.message}>
-        <input type='text' className="input w-full"
-               {...register('title', {required: "此填寫此欄位"})}/>
-      </FormInputCol>
-      <FormInputCol xs={6} label='說明文字對齊' error={errors.align_vertical?.message}>
-        <select className="select w-full" id='align_vertical'
-                defaultValue='center' {...register('align_vertical')}>
-          <option value='top'>垂直置頂</option>
-          <option value='center'>垂直置中</option>
-        </select>
-      </FormInputCol>
-      <FormInputCol xs={6} label='字體大小' error={errors.font_size?.message}>
-        <select className="select w-full" id='font_size' defaultValue='12'
-                {...register('font_size')}>
-          <option value='10'>小（10）</option>
-          <option value='11'>偏小（11）</option>
-          <option value='12'>普通（12）</option>
-          <option value='13'>偏大（13）</option>
-          <option value='14'>大（14）</option>
-        </select>
-      </FormInputCol>
-      <Col xs={12} className='mt-6'>
-      {isLoading ?
-           <AlertLoading count={itemCount}/>
-           :
-           <Button color='success' shape='block'
-                   onClick={handleSubmit(onSave)}>
-            <FaRegFileWord/>
-            儲存Word
-          </Button>
-        }
-      </Col>
-    </Row>
-  )
+  return <Row>
+    <Col xs={12}><Alert color='info'><IoMdAlert className='text-lg'/>會生成一個 WORD 檔提供下載</Alert></Col>
+    <FormInputCol xs={12} label='文件標題 / 檔案名稱' error={errors.title?.message}>
+      <input type='text' className='input w-full' disabled={isLoading} {...register('title')}/>
+    </FormInputCol>
+    <FormInputCol xs={6} label='說明文字對齊' error={errors.alignVertical?.message}>
+      <select className='select w-full' disabled={isLoading} {...register('alignVertical')}>
+        <option value='top'>垂直置頂</option>
+        <option value='center'>垂直置中</option>
+      </select>
+    </FormInputCol>
+    <FormInputCol xs={6} label='字體大小' error={errors.fontSize?.message}>
+      <select className='select w-full'
+              disabled={isLoading} {...register('fontSize')}>{['10', '11', '12', '13', '14'].map(size => <option
+        key={size} value={size}>{size}</option>)}</select>
+    </FormInputCol>
+    <Col xs={12} className='mt-6'>
+      {isLoading ? <div className='space-y-3'>
+          <div className='text-center'>正在建立 Word 文件（{progress}/{itemCount}）</div>
+          <progress className='progress progress-info w-full' value={progress} max={itemCount}/>
+          <Button color='warning' shape='block' onClick={() => controllerRef.current?.abort()}>取消</Button></div>
+        :
+        <Button color='success' shape='block' disabled={itemCount === 0} onClick={handleSubmit(onSave)}><FaRegFileWord/>下載
+          Word</Button>}
+    </Col>
+  </Row>
 }

@@ -1,6 +1,6 @@
 import {ProjectImportData} from '@/types/project.ts'
 import {CustomImage} from '@/utils/type.ts'
-import {getAssetImageUrl} from '@/services/imageApi.ts'
+import {browserAssetStore} from '@/services/browserAssetStore.ts'
 import {ProjectV2} from '@/types/project.ts'
 import {getOrderedItemViewModels} from '@/state/projectState.ts'
 
@@ -33,7 +33,6 @@ export function applyImportRemarks(
 
 export function toCustomImagesFromImportData(
   importData: ProjectImportData,
-  sessionId: string,
   remarkMode: RemarkMode,
 ): CustomImage[] {
   const importDataWithRemarks = applyImportRemarks(importData, remarkMode)
@@ -48,7 +47,7 @@ export function toCustomImagesFromImportData(
 
       const image = new CustomImage(null, item.remark)
       image.id = item.id
-      image.preview = getAssetImageUrl(sessionId, asset.id)
+      image.preview = browserAssetStore.getUrl(asset.id)
       image.width = asset.width
       image.height = asset.height
       image.rotation = item.rotation

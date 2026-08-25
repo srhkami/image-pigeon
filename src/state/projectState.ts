@@ -7,7 +7,7 @@ import {
   ProjectV2,
   WordCompatibleGridLayout,
 } from '@/types/project.ts'
-import {getAssetImageUrl} from '@/services/imageApi.ts'
+import {browserAssetStore} from '@/services/browserAssetStore.ts'
 
 const DEFAULT_LAYOUT_ID = 'layout_word_default'
 const DEFAULT_LAYOUT_TYPE: WordCompatibleGridLayout['type'] = 'word-compatible-grid'
@@ -108,7 +108,8 @@ export function applyImportResult(project: ProjectV2, importData: ProjectImportD
   }
 }
 
-export function getOrderedItemViewModels(project: ProjectV2, sessionId: string): ProjectItemViewModel[] {
+export function getOrderedItemViewModels(project: ProjectV2, sessionId?: string): ProjectItemViewModel[] {
+  void sessionId
   const defaultLayout = getDefaultLayout(project)
   const itemOrder = defaultLayout.itemOrder
   const itemMap = new Map<string, Item>(project.items.map((item) => [item.id, item]))
@@ -149,7 +150,7 @@ export function getOrderedItemViewModels(project: ProjectV2, sessionId: string):
         assetSize: asset.size,
         mime: asset.mime,
         originalName: asset.originalName,
-        previewUrl: getAssetImageUrl(sessionId, asset.id),
+        previewUrl: browserAssetStore.getUrl(asset.id),
       }
     })
     .filter((item): item is ProjectItemViewModel => Boolean(item))

@@ -2,6 +2,14 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '3.0.0',
+    date: '1150825',
+    logs: [
+      {color: 'new', text: '全面改為純前端處理，圖片、專案與輸出皆在本機瀏覽器完成。'},
+      {color: 'info', text: '專案格式統一為單一 `.ipigeon` 壓縮檔，停止支援 1.x 獨立 JSON 與舊 `.ipigeon/` 專案資料夾。'},
+    ],
+  },
+  {
     version: '2.2.0',
     date:'1150804',
     logs:[

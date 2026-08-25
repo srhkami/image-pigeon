@@ -1,29 +1,3 @@
-export type Response<T> = {
-  status: number,
-  message: string,
-  data: T,
-}
-
-export type UploadImage = {
-  file: string; // 為base64字串
-  min_size: number, // 最小尺寸
-  quality: '90' | '75' | '50', // 壓縮率
-}
-
-
-export interface OutputBaseData {
-  title: string,
-  images: Array<CustomImage>,
-  path: string,
-}
-
-export type AutoCollageWordTemplate =
-  | 'landscape-2'
-  | 'portrait-large-2'
-  | 'portrait-small-6'
-  | 'mixed-landscape1-small3'
-  | 'mixed-small3-landscape1'
-
 export type AutoCollageWordSlotRole =
   | 'landscape-top'
   | 'landscape-bottom'
@@ -43,36 +17,6 @@ export type AutoCollageWordSlotRole =
   | 'mixed-small-bottom-middle'
   | 'mixed-small-bottom-right'
   | 'mixed-landscape-bottom'
-
-export interface AutoCollageWordSlot {
-  slotId: string
-  itemId: string | null
-  role: AutoCollageWordSlotRole
-  order: number
-}
-
-export interface AutoCollageWordPage {
-  pageId: string
-  template: AutoCollageWordTemplate
-  slots: AutoCollageWordSlot[]
-}
-
-export interface OutputWord extends OutputBaseData {
-  mode?: '1' | '2' | '4' | '6',
-  layoutMode?: 'auto-collage-v1',
-  pages?: AutoCollageWordPage[],
-  align_vertical: 'top' | 'center',
-  font_size: '10' | '11' | '12' | '13' | '14',
-}
-
-export interface SaveAsImages extends OutputBaseData {
-  is_remark_mode: boolean,
-}
-
-export type TSelectPath = {
-  mode: 'word' | 'images' | 'json' | 'project-save' | 'project-open',
-  title?: string,
-}
 
 export class CustomImage {
   id: string
@@ -174,13 +118,6 @@ export class CustomImage {
   setRotation(value: 0 | 90 | 180 | 270) {
     this.rotation = value; // 角度保持在 0~359
   }
-}
-
-export type VersionCheckData = {
-  app_version: string,
-  whats_new: string,
-  download_link: string,
-  updated_at: string,
 }
 
 export type TVersionObject = {

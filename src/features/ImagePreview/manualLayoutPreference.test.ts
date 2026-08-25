@@ -47,6 +47,24 @@ test('排版演算法保留六張空 slot 與穩定 page、slot id', () => {
   )
 })
 
+test('六張後接上下時，上下圖片固定放在混合版型的底部橫圖位置', () => {
+  const pages = buildAutoCollageLayout([
+    source('grid-01', 'grid-6'),
+    source('stacked-01', 'stacked-2'),
+  ])
+
+  assert.equal(pages[0]?.template, 'mixed-small3-landscape1')
+  assert.deepEqual(
+    pages[0]?.slots.map((slot) => [slot.role, slot.itemId]),
+    [
+      ['mixed-small-bottom-left', 'grid-01'],
+      ['mixed-small-bottom-middle', null],
+      ['mixed-small-bottom-right', null],
+      ['mixed-landscape-bottom', 'stacked-01'],
+    ],
+  )
+})
+
 test('前端狀態以已保存 layoutPreference 為權威，旋轉不覆寫它', () => {
   const sourceText = readFileSync(new URL('../../state/projectState.ts', import.meta.url), 'utf8')
 
@@ -60,18 +78,18 @@ test('焦點預覽只把刪除放在右上，排版選擇器與旋轉控制同�
   const sourceText = readFileSync(new URL('./FocusImageCard.tsx', import.meta.url), 'utf8')
 
   assert.match(sourceText, /aria-label='刪除圖片'/)
-  assert.match(sourceText, /flex items-center justify-between[^>]*><span className='badge badge-outline'>#\{index \+ 1\}<\/span>\{isActive && <button type='button' aria-label='刪除圖片'/)
+  assert.match(sourceText, /flex items-center justify-between[^>]*>\s*<span className='badge badge-outline'>#\{index \+ 1\}<\/span>\s*\{isActive &&\s*<button type='button' aria-label='刪除圖片'/)
   assert.doesNotMatch(sourceText, /badge-info'\}>\{orientation\}/)
   assert.match(sourceText, /ml-auto[^>]*>\{LAYOUT_OPTIONS\.map/)
   assert.doesNotMatch(sourceText, /LAYOUT_OPTIONS\.map[\s\S]*btn btn-xs/)
   assert.doesNotMatch(sourceText, /absolute bottom-2 right-2[^>]*>\{LAYOUT_OPTIONS\.map/)
 })
 
-test('Word 輸出與預覽共用同一個自動分頁 builder', () => {
-  const sourceText = readFileSync(new URL('../../state/projectOutputAdapter.ts', import.meta.url), 'utf8')
+test('Word exporter 與預覽共用同一個自動分頁 builder', () => {
+  const sourceText = readFileSync(new URL('../../services/browserWordExporter.ts', import.meta.url), 'utf8')
 
-  assert.match(sourceText, /import \{AutoCollagePage, buildAutoCollageLayout\}/)
-  assert.match(sourceText, /const pages = buildAutoCollageLayout\(viewModels\)/)
+  assert.match(sourceText, /import \{buildAutoCollageLayout, type AutoCollagePage\}/)
+  assert.match(sourceText, /const layout = buildAutoCollageLayout\(options\.items\)/)
 })
 
 test('排序模式放大圖片並顯示目前排版偏好', () => {

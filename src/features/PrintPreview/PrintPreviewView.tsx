@@ -11,7 +11,6 @@ import './printPreview.css'
 
 type Props = {
   readonly project: ProjectV2
-  readonly sessionId: string | null
   readonly title: string
   readonly fontSize: PrintFontSize
   readonly alignVertical: PrintAlignVertical
@@ -20,15 +19,14 @@ type Props = {
 
 export default function PrintPreviewView({
   project,
-  sessionId,
   title,
   fontSize,
   alignVertical,
   onBackToEditor,
 }: Props) {
   const viewModels = useMemo(
-    () => getOrderedItemViewModels(project, sessionId ?? ''),
-    [project, sessionId],
+    () => getOrderedItemViewModels(project),
+    [project],
   )
   const pages = useMemo(() => buildAutoCollageLayout(viewModels), [viewModels])
   const slotIndexMap = useMemo(() => buildPrintableSlotIndexMap(pages), [pages])
@@ -51,7 +49,6 @@ export default function PrintPreviewView({
         <div className='print-preview-stage'>
           <PrintableDocument
             project={project}
-            sessionId={sessionId ?? ''}
             pages={pages}
             slotIndexMap={slotIndexMap}
             title={title}

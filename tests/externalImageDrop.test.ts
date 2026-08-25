@@ -89,10 +89,12 @@ test('導入 modal 每次開啟都以一般圖片受控頁籤開始', () => {
   assert.match(modalImportSource, /checked=\{activeTab === 'multiple'\}/)
 })
 
-test('多檔導入在使用者送出前只保留暫存檔案', () => {
+test('多檔導入在使用者送出後才交給純前端 adapter', () => {
   assert.match(uploadMultipleSource, /const files = selectedFiles/)
   assert.match(uploadMultipleSource, /if \(!files\.length\) \{/)
-  assert.match(uploadMultipleSource, /notifyOptionalProgress\(window\.pywebview, done\)/)
+  assert.match(uploadMultipleSource, /await importGeneralImages\(\{/)
+  assert.match(uploadMultipleSource, /store: browserAssetStore/)
+  assert.doesNotMatch(uploadMultipleSource, /window\.pywebview|importImages\(/)
 })
 
 test('drop path 只開啟受控 modal，不直接呼叫匯入 API', () => {
@@ -111,8 +113,7 @@ test('關閉 modal 時會清除拖放暫存檔案，手動選檔仍更新 select
   assert.match(uploadMultipleSource, /setSelectedFiles\(Array\.from\(event\.target\.files \?\? \[\]\)\)/)
 })
 
-test('loading 掛載時缺少 pywebview bridge 會安全略過註冊', () => {
-  assert.match(alertLoadingSource, /const bridge = window\.pywebview/)
-  assert.match(alertLoadingSource, /if \(!count \|\| !bridge\) return/)
-  assert.match(alertLoadingSource, /bridge\.updateProgress = \(progress\) =>/)
+test('loading 是誠實的本機不定進度，沒有 pywebview bridge 或虛構百分比', () => {
+  assert.doesNotMatch(alertLoadingSource, /pywebview|updateProgress|<progress/)
+  assert.match(alertLoadingSource, /處理中請稍後/)
 })

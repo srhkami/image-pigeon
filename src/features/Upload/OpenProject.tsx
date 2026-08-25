@@ -1,11 +1,15 @@
-import {Dispatch, SetStateAction} from 'react'
+import {ChangeEvent, Dispatch, SetStateAction, useEffect, useRef} from 'react'
 import {Button} from '@/component'
 import {CustomImage} from '@/utils/type.ts'
 import {ProjectV2} from '@/types/project.ts'
-import {checkStatus} from '@/utils/handleError.ts'
 import {showToast} from '@/utils/handleToast.ts'
-import {openProject} from '@/services/projectApi.ts'
+import {openProjectArchive, type OpenedBrowserProject} from '@/services/browserProjectArchive.ts'
+import {browserAssetStore} from '@/services/browserAssetStore.ts'
 import {toCustomImagesFromProject} from '@/state/projectImageAdapter.ts'
+import {
+  browserProjectOperationCoordinator,
+  type BrowserProjectOperationLease,
+} from '@/services/browserProjectOperation.ts'
 import {HiFolderOpen,} from 'react-icons/hi'
 import toast from 'react-hot-toast'
 
@@ -16,35 +20,39 @@ type Props = {
   readonly itemCount: number
 }
 
-function getPywebviewApi() {
-  const api = window.pywebview?.api
-  if (!api) {
-    throw new Error('請在桌面程式中使用專案儲存/開啟功能')
-  }
-  return api
-}
-
 export default function OpenProject({setProject, setSessionId, setImages, itemCount}: Props) {
+  const archiveInputRef = useRef<HTMLInputElement | null>(null)
+  const operationRef = useRef<BrowserProjectOperationLease | null>(null)
 
-  const openSelectedProject = () => {
-    showToast(
-      async () => {
-        const res = await getPywebviewApi().select_path({mode: 'project-open'})
-        checkStatus(res)
+  useEffect(() => () => operationRef.current?.cancel(), [])
 
-        const opened = await openProject({projectPath: res.message})
-        setProject(opened.data.project)
-        setSessionId(opened.data.sessionId)
-        setImages(() => toCustomImagesFromProject(opened.data.project, opened.data.sessionId))
-
-      },
-      {success: '專案開啟成功', error: (err) => String(err)},
-    )
+  const applyOpenedProject = (opened: OpenedBrowserProject) => {
+    browserAssetStore.replaceAll(opened.assets)
+    setProject(opened.project)
+    setSessionId(null)
+    setImages(() => toCustomImagesFromProject(opened.project, ''))
   }
 
-  const handleOpen = () => {
+  const runOpen = (operation: (signal: AbortSignal) => Promise<OpenedBrowserProject>) => {
+    operationRef.current?.cancel()
+    const lease = browserProjectOperationCoordinator.begin()
+    operationRef.current = lease
+    showToast(async () => {
+      const opened = await operation(lease.signal)
+      lease.assertCurrent()
+      applyOpenedProject(opened)
+    }, {
+      success: '專案開啟成功',
+      error: (error) => String(error),
+    }).finally(() => {
+      lease.finish()
+      if (operationRef.current === lease) operationRef.current = null
+    })
+  }
+
+  const confirmThenSelect = (input: HTMLInputElement | null) => {
     if (itemCount === 0) {
-      openSelectedProject()
+      input?.click()
       return
     }
 
@@ -55,7 +63,7 @@ export default function OpenProject({setProject, setSessionId, setImages, itemCo
         <div className='flex justify-end mt-2'>
           <Button size='sm' color='error' onClick={() => {
             toast.dismiss(t.id)
-            openSelectedProject()
+            input?.click()
           }}>
             確定
           </Button>
@@ -67,9 +75,18 @@ export default function OpenProject({setProject, setSessionId, setImages, itemCo
     ))
   }
 
+  const onArchiveChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (file) runOpen(signal => openProjectArchive(file, signal))
+  }
+
   return (
-      <Button color='primary' onClick={handleOpen}>
-        <HiFolderOpen/> 開啟專案
+    <div className='flex flex-col gap-2'>
+      <input ref={archiveInputRef} type='file' accept='.ipigeon' className='hidden' onChange={onArchiveChange}/>
+      <Button color='primary' onClick={() => confirmThenSelect(archiveInputRef.current)}>
+        <HiFolderOpen/> 開啟專案檔
       </Button>
+    </div>
   )
 }

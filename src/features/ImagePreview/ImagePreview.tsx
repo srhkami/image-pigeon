@@ -20,10 +20,11 @@ import {CustomImage} from '@/utils/type.ts'
 import FocusImageEditor from '@/features/ImagePreview/FocusImageEditor.tsx'
 import SortableImageList from '@/features/ImagePreview/SortableImageList.tsx'
 import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
-import {getOrderedItemViewModels, reorderItem} from '@/state/projectState.ts'
+import {getOrderedItemViewModels, removeItem, reorderItem} from '@/state/projectState.ts'
 import CollagePagePreviewRail from '@/features/ImagePreview/CollagePagePreviewRail.tsx'
 import {buildAutoCollageLayout, findPageIndexByItemId} from '@/features/ImagePreview/autoCollageLayout.ts'
-import {activateItemByOffset} from '@/features/ImagePreview/wheelNavigation.ts'
+import {activateItemByOffset, getActiveItemIdAfterRemoval} from '@/features/ImagePreview/wheelNavigation.ts'
+import {browserAssetStore} from '@/services/browserAssetStore.ts'
 
 type Props = {
   readonly project: ProjectV2,
@@ -137,6 +138,19 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
     }
   }
 
+  const handleRemoveItem = useCallback((itemId: string) => {
+    setActiveItemId(getActiveItemIdAfterRemoval(sortableItemIds, itemId))
+    setProject((prev) => {
+      const removedItem = prev.items.find(item => item.id === itemId)
+      const nextProject = removeItem(prev, itemId)
+      if (removedItem && !nextProject.items.some(item => item.assetId === removedItem.assetId)) {
+        browserAssetStore.delete(removedItem.assetId)
+      }
+      return nextProject
+    })
+    setImages((prev) => prev.filter((item) => item.id !== itemId))
+  }, [setImages, setProject, sortableItemIds])
+
   const handleDragEnd = (event: DragEndEvent) => {
     const {active, over} = event
     if (!over || active.id === over.id) return
@@ -197,6 +211,7 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
           setActiveItemId={setActiveItemId}
           setProject={setProject}
           setImages={setImages}
+          onRemoveItem={handleRemoveItem}
         />
       </div>
       <CollagePagePreviewRail
