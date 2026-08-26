@@ -1,4 +1,4 @@
-import {
+import type {
   Asset,
   Item,
   LayoutPreference,
@@ -6,8 +6,8 @@ import {
   ProjectItemViewModel,
   ProjectV2,
   WordCompatibleGridLayout,
-} from '@/types/project.ts'
-import {browserAssetStore} from '@/services/browserAssetStore.ts'
+} from '../types/project.ts'
+import {browserAssetStore} from '../services/browserAssetStore.ts'
 
 const DEFAULT_LAYOUT_ID = 'layout_word_default'
 const DEFAULT_LAYOUT_TYPE: WordCompatibleGridLayout['type'] = 'word-compatible-grid'
@@ -156,22 +156,48 @@ export function getOrderedItemViewModels(project: ProjectV2, sessionId?: string)
     .filter((item): item is ProjectItemViewModel => Boolean(item))
 }
 
-export function removeItem(project: ProjectV2, itemId: string): ProjectV2 {
-  const defaultLayout = getDefaultLayout(project)
-  const nextLayout: WordCompatibleGridLayout = {
-    ...defaultLayout,
-    itemOrder: defaultLayout.itemOrder.filter((id) => id !== itemId),
+export function applyBatchRotation(project: ProjectV2, itemIds: ReadonlySet<string>, offset: 90 | -90): ProjectV2 {
+  return {
+    ...project,
+    items: project.items.map((item) => {
+      if (!itemIds.has(item.id)) return item
+      return {...item, rotation: ((item.rotation + offset) % 360 + 360) % 360 as Item['rotation']}
+    }),
   }
+}
+
+export function applyBatchLayoutPreference(
+  project: ProjectV2,
+  itemIds: ReadonlySet<string>,
+  layoutPreference: LayoutPreference,
+): ProjectV2 {
+  return {
+    ...project,
+    items: project.items.map((item) => itemIds.has(item.id) ? {...item, layoutPreference} : item),
+  }
+}
+
+export function removeItems(project: ProjectV2, itemIds: ReadonlySet<string>): ProjectV2 {
+  const existingItemIds = new Set(project.items.map((item) => item.id))
+  const removedItemIds = new Set([...itemIds].filter((itemId) => existingItemIds.has(itemId)))
+  if (!removedItemIds.size) return project
+
+  const items = project.items.filter((item) => !removedItemIds.has(item.id))
+  const referencedAssetIds = new Set(items.map((item) => item.assetId))
 
   return {
-    ...replaceDefaultLayout(
-      {
-        ...project,
-        items: project.items.filter((item) => item.id !== itemId),
-      },
-      nextLayout,
-    ),
+    ...project,
+    items,
+    assets: project.assets.filter((asset) => referencedAssetIds.has(asset.id)),
+    layouts: project.layouts.map((layout) => ({
+      ...layout,
+      itemOrder: layout.itemOrder.filter((itemId) => !removedItemIds.has(itemId)),
+    })),
   }
+}
+
+export function removeItem(project: ProjectV2, itemId: string): ProjectV2 {
+  return removeItems(project, new Set([itemId]))
 }
 
 export function clearProjectItems(project: ProjectV2): ProjectV2 {

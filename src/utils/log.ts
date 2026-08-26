@@ -2,6 +2,14 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '3.1.0',
+    date: '1150826',
+    logs: [
+      {color: 'info', text: '將排序模式改善為「整理模式」，支援批次排版和刪除。'},
+      {color: 'info', text: '調整單一專案可以處理的圖片至500張，一次匯入調整為100張。'},
+    ],
+  },
+  {
     version: '3.0.1',
     date: '1150825',
     logs: [

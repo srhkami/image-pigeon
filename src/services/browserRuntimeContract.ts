@@ -1,34 +1,35 @@
 export const BROWSER_RUNTIME_LIMITS = {
   generalImage: {
     maxFileBytes: 33_554_432,
-    maxBatchFiles: 50,
+    maxBatchFiles: 100,
     maxBatchBytes: 536_870_912,
     maxDimension: 16_384,
     maxPixels: 64_000_000,
   },
   longScreen: {
     maxFileBytes: 67_108_864,
+    maxBatchFiles: 100,
     maxWidth: 8_192,
     maxHeight: 65_535,
     maxPixels: 96_000_000,
     maxSegments: 100,
   },
   assetStore: {
-    maxAssets: 200,
+    maxAssets: 500,
     maxBytes: 536_870_912,
   },
   projectArchive: {
     maxCompressedBytes: 536_870_912,
-    maxEntries: 201,
+    maxEntries: 501,
     maxProjectJsonBytes: 2_097_152,
     maxImageEntryBytes: 67_108_864,
     maxExpandedBytes: 536_870_912,
     maxCompressionRatio: 100,
-    maxAssets: 200,
-    maxItems: 200,
+    maxAssets: 500,
+    maxItems: 500,
   },
   imageExport: {
-    maxImages: 200,
+    maxImages: 500,
     maxSourceBytes: 536_870_912,
     maxOutputBytes: 536_870_912,
   },
@@ -92,6 +93,12 @@ export function assertLongScreenFile(file: FileMetadata): void {
 }
 
 export function assertLongScreenBatch(files: readonly FileMetadata[], existingAssetCount = 0): void {
+  if (files.length > BROWSER_RUNTIME_LIMITS.longScreen.maxBatchFiles) {
+    throw new BrowserOperationError(
+      'RESOURCE_LIMIT_EXCEEDED',
+      `一次最多處理 ${BROWSER_RUNTIME_LIMITS.longScreen.maxBatchFiles} 張長截圖`,
+    )
+  }
   const availableAssets = BROWSER_RUNTIME_LIMITS.assetStore.maxAssets - existingAssetCount
   if (files.length > availableAssets) {
     throw new BrowserOperationError('RESOURCE_LIMIT_EXCEEDED', `目前最多可再處理 ${Math.max(0, availableAssets)} 張長截圖`)

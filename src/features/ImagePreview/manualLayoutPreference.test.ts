@@ -107,7 +107,7 @@ test('排序模式放大圖片並顯示目前排版偏好', () => {
   assert.doesNotMatch(sourceText, /summaryText/)
   assert.match(sourceText, /tabIndex=\{0\}/)
   assert.match(sourceText, /onKeyDown=/)
-  assert.match(sourceText, /flex flex-wrap items-center gap-3/)
+  assert.match(sourceText, /relative flex w-full items-center justify-center/)
   assert.match(sourceText, /w-\[32rem\] max-w-full/)
   assert.doesNotMatch(sourceText, /w-\[32rem\][^']*shrink-0/)
 })

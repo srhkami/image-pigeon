@@ -13,6 +13,11 @@ scope:
 parent_state: null
 workstreams: []
 recent_results:
+  - id: result-image-pigeon-batch-image-editing-2026-08-26
+    path: docs/result/2026-08-26-batch-image-editing-result.md
+    status: completed_with_known_test_gap
+    completed_at: 2026-08-26
+    note: 整理模式批次選取、旋轉、排版與確認刪除完成；卡片定位與頂端防遮擋已調整，聚焦 18/18、lint、build、static、差異護欄與最後聚焦複審 PASS；完整前端 108/110 的列印文案與版本契約既有失敗保留；C5 由使用者人工驗收完成，Agent 未操作瀏覽器，commit／push／部署未核准
   - id: result-image-pigeon-wheel-sensitivity-2026-08-25
     path: docs/result/2026-08-25-wheel-sensitivity-result.md
     status: completed
@@ -85,7 +90,7 @@ recent_results:
     path: docs/result/2026-07-29-project-state-v1-trial-result.md
     status: completed
     completed_at: 2026-07-29
-last_reconciled: 2026-08-25
+last_reconciled: 2026-08-26
 ---
 
 # image-pigeon 專案狀態
@@ -104,10 +109,13 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-目前沒有 active workstream。圖片預覽滾輪累積門檻已由 90 降至 45，聚焦滾輪測試 7/7、lint、build 與差異檢查通過；完整前端測試為 97/99，兩項範圍外失敗是既有列印文案契約及版本值 3.0.1 與舊測試期待 3.0.0 不一致。實際操作已由使用者人工驗收完成（user-attested），本工作線已收束；commit、push 與部署均未核准。
+目前沒有執行中的工作線。整理模式批次圖片編輯計畫已完成：C0–C4 原始碼與自動驗證完成，C5 由使用者於 2026-08-26 人工瀏覽器驗收成功，最後文件聚焦複審 `deleg_d2568d4b` 為 `PASS`；Agent 未啟動或操作瀏覽器。完整前端測試 108/110 的兩項既有範圍外失敗保留，commit、push 與部署仍未核准。
+
+上一條圖片預覽滾輪工作線已完成：累積門檻由 90 降至 45，聚焦滾輪測試 7/7、lint、build 與差異檢查通過；完整前端測試為 97/99，兩項範圍外失敗是既有列印文案契約及版本值 3.0.1 與舊測試期待 3.0.0 不一致。實際操作已由使用者人工驗收完成（user-attested）。
 
 ## Recent results
 
+- `docs/result/2026-08-26-batch-image-editing-result.md`
 - `docs/result/2026-08-25-wheel-sensitivity-result.md`
 - `docs/result/2026-08-25-retire-python-runtime-result.md`
 - `docs/result/2026-08-25-remove-automatic-update-result.md`
@@ -125,6 +133,7 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 導航
 
+- 整理模式批次圖片編輯計畫：`docs/plans/2026-08-26-batch-image-editing.md`
 - Python 執行階段退役計畫：`docs/plans/2026-08-25-retire-python-runtime.md`
 - Python 執行階段退役結果：`docs/result/2026-08-25-retire-python-runtime-result.md`
 - 舊專案格式退場計畫：`docs/plans/2026-08-25-retire-legacy-project-formats.md`

@@ -1,5 +1,5 @@
 import {arrayMove} from '@dnd-kit/sortable'
-import {Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState, type WheelEvent} from 'react'
+import {Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, type WheelEvent} from 'react'
 import {
   DndContext,
   closestCenter,
@@ -20,11 +20,10 @@ import {CustomImage} from '@/utils/type.ts'
 import FocusImageEditor from '@/features/ImagePreview/FocusImageEditor.tsx'
 import SortableImageList from '@/features/ImagePreview/SortableImageList.tsx'
 import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
-import {getOrderedItemViewModels, removeItem, reorderItem} from '@/state/projectState.ts'
+import {getOrderedItemViewModels, reorderItem} from '@/state/projectState.ts'
 import CollagePagePreviewRail from '@/features/ImagePreview/CollagePagePreviewRail.tsx'
 import {buildAutoCollageLayout, findPageIndexByItemId} from '@/features/ImagePreview/autoCollageLayout.ts'
-import {activateItemByOffset, getActiveItemIdAfterRemoval} from '@/features/ImagePreview/wheelNavigation.ts'
-import {browserAssetStore} from '@/services/browserAssetStore.ts'
+import {activateItemByOffset} from '@/features/ImagePreview/wheelNavigation.ts'
 
 type Props = {
   readonly project: ProjectV2,
@@ -32,6 +31,11 @@ type Props = {
   readonly sessionId: string | null,
   readonly setImages: Dispatch<SetStateAction<Array<CustomImage>>>,
   readonly isMoveMode: boolean,
+  readonly activeItemId: string | null,
+  readonly setActiveItemId: Dispatch<SetStateAction<string | null>>,
+  readonly selectedItemIds: ReadonlySet<string>,
+  readonly onToggleSelectedItem: (itemId: string) => void,
+  readonly onRemoveItems: (itemIds: ReadonlySet<string>) => void,
 }
 
 const WHEEL_THRESHOLD = 45
@@ -60,10 +64,12 @@ const isEditableTarget = (target: EventTarget | null) => {
     || target.tagName === 'SELECT'
 }
 
-export default function ImagePreview({project, setProject, sessionId, setImages, isMoveMode}: Props) {
+export default function ImagePreview({
+  project, setProject, sessionId, setImages, isMoveMode, activeItemId, setActiveItemId,
+  selectedItemIds, onToggleSelectedItem, onRemoveItems,
+}: Props) {
 
   const viewModels: ProjectItemViewModel[] = getOrderedItemViewModels(project, sessionId ?? "")
-  const [activeItemId, setActiveItemId] = useState<string | null>(null)
   const wheelAccumulatorRef = useRef(0)
   const lastWheelSwitchAtRef = useRef(0)
   const collageLayout = useMemo(() => buildAutoCollageLayout(viewModels), [viewModels])
@@ -84,18 +90,6 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
   const previewLayoutClassName = 'flex h-full min-h-0 flex-col gap-3 overflow-hidden core-3 lg:flex-row lg:items-stretch'
   const editorColumnClassName = 'flex min-h-0 w-full flex-1 justify-center overflow-hidden'
 
-  useEffect(() => {
-    if (!viewModels.length) {
-      setActiveItemId(null)
-      return
-    }
-
-    if (activeItemId && viewModels.some((item) => item.itemId === activeItemId)) {
-      return
-    }
-
-    setActiveItemId(viewModels[0]?.itemId ?? null)
-  }, [viewModels, activeItemId])
 
   useEffect(() => {
     wheelAccumulatorRef.current = 0
@@ -139,17 +133,8 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
   }
 
   const handleRemoveItem = useCallback((itemId: string) => {
-    setActiveItemId(getActiveItemIdAfterRemoval(sortableItemIds, itemId))
-    setProject((prev) => {
-      const removedItem = prev.items.find(item => item.id === itemId)
-      const nextProject = removeItem(prev, itemId)
-      if (removedItem && !nextProject.items.some(item => item.assetId === removedItem.assetId)) {
-        browserAssetStore.delete(removedItem.assetId)
-      }
-      return nextProject
-    })
-    setImages((prev) => prev.filter((item) => item.id !== itemId))
-  }, [setImages, setProject, sortableItemIds])
+    onRemoveItems(new Set([itemId]))
+  }, [onRemoveItems])
 
   const handleDragEnd = (event: DragEndEvent) => {
     const {active, over} = event
@@ -159,7 +144,6 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
     const overId = String(over.id)
 
     setProject(prev => reorderItem(prev, activeId, overId))
-    setActiveItemId(activeId)
 
     setImages((prev) => {
       const oldIndex = prev.findIndex(item => item.id === activeId)
@@ -185,8 +169,8 @@ export default function ImagePreview({project, setProject, sessionId, setImages,
             >
               <SortableImageList
                 viewModels={viewModels}
-                activeItemId={activeItemId}
-                setActiveItemId={setActiveItemId}
+                selectedItemIds={selectedItemIds}
+                onToggleSelectedItem={onToggleSelectedItem}
               />
             </SortableContext>
           </DndContext>

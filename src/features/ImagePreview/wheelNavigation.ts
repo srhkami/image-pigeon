@@ -14,6 +14,25 @@ export function getActiveItemIdAfterRemoval(itemIds: readonly string[], removedI
   return itemIds[removedIndex + 1] ?? itemIds[removedIndex - 1] ?? null
 }
 
+export function getActiveItemIdAfterRemovingItems(
+  itemIds: readonly string[],
+  activeItemId: string | null,
+  removedItemIds: ReadonlySet<string>,
+): string | null {
+  if (activeItemId && !removedItemIds.has(activeItemId) && itemIds.includes(activeItemId)) {
+    return activeItemId
+  }
+
+  const activeIndex = activeItemId ? itemIds.indexOf(activeItemId) : -1
+  const remainingItemIds = itemIds.filter((itemId) => !removedItemIds.has(itemId))
+  if (!remainingItemIds.length) return null
+  if (activeIndex < 0) return remainingItemIds[0] ?? null
+
+  return itemIds.slice(activeIndex + 1).find((itemId) => !removedItemIds.has(itemId))
+    ?? itemIds.slice(0, activeIndex).reverse().find((itemId) => !removedItemIds.has(itemId))
+    ?? null
+}
+
 type ActivateItemByOffsetOptions = {
   activeItemIndex: number
   itemIds: readonly string[]

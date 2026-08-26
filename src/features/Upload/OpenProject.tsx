@@ -59,7 +59,9 @@ export default function OpenProject({setProject, setSessionId, setImages, itemCo
     toast(t => (
       <div className='w-56'>
         <div className='font-bold'>是否開啟其他專案？</div>
-        <div className='text-sm text-error text-start'>會清除目前預覽的所有圖片，此操作無法復原。如需再次編輯，請先儲存當前專案。</div>
+        <div
+          className='text-sm text-error text-start'>會清除目前預覽的所有圖片，此操作無法復原。如需再次編輯，請先儲存當前專案。
+        </div>
         <div className='flex justify-end mt-2'>
           <Button size='sm' color='error' onClick={() => {
             toast.dismiss(t.id)
@@ -85,7 +87,7 @@ export default function OpenProject({setProject, setSessionId, setImages, itemCo
     <div className='flex flex-col gap-2'>
       <input ref={archiveInputRef} type='file' accept='.ipigeon' className='hidden' onChange={onArchiveChange}/>
       <Button color='primary' onClick={() => confirmThenSelect(archiveInputRef.current)}>
-        <HiFolderOpen/> 開啟專案檔
+        <HiFolderOpen/> 開啟專案
       </Button>
     </div>
   )
