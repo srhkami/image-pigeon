@@ -15,23 +15,23 @@ export const BROWSER_RUNTIME_LIMITS = {
     maxSegments: 100,
   },
   assetStore: {
-    maxAssets: 500,
-    maxBytes: 536_870_912,
+    maxAssets: 1000,
+    maxBytes: 209_715_200,
   },
   projectArchive: {
-    maxCompressedBytes: 536_870_912,
-    maxEntries: 501,
+    maxCompressedBytes: 209_715_200,
+    maxEntries: 1001,
     maxProjectJsonBytes: 2_097_152,
     maxImageEntryBytes: 67_108_864,
-    maxExpandedBytes: 536_870_912,
+    maxExpandedBytes: 209_715_200,
     maxCompressionRatio: 100,
-    maxAssets: 500,
-    maxItems: 500,
+    maxAssets: 1000,
+    maxItems: 1000,
   },
   imageExport: {
-    maxImages: 500,
-    maxSourceBytes: 536_870_912,
-    maxOutputBytes: 536_870_912,
+    maxImages: 1000,
+    maxSourceBytes: 209_715_200,
+    maxOutputBytes: 209_715_200,
   },
 } as const
 

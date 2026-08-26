@@ -13,6 +13,11 @@ scope:
 parent_state: null
 workstreams: []
 recent_results:
+  - id: result-image-pigeon-project-resource-limits-2026-08-26
+    path: docs/result/2026-08-26-project-resource-limits-result.md
+    status: completed_with_known_test_gap
+    completed_at: 2026-08-26
+    note: 單一專案圖片上限調整為 1000 張，資產儲存、專案封存與圖片輸出的總量上限調整為 200 MiB；聚焦 4/4、lint、build 與差異檢查通過，完整前端測試 108/110 的兩項既有範圍外失敗保留，commit／push／部署未核准
   - id: result-image-pigeon-batch-image-editing-2026-08-26
     path: docs/result/2026-08-26-batch-image-editing-result.md
     status: completed_with_known_test_gap
@@ -109,12 +114,13 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-目前沒有執行中的工作線。整理模式批次圖片編輯計畫已完成：C0–C4 原始碼與自動驗證完成，C5 由使用者於 2026-08-26 人工瀏覽器驗收成功，最後文件聚焦複審 `deleg_d2568d4b` 為 `PASS`；Agent 未啟動或操作瀏覽器。完整前端測試 108/110 的兩項既有範圍外失敗保留，commit、push 與部署仍未核准。
+目前沒有執行中的工作線。單一專案圖片上限已調整為 1000 張，資產儲存、專案封存與圖片輸出的總量上限已調整為 200 MiB。整理模式批次圖片編輯計畫已完成：C0–C4 原始碼與自動驗證完成，C5 由使用者於 2026-08-26 人工瀏覽器驗收成功，最後文件聚焦複審 `deleg_d2568d4b` 為 `PASS`；Agent 未啟動或操作瀏覽器。完整前端測試 108/110 的兩項既有範圍外失敗保留，commit、push 與部署仍未核准。
 
 上一條圖片預覽滾輪工作線已完成：累積門檻由 90 降至 45，聚焦滾輪測試 7/7、lint、build 與差異檢查通過；完整前端測試為 97/99，兩項範圍外失敗是既有列印文案契約及版本值 3.0.1 與舊測試期待 3.0.0 不一致。實際操作已由使用者人工驗收完成（user-attested）。
 
 ## Recent results
 
+- `docs/result/2026-08-26-project-resource-limits-result.md`
 - `docs/result/2026-08-26-batch-image-editing-result.md`
 - `docs/result/2026-08-25-wheel-sensitivity-result.md`
 - `docs/result/2026-08-25-retire-python-runtime-result.md`

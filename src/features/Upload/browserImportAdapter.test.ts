@@ -123,7 +123,7 @@ test('長截圖 processor 每個來源都取得扣除既有與 pending 後的容
     processor: boundedProcessor,
   })
 
-  assert.deepEqual(capacities.map(value => value.assets), [199, 198])
+  assert.deepEqual(capacities.map(value => value.assets), [999, 998])
   assert.ok(capacities[1].bytes! < capacities[0].bytes!)
 })
 

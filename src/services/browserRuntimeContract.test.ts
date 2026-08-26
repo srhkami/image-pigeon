@@ -11,15 +11,26 @@ import {
 
 test('純前端 v1 資源限制使用固定 bytes 與數量', () => {
   assert.equal(BROWSER_RUNTIME_LIMITS.generalImage.maxFileBytes, 33_554_432)
-  assert.equal(BROWSER_RUNTIME_LIMITS.generalImage.maxBatchFiles, 50)
-  assert.equal(BROWSER_RUNTIME_LIMITS.assetStore.maxAssets, 200)
-  assert.equal(BROWSER_RUNTIME_LIMITS.assetStore.maxBytes, 536_870_912)
+  assert.equal(BROWSER_RUNTIME_LIMITS.generalImage.maxBatchFiles, 100)
+  assert.equal(BROWSER_RUNTIME_LIMITS.assetStore.maxAssets, 1000)
+  assert.equal(BROWSER_RUNTIME_LIMITS.assetStore.maxBytes, 209_715_200)
+  assert.equal(BROWSER_RUNTIME_LIMITS.projectArchive.maxEntries, 1001)
+  assert.equal(BROWSER_RUNTIME_LIMITS.projectArchive.maxAssets, 1000)
+  assert.equal(BROWSER_RUNTIME_LIMITS.projectArchive.maxItems, 1000)
+  assert.equal(BROWSER_RUNTIME_LIMITS.projectArchive.maxCompressedBytes, 209_715_200)
+  assert.equal(BROWSER_RUNTIME_LIMITS.projectArchive.maxExpandedBytes, 209_715_200)
+  assert.equal(BROWSER_RUNTIME_LIMITS.imageExport.maxImages, 1000)
+  assert.equal(BROWSER_RUNTIME_LIMITS.imageExport.maxSourceBytes, 209_715_200)
+  assert.equal(BROWSER_RUNTIME_LIMITS.imageExport.maxOutputBytes, 209_715_200)
   assert.equal(BROWSER_RUNTIME_LIMITS.longScreen.maxSegments, 100)
 })
 
 test('一般圖片批次超過檔數或總 bytes 時固定拒絕', () => {
   assert.throws(
-    () => assertGeneralImageBatch(Array.from({length: 51}, (_, index) => ({name: `${index}.jpg`, size: 1}))),
+    () => assertGeneralImageBatch(Array.from(
+      {length: BROWSER_RUNTIME_LIMITS.generalImage.maxBatchFiles + 1},
+      (_, index) => ({name: `${index}.jpg`, size: 1}),
+    )),
     (error: unknown) => error instanceof BrowserOperationError && error.code === 'RESOURCE_LIMIT_EXCEEDED',
   )
   assert.throws(
@@ -46,5 +57,5 @@ test('長截圖批次在解碼前受資產數量與輸入 bytes 上限約束', (
     () => assertLongScreenBatch([{name: 'large.png', size: BROWSER_RUNTIME_LIMITS.assetStore.maxBytes + 1}]),
     (error: unknown) => (error as {code?: string}).code === 'RESOURCE_LIMIT_EXCEEDED',
   )
-  assert.doesNotThrow(() => assertLongScreenBatch([{name: 'ok.png', size: 1}], 199))
+  assert.doesNotThrow(() => assertLongScreenBatch([{name: 'ok.png', size: 1}], 999))
 })
