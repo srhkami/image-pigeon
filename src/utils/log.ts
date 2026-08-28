@@ -2,11 +2,18 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '3.1.1',
+    date: '1150826',
+    logs: [
+      {color: 'info', text: '調整單一專案可以處理的圖片上限至 1000 張，最多容納 200 MB'},
+    ],
+  },
+  {
     version: '3.1.0',
     date: '1150826',
     logs: [
       {color: 'info', text: '將排序模式改善為「整理模式」，支援批次排版和刪除。'},
-      {color: 'info', text: '調整單一專案可以處理的圖片至500張，一次匯入調整為100張。'},
+      {color: 'info', text: '調整單一專案可以處理的圖片上限至 500 張，一次匯入上限調整為 100 張。'},
     ],
   },
   {

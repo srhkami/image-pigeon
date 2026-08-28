@@ -1,0 +1,21 @@
+appId: tw.pigeonhand.imagepigeon
+productName: 貼圖小鴿手
+asar: true
+npmRebuild: false
+
+files:
+  - dist/**
+  - electron/**
+  - package.json
+  - '!node_modules/**'
+
+directories:
+  output: release
+
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+  artifactName: image-pigeon-${version}-win-${arch}-portable.${ext}
+  forceCodeSigning: false

@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 /tests/*
 !/tests/staticDeploymentContract.test.ts
+!/tests/electronPackagingContract.test.ts
+
+# Electron packaging output
+/release/

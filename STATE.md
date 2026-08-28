@@ -11,8 +11,20 @@ scope:
   affected_projects:
     - image-pigeon
 parent_state: null
-workstreams: []
+workstreams:
+  - id: workstream-electron-portable-mvp-2026-08-28
+    title: Electron Windows x64 免安裝候選
+    status: partial
+    plan: docs/plans/2026-08-28-electron-portable-mvp.md
+    current_checkpoint: windows_manual_uat_pending
+    blocker: Windows GUI、Word、列印、SmartScreen 與防毒仍需後續人工驗收
+    next_action: 使用者在 Windows x64 完成斷網與功能人工驗收後回報結果
 recent_results:
+  - id: result-image-pigeon-electron-portable-mvp-2026-08-28
+    path: docs/result/2026-08-28-electron-portable-mvp-result.md
+    status: partial
+    completed_at: 2026-08-28
+    note: Electron 最小安全殼與 Windows x64 portable 候選已完成；Electron 契約 6/6、範圍內前端測試 110/110、lint、build、static、package、產物探針及獨立複審 PASS；完整前端 114/116 的兩項既有失敗保留，Windows 人工 UAT 待使用者執行，commit／push／部署未核准
   - id: result-image-pigeon-project-resource-limits-2026-08-26
     path: docs/result/2026-08-26-project-resource-limits-result.md
     status: completed_with_known_test_gap
@@ -102,7 +114,7 @@ last_reconciled: 2026-08-26
 
 ## 目前摘要
 
-本專案已切換至 Project-State v1；`STATE.md` 是目前工作線與下一步的唯一入口。3.0 純前端版本已合併至 `dev` 與 `main`，並作為後續主要更新基線；現行唯一專案交換格式為單檔 `.ipigeon` archive，自動更新與舊格式相容路徑均已退役。Python 執行階段、測試、套件環境及 PyInstaller 打包資產也已依 `docs/plans/2026-08-25-retire-python-runtime.md` 從目前候選移除，現行架構與 ADR-0002 以 React + Vite 純前端為權威。退役聚焦測試、lint、build 與靜態產物探針通過；完整前端測試為 97/98，唯一失敗是既有列印文案契約。目標 Windows 11／Microsoft Edge／Microsoft 365 Word UAT 仍未執行，不得擴張為相容性 PASS；本輪 commit、push 與正式部署均未核准。
+本專案已切換至 Project-State v1；`STATE.md` 是目前工作線與下一步的唯一入口。3.0 純前端版本已合併至 `dev` 與 `main`，並作為後續主要更新基線；現行唯一專案交換格式為單檔 `.ipigeon` archive，自動更新與舊格式相容路徑均已退役。Python 執行階段、測試、套件環境及 PyInstaller 打包資產也已依 `docs/plans/2026-08-25-retire-python-runtime.md` 從目前候選移除，現行架構與 ADR-0002 以 React + Vite 純前端為權威。現在新增一條規劃中工作線，評估以最小 Electron 桌面殼包裝同一份 `dist/`，只交付未簽章 Windows x64 免安裝候選；純前端功能、既有 `pnpm run build` 與 HTTPS 靜態部署必須保持不變。該工作線仍在計畫審查階段，source、依賴安裝、自動驗證與本機打包閘門尚未開啟。
 
 Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並完成 lifecycle closure。焦點式編輯器以滾輪切換圖片前保存備註的修正已通過回歸測試、lint、build 與獨立程式審查，並完成生命週期閉環。「外部圖片拖放導入」已完成來源改動、15 項前端回歸、lint、build、scope guard、focused rereview `PASS` 與 Vite browser UAT；macOS pywebview UAT 已由使用者人工驗收成功（user-attested），工作線已收束。檔案選擇器已改為由應用程式提供可靠的初始資料夾，避免 Windows 缺少 `HOMEPATH` 時由 pywebview 拋出 `KeyError`；source 與自動驗證已完成，Windows GUI 實機確認留待問題環境更新。新版本提示曾加入以遠端更新日期保存的忽略機制，該提示、遠端 API 與儲存狀態現已隨純前端版本決策退場；README 彈窗版本化保存仍未實作。Git 歷史中的舊計畫標籤與既有 `.planning/` 草稿均未被匯入為目前工作。
 
@@ -114,7 +126,9 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-目前沒有執行中的工作線。單一專案圖片上限已調整為 1000 張，資產儲存、專案封存與圖片輸出的總量上限已調整為 200 MiB。整理模式批次圖片編輯計畫已完成：C0–C4 原始碼與自動驗證完成，C5 由使用者於 2026-08-26 人工瀏覽器驗收成功，最後文件聚焦複審 `deleg_d2568d4b` 為 `PASS`；Agent 未啟動或操作瀏覽器。完整前端測試 108/110 的兩項既有範圍外失敗保留，commit、push 與部署仍未核准。
+Electron Windows x64 免安裝候選工作線已進入執行：使用者於 2026-08-28 核准依正式計畫開始實作，source、依賴安裝、自動驗證與本機打包閘門已消耗。第一輪計畫健全性審查為 `REQUEST_CHANGES`，必要修正已寫回，聚焦複審 `deleg_e1ea7501` 為 `PASS`。Windows 人工 UAT、commit、push 與部署仍未核准；現有 `src/utils/log.ts` 未暫存修改屬使用者既有工作，必須完整保護。
+
+上一條整理模式批次圖片編輯計畫已完成：C0–C4 原始碼與自動驗證完成，C5 由使用者於 2026-08-26 人工瀏覽器驗收成功，最後文件聚焦複審 `deleg_d2568d4b` 為 `PASS`；Agent 未啟動或操作瀏覽器。完整前端測試 108/110 的兩項既有範圍外失敗保留，commit、push 與部署仍未核准。單一專案圖片上限已調整為 1000 張，資產儲存、專案封存與圖片輸出的總量上限已調整為 200 MiB。
 
 上一條圖片預覽滾輪工作線已完成：累積門檻由 90 降至 45，聚焦滾輪測試 7/7、lint、build 與差異檢查通過；完整前端測試為 97/99，兩項範圍外失敗是既有列印文案契約及版本值 3.0.1 與舊測試期待 3.0.0 不一致。實際操作已由使用者人工驗收完成（user-attested）。
 
@@ -139,6 +153,7 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 導航
 
+- Electron Windows x64 免安裝候選計畫：`docs/plans/2026-08-28-electron-portable-mvp.md`
 - 整理模式批次圖片編輯計畫：`docs/plans/2026-08-26-batch-image-editing.md`
 - Python 執行階段退役計畫：`docs/plans/2026-08-25-retire-python-runtime.md`
 - Python 執行階段退役結果：`docs/result/2026-08-25-retire-python-runtime-result.md`
