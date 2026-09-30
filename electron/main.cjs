@@ -2,8 +2,9 @@
 
 const path = require('node:path')
 const {pathToFileURL} = require('node:url')
-const {app, BrowserWindow, Menu, session, shell} = require('electron')
+const {app, BrowserWindow, Menu, session, shell, ipcMain} = require('electron')
 const {isAllowedExternalUrl, isTrustedAppUrl} = require('./navigation-policy.cjs')
+const {registerUpdateCheck} = require('./update-ipc.cjs')
 
 const entryFile = path.join(__dirname, '..', 'dist', 'index.html')
 const entryUrl = pathToFileURL(entryFile).href
@@ -43,6 +44,7 @@ function createWindow() {
     show: false,
     backgroundColor: '#111827',
     webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
@@ -79,6 +81,7 @@ if (!hasSingleInstanceLock) {
   })
 
   app.whenReady().then(() => {
+    registerUpdateCheck({ipcMain, getWindow: () => mainWindow, entryUrl, currentVersion: app.getVersion()})
     Menu.setApplicationMenu(null)
     session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false))
     session.defaultSession.setPermissionCheckHandler(() => false)

@@ -2,6 +2,13 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '3.2.0',
+    date: '1150930',
+    logs: [
+      {color: 'new', text: '加入「一頁四張排版」'},
+    ],
+  },
+  {
     version: '3.1.1',
     date: '1150826',
     logs: [

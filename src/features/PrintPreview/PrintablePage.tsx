@@ -29,6 +29,26 @@ const getGridClass = (template: AutoCollagePage['template']) => {
     return 'print-page-grid print-page-grid-portrait-small-6'
   }
 
+  if (template === 'grid-4') {
+    return 'print-page-grid print-page-grid-grid-4'
+  }
+
+  if (template === 'mixed-landscape1-grid2') {
+    return 'print-page-grid print-page-grid-mixed-landscape1-grid2'
+  }
+
+  if (template === 'mixed-grid2-landscape1') {
+    return 'print-page-grid print-page-grid-mixed-grid2-landscape1'
+  }
+
+  if (template === 'mixed-grid2-small3') {
+    return 'print-page-grid print-page-grid-mixed-grid2-small3'
+  }
+
+  if (template === 'mixed-small3-grid2') {
+    return 'print-page-grid print-page-grid-mixed-small3-grid2'
+  }
+
   if (template === 'mixed-landscape1-small3') {
     return 'print-page-grid print-page-grid-mixed-landscape1-small3'
   }

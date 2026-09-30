@@ -41,6 +41,8 @@ const projectFixture = (): ProjectV2 => ({
   layouts: [{id: 'layout_word_default', type: 'word-compatible-grid', itemOrder: ['item-1']}],
 })
 
+const grid4LayoutPreference = 'grid-4' as const
+
 const urlApi = {
   next: 0,
   createObjectURL() {
@@ -80,6 +82,24 @@ test('單一 .ipigeon roundtrip 保留 ProjectV2、圖片 bytes 與順序', asyn
   assert.equal(opened.assets.length, 1)
   assert.equal(opened.assets[0].id, 'asset-1')
   assert.deepEqual(new Uint8Array(await opened.assets[0].blob.arrayBuffer()), imageBytes)
+})
+
+test('version 2 archive roundtrip 接受 grid-4，且既有 grid-6 專案維持可讀', async () => {
+  const grid4Project: ProjectV2 = {
+    ...projectFixture(),
+    items: [{...projectFixture().items[0], layoutPreference: grid4LayoutPreference}],
+  }
+  const store = new BrowserAssetStore(urlApi)
+  store.register('asset-1', new Blob([WEBP_BYTES], {type: 'image/webp'}))
+
+  const grid4Archive = await createProjectArchive(grid4Project, store)
+  const openedGrid4 = await openProjectArchive(grid4Archive, undefined, inspectFixtureImage)
+  const legacyArchive = await createProjectArchive(projectFixture(), store)
+  const openedLegacy = await openProjectArchive(legacyArchive, undefined, inspectFixtureImage)
+
+  assert.equal(openedGrid4.project.version, 2)
+  assert.equal(openedGrid4.project.items[0].layoutPreference, 'grid-4')
+  assert.equal(openedLegacy.project.items[0].layoutPreference, 'grid-6')
 })
 
 test('archive 開啟時拒絕非 WebP bytes 與實際尺寸不符', async () => {

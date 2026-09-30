@@ -14,7 +14,7 @@ const ZIP_EOCD_SIGNATURE = 0x06054b50
 const ZIP_CENTRAL_SIGNATURE = 0x02014b50
 const PROJECT_JSON_PATH = 'project.json'
 const ROTATIONS = new Set([0, 90, 180, 270])
-const LAYOUT_PREFERENCES = new Set<LayoutPreference>(['stacked-2', 'side-by-side-2', 'grid-6'])
+const LAYOUT_PREFERENCES = new Set<LayoutPreference>(['stacked-2', 'side-by-side-2', 'grid-4', 'grid-6'])
 
 type ArchiveLimits = typeof BROWSER_RUNTIME_LIMITS.projectArchive
 

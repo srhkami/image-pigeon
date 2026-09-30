@@ -20,11 +20,50 @@ const TEMPLATE_LABEL: Record<AutoCollagePage['template'], string> = {
   'landscape-2': '2張橫圖(上下)',
   'portrait-large-2': '2張直圖(左右)',
   'portrait-small-6': '6格直圖(3x2)',
+  'grid-4': '4格(2x2)',
+  'mixed-landscape1-grid2': '上下 + 四張(1+2)',
+  'mixed-grid2-landscape1': '四張 + 上下(2+1)',
+  'mixed-grid2-small3': '四張 + 六張(2+3)',
+  'mixed-small3-grid2': '六張 + 四張(3+2)',
   'mixed-landscape1-small3': '橫圖 + 小直(1+3)',
   'mixed-small3-landscape1': '小直 + 橫圖(3+1)',
 }
 
-const getSlotClass = (role: AutoCollageSlot['role']) => {
+const MIXED_GRID_SLOT_CLASS: Partial<Record<AutoCollageSlot['role'], string>> = {
+  'grid-4-top-left': 'row-start-1 row-end-2 col-start-1 col-end-4',
+  'grid-4-top-right': 'row-start-1 row-end-2 col-start-4 col-end-7',
+  'grid-4-bottom-left': 'row-start-2 row-end-3 col-start-1 col-end-4',
+  'grid-4-bottom-right': 'row-start-2 row-end-3 col-start-4 col-end-7',
+  'portrait-small-1': 'row-start-1 row-end-2 col-start-1 col-end-3',
+  'portrait-small-2': 'row-start-1 row-end-2 col-start-3 col-end-5',
+  'portrait-small-3': 'row-start-1 row-end-2 col-start-5 col-end-7',
+  'portrait-small-4': 'row-start-2 row-end-3 col-start-1 col-end-3',
+  'portrait-small-5': 'row-start-2 row-end-3 col-start-3 col-end-5',
+  'portrait-small-6': 'row-start-2 row-end-3 col-start-5 col-end-7',
+}
+
+const getSlotClass = (role: AutoCollageSlot['role'], template: AutoCollagePage['template']) => {
+  if (template === 'mixed-grid2-small3' || template === 'mixed-small3-grid2') {
+    return MIXED_GRID_SLOT_CLASS[role] ?? ''
+  }
+  if (role === 'mixed-grid4-landscape-top') {
+    return 'row-start-1 row-end-2 col-start-1 col-end-3'
+  }
+  if (role === 'mixed-grid4-landscape-bottom') {
+    return 'row-start-2 row-end-3 col-start-1 col-end-3'
+  }
+  if (role === 'grid-4-top-left') {
+    return 'row-start-1 row-end-2 col-start-1 col-end-2'
+  }
+  if (role === 'grid-4-top-right') {
+    return 'row-start-1 row-end-2 col-start-2 col-end-3'
+  }
+  if (role === 'grid-4-bottom-left') {
+    return 'row-start-2 row-end-3 col-start-1 col-end-2'
+  }
+  if (role === 'grid-4-bottom-right') {
+    return 'row-start-2 row-end-3 col-start-2 col-end-3'
+  }
   if (role === 'landscape-top') {
     return 'row-start-1 row-end-2 col-span-3'
   }
@@ -57,11 +96,17 @@ const getSlotClass = (role: AutoCollageSlot['role']) => {
 }
 
 const getGridClass = (template: AutoCollagePage['template']) => {
+  if (template === 'mixed-grid2-small3' || template === 'mixed-small3-grid2') {
+    return 'grid grid-cols-6 grid-rows-2 gap-1'
+  }
   if (template === 'landscape-2') {
     return 'grid grid-rows-2 gap-1'
   }
   if (template === 'portrait-large-2') {
     return 'grid grid-cols-2 gap-1'
+  }
+  if (template === 'grid-4' || template === 'mixed-landscape1-grid2' || template === 'mixed-grid2-landscape1') {
+    return 'grid grid-cols-2 grid-rows-2 gap-1'
   }
   return 'grid grid-cols-3 grid-rows-2 gap-1'
 }
@@ -87,7 +132,7 @@ export default function CollagePageThumbnail({
         'ring-2 ring-info border-info': isActiveSlot,
         'border-base-300/80': !isActiveSlot,
       }),
-      getSlotClass(slot.role)
+      getSlotClass(slot.role, page.template)
     )
 
     if (!item) {

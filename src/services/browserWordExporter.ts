@@ -64,6 +64,9 @@ export type BrowserWordDocumentOptions = {
 
 const CM_TO_PX = 96 / 2.54
 const TABLE_WIDTH_MM = 170
+const GRID_IMAGE_INSET_MM = 2
+const GRID4_IMAGE_WIDTH_MM = TABLE_WIDTH_MM / 2 - GRID_IMAGE_INSET_MM * 2
+const GRID6_IMAGE_WIDTH_MM = TABLE_WIDTH_MM / 3 - GRID_IMAGE_INSET_MM * 2
 const cellWidth = (millimeters: number) => ({size: convertMillimetersToTwip(millimeters), type: WidthType.DXA})
 const rowHeight = (millimeters: number) => ({value: convertMillimetersToTwip(millimeters), rule: HeightRule.EXACT})
 const blankParagraph = () => new Paragraph({children: []})
@@ -89,7 +92,7 @@ type CellContext = {
   readonly fontSize: number
 }
 
-function imageCell(context: CellContext, itemId: string | null, maxWidthMm: number, maxHeightMm: number, columnSpan?: number) {
+function imageCell(context: CellContext, itemId: string | null, maxWidthMm: number, maxHeightMm: number, columnSpan?: number, horizontalInsetMm?: number) {
   const item = itemId ? context.byId.get(itemId) : undefined
   const children = item
     ? [new Paragraph({
@@ -102,10 +105,17 @@ function imageCell(context: CellContext, itemId: string | null, maxWidthMm: numb
         })],
       })]
     : [blankParagraph()]
-  return new TableCell({children, columnSpan, verticalAlign: VerticalAlign.CENTER})
+  return new TableCell({
+    children, columnSpan, verticalAlign: VerticalAlign.CENTER,
+    margins: horizontalInsetMm === undefined ? undefined : {
+      marginUnitType: WidthType.DXA,
+      left: convertMillimetersToTwip(horizontalInsetMm),
+      right: convertMillimetersToTwip(horizontalInsetMm),
+    },
+  })
 }
 
-function numberCell(context: CellContext, itemId: string | null, widthMm?: number) {
+function numberCell(context: CellContext, itemId: string | null, widthMm?: number, columnSpan?: number) {
   const number = itemId ? context.numberById.get(itemId) : undefined
   return new TableCell({
     children: [new Paragraph({
@@ -114,6 +124,7 @@ function numberCell(context: CellContext, itemId: string | null, widthMm?: numbe
     })],
     verticalAlign: VerticalAlign.CENTER,
     width: widthMm ? cellWidth(widthMm) : undefined,
+    columnSpan,
   })
 }
 
@@ -157,7 +168,7 @@ function portraitLargeTable(page: AutoCollagePage, context: CellContext) {
   const second = slotId(page, 1)
   return new Table({
     rows: [
-      exactRow([imageCell(context, first, 76, 180), imageCell(context, second, 76, 180)], 182),
+      exactRow([imageCell(context, first, GRID4_IMAGE_WIDTH_MM, 180, undefined, GRID_IMAGE_INSET_MM), imageCell(context, second, GRID4_IMAGE_WIDTH_MM, 180, undefined, GRID_IMAGE_INSET_MM)], 182),
       exactRow([numberCell(context, first), numberCell(context, second)], 8),
       exactRow([remarkCell(context, first), remarkCell(context, second)], 35),
     ],
@@ -171,7 +182,7 @@ function portraitLargeTable(page: AutoCollagePage, context: CellContext) {
 function gridRows(page: AutoCollagePage, context: CellContext, offset: number) {
   const ids = [0, 1, 2].map((index) => slotId(page, offset + index))
   return [
-    exactRow(ids.map((id) => imageCell(context, id, 50, 70)), 72),
+    exactRow(ids.map((id) => imageCell(context, id, GRID6_IMAGE_WIDTH_MM, 70, undefined, GRID_IMAGE_INSET_MM)), 72),
     exactRow(ids.map((id) => numberCell(context, id)), 6),
     exactRow(ids.map((id) => remarkCell(context, id)), 32),
   ]
@@ -187,37 +198,105 @@ function portraitSmallTable(page: AutoCollagePage, context: CellContext) {
   })
 }
 
+function grid4Rows(page: AutoCollagePage, context: CellContext, offset: number) {
+  const ids = [0, 1].map((index) => slotId(page, offset + index))
+  return [
+    exactRow(ids.map((id) => imageCell(context, id, GRID4_IMAGE_WIDTH_MM, 82, undefined, GRID_IMAGE_INSET_MM)), 84),
+    exactRow(ids.map((id) => numberCell(context, id)), 8),
+    exactRow(ids.map((id) => remarkCell(context, id)), 28),
+  ]
+}
+
+function grid4Table(page: AutoCollagePage, context: CellContext) {
+  return new Table({
+    rows: [...grid4Rows(page, context, 0), ...grid4Rows(page, context, 2)],
+    width: cellWidth(TABLE_WIDTH_MM),
+    columnWidths: Array.from({length: 2}, () => convertMillimetersToTwip(TABLE_WIDTH_MM / 2)),
+    layout: TableLayoutType.FIXED,
+    style: 'TableGrid',
+  })
+}
+
+function mixedGrid4Table(page: AutoCollagePage, context: CellContext, landscapeFirst: boolean) {
+  const landscape = slotId(page, landscapeFirst ? 0 : 2)
+  const landscapeRows = [
+    exactRow([imageCell(context, landscape, 150, 82, 2)], 84),
+    exactRow([numberCell(context, landscape, undefined, 2)], 8),
+    exactRow([remarkCell(context, landscape, undefined, 2)], 28),
+  ]
+  const pairRows = grid4Rows(page, context, landscapeFirst ? 1 : 0)
+  return new Table({
+    rows: landscapeFirst ? [...landscapeRows, ...pairRows] : [...pairRows, ...landscapeRows],
+    width: cellWidth(TABLE_WIDTH_MM),
+    columnWidths: [convertMillimetersToTwip(85), convertMillimetersToTwip(85)],
+    layout: TableLayoutType.FIXED,
+    style: 'TableGrid',
+  })
+}
+
+function mixedGridPairTable(page: AutoCollagePage, context: CellContext, fourFirst: boolean) {
+  const halfRows = (offset: number, count: number, span: number, imageWidth: number) => {
+    const ids = Array.from({length: count}, (_, i) => slotId(page, offset + i))
+    return [
+      exactRow(ids.map((id) => imageCell(context, id, imageWidth, 82, span, GRID_IMAGE_INSET_MM)), 84),
+      exactRow(ids.map((id) => numberCell(context, id, undefined, span)), 8),
+      exactRow(ids.map((id) => remarkCell(context, id, undefined, span)), 28),
+    ]
+  }
+  const fourRows = halfRows(fourFirst ? 0 : 3, 2, 3, GRID4_IMAGE_WIDTH_MM)
+  const sixRows = halfRows(fourFirst ? 2 : 0, 3, 2, GRID6_IMAGE_WIDTH_MM)
+  return new Table({
+    rows: fourFirst ? [...fourRows, ...sixRows] : [...sixRows, ...fourRows],
+    width: cellWidth(TABLE_WIDTH_MM),
+    columnWidths: Array.from({length: 6}, () => convertMillimetersToTwip(TABLE_WIDTH_MM / 6)),
+    layout: TableLayoutType.FIXED,
+    style: 'TableGrid',
+  })
+}
+
+function mixedStackedGridColumns() {
+  const width = convertMillimetersToTwip(TABLE_WIDTH_MM)
+  const third = convertMillimetersToTwip(TABLE_WIDTH_MM / 3)
+  const number = convertMillimetersToTwip(18)
+  // 拆開第一個三等分格位，讓上下的編號窄欄與六張共用同一份基準欄。
+  return [number, third - number, third, width - third * 2]
+}
+
+function mixedSmallRows(page: AutoCollagePage, context: CellContext, offset: number) {
+  const ids = [0, 1, 2].map((index) => slotId(page, offset + index))
+  const span = (index: number) => index === 0 ? 2 : 1
+  return [
+    exactRow(ids.map((id, index) => imageCell(context, id, GRID6_IMAGE_WIDTH_MM, 74, span(index), GRID_IMAGE_INSET_MM)), 76),
+    exactRow(ids.map((id, index) => numberCell(context, id, undefined, span(index))), 6),
+    exactRow(ids.map((id, index) => remarkCell(context, id, undefined, span(index))), 32),
+  ]
+}
+
 function mixedLandscapeFirstTable(page: AutoCollagePage, context: CellContext) {
   const landscape = slotId(page, 0)
-  const small = [1, 2, 3].map((index) => slotId(page, index))
   return new Table({
     rows: [
-      exactRow([imageCell(context, landscape, 150, 80, 3)], 82),
-      exactRow([numberCell(context, landscape, 18), remarkCell(context, landscape, 152, 2)], 32),
-      exactRow(small.map((id) => imageCell(context, id, 50, 74)), 76),
-      exactRow(small.map((id) => numberCell(context, id)), 6),
-      exactRow(small.map((id) => remarkCell(context, id)), 32),
+      exactRow([imageCell(context, landscape, 150, 80, 4)], 82),
+      exactRow([numberCell(context, landscape, 18), remarkCell(context, landscape, 152, 3)], 32),
+      ...mixedSmallRows(page, context, 1),
     ],
     width: cellWidth(TABLE_WIDTH_MM),
-    columnWidths: Array.from({length: 3}, () => convertMillimetersToTwip(TABLE_WIDTH_MM / 3)),
+    columnWidths: mixedStackedGridColumns(),
     layout: TableLayoutType.FIXED,
     style: 'TableGrid',
   })
 }
 
 function mixedLandscapeLastTable(page: AutoCollagePage, context: CellContext) {
-  const small = [0, 1, 2].map((index) => slotId(page, index))
   const landscape = slotId(page, 3)
   return new Table({
     rows: [
-      exactRow(small.map((id) => imageCell(context, id, 50, 74)), 76),
-      exactRow(small.map((id) => numberCell(context, id)), 6),
-      exactRow(small.map((id) => remarkCell(context, id)), 32),
-      exactRow([imageCell(context, landscape, 150, 80, 3)], 82),
-      exactRow([numberCell(context, landscape, 18), remarkCell(context, landscape, 152, 2)], 32),
+      ...mixedSmallRows(page, context, 0),
+      exactRow([imageCell(context, landscape, 150, 80, 4)], 82),
+      exactRow([numberCell(context, landscape, 18), remarkCell(context, landscape, 152, 3)], 32),
     ],
     width: cellWidth(TABLE_WIDTH_MM),
-    columnWidths: Array.from({length: 3}, () => convertMillimetersToTwip(TABLE_WIDTH_MM / 3)),
+    columnWidths: mixedStackedGridColumns(),
     layout: TableLayoutType.FIXED,
     style: 'TableGrid',
   })
@@ -228,8 +307,14 @@ function tableForPage(page: AutoCollagePage, context: CellContext) {
     case 'landscape-2': return landscapeTable(page, context)
     case 'portrait-large-2': return portraitLargeTable(page, context)
     case 'portrait-small-6': return portraitSmallTable(page, context)
+    case 'grid-4': return grid4Table(page, context)
+    case 'mixed-landscape1-grid2': return mixedGrid4Table(page, context, true)
+    case 'mixed-grid2-landscape1': return mixedGrid4Table(page, context, false)
+    case 'mixed-grid2-small3': return mixedGridPairTable(page, context, true)
+    case 'mixed-small3-grid2': return mixedGridPairTable(page, context, false)
     case 'mixed-landscape1-small3': return mixedLandscapeFirstTable(page, context)
     case 'mixed-small3-landscape1': return mixedLandscapeLastTable(page, context)
+    default: throw new Error(`不支援的 Word 排版模板：${page.template}`)
   }
 }
 

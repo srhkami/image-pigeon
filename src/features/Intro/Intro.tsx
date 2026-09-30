@@ -64,6 +64,13 @@ export default function Intro() {
             <div className='col-span-2 text-start flex items-center'>
               {AppVersionText}
             </div>
+            <div className='col-span-2 flex justify-end'>
+              <a className='btn btn-info btn-sm btn-outline' target='_blank' rel='noopener noreferrer'
+               href={EXTERNAL_NAVIGATION_URLS.updateFolder}>
+              檢查新版
+            </a>
+            </div>
+
           </div>
           <div className='divider my-1 text-xs'>作者的網站</div>
           <Row>

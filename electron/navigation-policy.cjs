@@ -6,6 +6,7 @@ const ALLOWED_EXTERNAL_URLS = Object.freeze([
   'https://pigeonhand.tw',
   'https://traffic.pigeonhand.tw',
   'https://github.com/srhkami/image-pigeon.git',
+  'https://drive.google.com/drive/folders/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm?usp=drive_link',
 ])
 
 const allowedExternalUrls = new Set(ALLOWED_EXTERNAL_URLS)

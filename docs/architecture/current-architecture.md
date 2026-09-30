@@ -3,7 +3,7 @@ type: architecture
 status: current
 canonical: true
 scope: image-pigeon
-verified_against_source_at: 2026-08-25
+verified_against_source_at: 2026-09-30
 ---
 
 # image-pigeon 現行架構
@@ -52,6 +52,7 @@ ProjectV2
 - 預覽以 `URL.createObjectURL()` 建立；替換、刪除、清空、開啟其他專案與卸載時回收 URL。
 - `assets[].file` 指向 archive 內相對的 `images/<asset-id>.webp`。
 - `items[]` 保存備註、旋轉、裁切、直向尺寸與排版偏好。
+- 排版偏好包含上下、左右、四張與六張；純四張使用 `grid-4` 模板，內容區為 2×2 等分，依左上、右上、左下、右下排序。四張／上下及四張／六張皆支援兩方向半頁混排，半頁分別為上下一張、四張最多兩張、六張最多三張，不足留空；前段四張超過兩張、六張超過三張及上下連續兩張仍優先純版型。只取緊鄰同偏好圖片，不跨其他偏好補圖；匯入預設與原六張／上下混排規則不變。
 - `layouts[]` 使用 `word-compatible-grid`；輸出順序由 `itemOrder` 決定。
 
 ## 圖片處理
@@ -73,7 +74,7 @@ ProjectV2
 
 - 圖片輸出：`src/services/browserImageZip.ts` 依 canonical order 產生 JPEG 並封裝成單一 ZIP 下載。
 - Word 輸出：`src/services/browserWordExporter.ts` 與 `browserWordProjectAdapter.ts` 產生 DOCX Blob 並下載。
-- 列印：`src/features/PrintPreview/` 重用五種自動拼貼版型，透過 `window.print()` 開啟系統列印流程；PDF 由使用者在系統列印對話框另存。
+- 列印：`src/features/PrintPreview/` 重用共用自動分頁，包括五種既有版型、純四張及四張／上下、四張／六張各兩種混排版型；透過 `window.print()` 開啟系統列印流程，PDF 由使用者在系統列印對話框另存。Word 純四張及四張／上下使用固定兩欄，上下圖片跨兩欄；四張／六張使用六個等寬基準欄，四張格跨三欄、六張格跨兩欄，各半頁等高，保留圖片、編號、備註與留空。
 - 專案、ZIP 與 DOCX 皆由本機 Blob URL 下載，不經應用程式後端。
 
 ## 網路與隱私邊界
@@ -82,6 +83,14 @@ ProjectV2
 - 應用程式只讀取使用者明確選定的檔案。
 - 固定外部網站入口集中於 `src/services/browserExternalNavigation.ts`，只在使用者明確點擊後開啟，且不攜帶應用程式資料。
 - `scripts/verify-static-build.mjs` 會驗證靜態資產引用並拒絕退役 runtime 與網路 sink。
+
+## Electron 桌面專用版本查詢
+
+同一份 `dist/` 可由 Electron 沙箱載入，圖片與輸出仍沿用本機前端流程。桌面主程序新增固定公開版本端點的單次 GET，透過單用途預載與 IPC 回傳必要純文字資訊；無橋接的網頁版不查詢。總逾時與回應上限、主視窗頂層來源驗證、無參數介面及既有權限／導覽拒絕維持最小邊界。
+
+首頁 Intro 的版本資訊旁固定有「檢查新版」，與偵測結果無關；使用者主動點擊後才開啟 v2 的固定 Google 雲端資料夾。桌面新版提示只在遠端版本較新且未關閉／忽略時顯示，下載入口同樣使用固定允許網址，不採用 API 的任意下載連結、不自動更新，也不發送圖片、專案或備註。
+
+此桌面例外依 `docs/adr/0003-electron-update-check-boundary.md` 與 `docs/plans/2026-09-30-electron-update-check.md`，不取代網頁版零背景請求、不改網站 CSP，也不代表已完成 EXE 打包或 Windows 人工驗收。
 
 ## 驗證邊界
 

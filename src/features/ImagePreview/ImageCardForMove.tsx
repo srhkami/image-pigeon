@@ -24,6 +24,7 @@ export default function ImageCardForMove({viewModel, index, isSelected, onToggle
   const layoutTag = {
     'stacked-2': {label: '上下', style: 'badge-info'},
     'side-by-side-2': {label: '左右', style: 'badge-success'},
+    'grid-4': {label: '四張', style: 'badge-primary'},
     'grid-6': {label: '六張', style: 'badge-warning'},
   }[viewModel.layoutPreference]
   const toggle = () => onToggleSelectedItem(viewModel.itemId)

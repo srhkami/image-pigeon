@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import {FaArrowRotateLeft, FaArrowRotateRight} from 'react-icons/fa6'
 import {MdDeleteForever} from 'react-icons/md'
 import {ProjectV2} from '@/types/project.ts'
+import type {LayoutPreference} from '@/types/project.ts'
 import {CustomImage} from '@/utils/type.ts'
 import OpenProject from '../features/Upload/OpenProject.tsx'
 import ModalImport from '@/features/Upload/ModalImport.tsx'
@@ -25,7 +26,7 @@ type Props = {
   readonly onSelectAll: () => void
   readonly onClearSelection: () => void
   readonly onBatchRotate: (offset: 90 | -90) => void
-  readonly onBatchLayout: (layout: 'stacked-2' | 'side-by-side-2' | 'grid-6') => void
+  readonly onBatchLayout: (layout: LayoutPreference) => void
   readonly onRemoveSelected: (itemIds: ReadonlySet<string>, expectedSessionId: string | null) => void
   readonly onPrintPreview: (options: PrintPreviewOptions) => void
   readonly isImportModalOpen: boolean
@@ -115,12 +116,15 @@ export default function Sidebar({
                   <FaArrowRotateRight/>右轉
               </button>
           </div>
-          <div className='grid grid-cols-3 gap-1'>
+          <div className='grid grid-cols-2 gap-1'>
               <button type='button' className='btn btn-sm' onClick={() => onBatchLayout('stacked-2')}
                       disabled={!hasSelection}>上下
               </button>
               <button type='button' className='btn btn-sm' onClick={() => onBatchLayout('side-by-side-2')}
                       disabled={!hasSelection}>左右
+              </button>
+              <button type='button' className='btn btn-sm' onClick={() => onBatchLayout('grid-4')}
+                      disabled={!hasSelection}>四張
               </button>
               <button type='button' className='btn btn-sm' onClick={() => onBatchLayout('grid-6')}
                       disabled={!hasSelection}>六張

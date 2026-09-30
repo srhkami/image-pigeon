@@ -38,6 +38,7 @@ const allowedExternalUrls = [
   /^https:\/\/pigeonhand\.tw(?:\/feedback\/web)?$/,
   /^https:\/\/traffic\.pigeonhand\.tw$/,
   /^https:\/\/github\.com\/srhkami\/image-pigeon\.git$/,
+  /^https:\/\/drive\.google\.com\/drive\/folders\/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm\?usp=drive_link$/,
 ]
 const metadataExternalUrls = [
   /^https?:\/\/(?:purl\.org|schemas\.microsoft\.com|schemas\.openxmlformats\.org|www\.w3\.org)\//,

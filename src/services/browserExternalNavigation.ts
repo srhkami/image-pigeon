@@ -4,6 +4,7 @@ export const EXTERNAL_NAVIGATION_URLS = Object.freeze({
   pigeonHand: 'https://pigeonhand.tw',
   trafficPigeonHand: 'https://traffic.pigeonhand.tw',
   sourceRepository: 'https://github.com/srhkami/image-pigeon.git',
+  updateFolder: 'https://drive.google.com/drive/folders/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm?usp=drive_link',
 } as const)
 
 const externalNavigationAllowlist = new Set<string>(Object.values(EXTERNAL_NAVIGATION_URLS))

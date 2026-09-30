@@ -21,6 +21,8 @@ import {SUPPORTED_IMAGE_FILE_EXTENSIONS} from '@/features/Upload/fileAccept.ts'
 import {browserAssetStore} from '@/services/browserAssetStore.ts'
 import {browserImportOperationCoordinator, browserProjectOperationCoordinator} from '@/services/browserProjectOperation.ts'
 import {getActiveItemIdAfterRemovingItems} from '@/features/ImagePreview/wheelNavigation.ts'
+import type {LayoutPreference} from '@/types/project.ts'
+import ModalDesktopUpdate from '@/features/Intro/ModalDesktopUpdate.tsx'
 
 const DEFAULT_PRINT_OPTIONS: PrintPreviewOptions = {title: '照片黏貼表', fontSize: '18', alignVertical: 'center'}
 
@@ -121,7 +123,7 @@ function App() {
     }))
     toast.success(`已將 ${selectedItemIds.size} 張圖片${offset < 0 ? '向左' : '向右'}轉 90°`)
   }
-  const batchLayout = (layout: 'stacked-2' | 'side-by-side-2' | 'grid-6') => {
+  const batchLayout = (layout: LayoutPreference) => {
     if (!selectedItemIds.size) return
     setProject((current) => applyBatchLayoutPreference(current, selectedItemIds, layout))
     toast.success(`已套用 ${selectedItemIds.size} 張圖片的排版`)
@@ -181,6 +183,7 @@ function App() {
         </main>
       </div>
       {dragDepth > 0 && <ExternalImageDropOverlay/>}
+      <ModalDesktopUpdate/>
       <Toaster position='top-center' reverseOrder={false}/>
     </div>
   )

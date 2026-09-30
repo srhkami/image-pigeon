@@ -106,10 +106,11 @@ test('既有外部導覽集中於明確允許清單並隔離 opener', () => {
     'https://pigeonhand.tw',
     'https://traffic.pigeonhand.tw',
     'https://github.com/srhkami/image-pigeon.git',
+    'https://drive.google.com/drive/folders/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm?usp=drive_link',
   ]) assert.match(policy, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
   assert.doesNotMatch(sources, /window\.open\(/)
   assert.doesNotMatch(sources, /href=['"]https?:\/\//)
-  assert.equal(sources.match(/rel=['"]noopener noreferrer['"]/g)?.length, 5)
+  assert.equal(sources.match(/rel=['"]noopener noreferrer['"]/g)?.length, 6)
 })
 
 test('產物探針拒絕第三方資源、絕對路徑、缺檔與未 hash 執行資產', () => {

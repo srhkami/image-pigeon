@@ -18,7 +18,9 @@ function productionSources(directory = new URL('src/', root)): URL[] {
   })
 }
 
-function writePortableCandidate(directory: string, name = 'image-pigeon-3.1.1-win-x64-portable.exe', machine = 0x8664) {
+const appVersion = JSON.parse(read('package.json')).version
+
+function writePortableCandidate(directory: string, name = `image-pigeon-${appVersion}-win-x64-portable.exe`, machine = 0x8664) {
   const candidate = join(directory, name)
   const payload = Buffer.alloc(1024 * 1024 + 1)
   payload.write('MZ')
@@ -31,7 +33,7 @@ function writePortableCandidate(directory: string, name = 'image-pigeon-3.1.1-wi
 
 test('Electron 使用獨立命令且不改變既有純前端 build', () => {
   const pkg = JSON.parse(read('package.json'))
-  assert.equal(pkg.version, '3.1.1')
+  assert.equal(pkg.version, /version:\s*'([^']+)'/.exec(read('src/utils/log.ts'))?.[1])
   assert.equal(pkg.scripts.build, 'tsc -b && vite build')
   assert.equal(pkg.scripts['build:electron'], 'pnpm run build && pnpm run verify:static')
   assert.equal(pkg.scripts['package:electron:win'], 'pnpm run build:electron && electron-builder --win portable --x64')
@@ -58,7 +60,7 @@ test('Electron 主程序採最小沙箱與拒絕權限策略', () => {
   assert.match(main, /nodeIntegration:\s*false/)
   assert.match(main, /contextIsolation:\s*true/)
   assert.match(main, /sandbox:\s*true/)
-  assert.doesNotMatch(main, /\bpreload\s*:/)
+  assert.match(main, /preload:\s*path\.join\(__dirname,\s*['"]preload\.cjs['"]\)/)
   assert.match(main, /setPermissionRequestHandler\(\([^)]*callback\)\s*=>\s*callback\(false\)\)/)
   assert.match(main, /setPermissionCheckHandler\(\(\)\s*=>\s*false\)/)
   assert.match(main, /setWindowOpenHandler/)
@@ -78,6 +80,7 @@ test('外部導覽只允許現有固定網址，未知或變形網址一律拒�
     'https://pigeonhand.tw',
     'https://traffic.pigeonhand.tw',
     'https://github.com/srhkami/image-pigeon.git',
+    'https://drive.google.com/drive/folders/1VRCiQbSn09LS3aWd4mgw_Eczls9wJsRm?usp=drive_link',
   ]
   assert.deepEqual([...policy.ALLOWED_EXTERNAL_URLS], allowed)
   const browserPolicy = read('src/services/browserExternalNavigation.ts')
@@ -89,6 +92,7 @@ test('外部導覽只允許現有固定網址，未知或變形網址一律拒�
     'https://pigeonhand.tw/',
     'https://pigeonhand.tw.evil.example',
     'https://github.com/srhkami/image-pigeon',
+    'https://drive.google.com/drive/folders/untrusted?usp=drive_link',
     'file:///etc/passwd',
     'javascript:alert(1)',
     'not a url',
@@ -116,7 +120,7 @@ test('封裝產物探針接受單一 portable exe 與 metadata，但拒絕額外
   const verifier = new URL('scripts/verify-electron-package.mjs', root).pathname
   const directory = mkdtempSync(join(tmpdir(), 'image-pigeon-electron-'))
   try {
-    const candidate = writePortableCandidate(directory, 'image-pigeon-3.1.1-win-x64-portable.exe', 0x014c)
+    const candidate = writePortableCandidate(directory, `image-pigeon-${appVersion}-win-x64-portable.exe`, 0x014c)
     writeFileSync(join(directory, 'builder-effective-config.yaml'), 'metadata: true')
     mkdirSync(join(directory, 'win-unpacked', 'resources'), {recursive: true})
     writePortableCandidate(directory, 'win-unpacked/貼圖小鴿手.exe')
@@ -129,7 +133,7 @@ test('封裝產物探針接受單一 portable exe 與 metadata，但拒絕額外
     assert.equal(report.portable, true)
     assert.equal(statSync(candidate).size, report.bytes)
 
-    writePortableCandidate(directory, 'image-pigeon-3.1.1-win-x64-setup.exe')
+    writePortableCandidate(directory, `image-pigeon-${appVersion}-win-x64-setup.exe`)
     const fail = spawnSync(process.execPath, [verifier, directory], {encoding: 'utf8'})
     assert.notEqual(fail.status, 0)
   } finally {

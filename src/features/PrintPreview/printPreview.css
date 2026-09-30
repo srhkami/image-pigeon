@@ -107,6 +107,69 @@
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
+.print-page-grid-mixed-landscape1-grid2,
+.print-page-grid-mixed-grid2-landscape1,
+.print-page-grid-grid-4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.print-page-grid-mixed-grid2-small3,
+.print-page-grid-mixed-small3-grid2 {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.print-page-grid-mixed-grid2-small3 .print-slot-grid-4-top-left {
+  grid-row: 1 / 2;
+  grid-column: 1 / 4;
+}
+
+.print-page-grid-mixed-grid2-small3 .print-slot-grid-4-top-right {
+  grid-row: 1 / 2;
+  grid-column: 4 / 7;
+}
+
+.print-page-grid-mixed-grid2-small3 .print-slot-grid-portrait-small-4 {
+  grid-row: 2 / 3;
+  grid-column: 1 / 3;
+}
+
+.print-page-grid-mixed-grid2-small3 .print-slot-grid-portrait-small-5 {
+  grid-row: 2 / 3;
+  grid-column: 3 / 5;
+}
+
+.print-page-grid-mixed-grid2-small3 .print-slot-grid-portrait-small-6 {
+  grid-row: 2 / 3;
+  grid-column: 5 / 7;
+}
+
+.print-page-grid-mixed-small3-grid2 .print-slot-grid-portrait-small-1 {
+  grid-row: 1 / 2;
+  grid-column: 1 / 3;
+}
+
+.print-page-grid-mixed-small3-grid2 .print-slot-grid-portrait-small-2 {
+  grid-row: 1 / 2;
+  grid-column: 3 / 5;
+}
+
+.print-page-grid-mixed-small3-grid2 .print-slot-grid-portrait-small-3 {
+  grid-row: 1 / 2;
+  grid-column: 5 / 7;
+}
+
+.print-page-grid-mixed-small3-grid2 .print-slot-grid-4-bottom-left {
+  grid-row: 2 / 3;
+  grid-column: 1 / 4;
+}
+
+.print-page-grid-mixed-small3-grid2 .print-slot-grid-4-bottom-right {
+  grid-row: 2 / 3;
+  grid-column: 4 / 7;
+}
+
 .print-slot {
   display: flex;
   flex-direction: column;
@@ -221,6 +284,36 @@
 .print-slot-grid-portrait-small-6 {
   grid-row: 2 / 3;
   grid-column: 3 / 4;
+}
+
+.print-slot-mixed-grid4-landscape-top {
+  grid-row: 1 / 2;
+  grid-column: 1 / 3;
+}
+
+.print-slot-mixed-grid4-landscape-bottom {
+  grid-row: 2 / 3;
+  grid-column: 1 / 3;
+}
+
+.print-slot-grid-4-top-left {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+}
+
+.print-slot-grid-4-top-right {
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
+}
+
+.print-slot-grid-4-bottom-left {
+  grid-row: 2 / 3;
+  grid-column: 1 / 2;
+}
+
+.print-slot-grid-4-bottom-right {
+  grid-row: 2 / 3;
+  grid-column: 2 / 3;
 }
 
 .print-slot-grid-mixed-landscape-top {

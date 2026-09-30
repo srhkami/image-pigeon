@@ -33,7 +33,7 @@ const POSITION_CLASS: Record<number, string> = {
   1: 'translate-y-2',
   2: 'translate-y-4'
 }
-const LAYOUT_OPTIONS = [['stacked-2', '上下'], ['side-by-side-2', '左右'], ['grid-6', '六張']] as const
+const LAYOUT_OPTIONS = [['stacked-2', '上下'], ['side-by-side-2', '左右'], ['grid-4', '四張'], ['grid-6', '六張']] as const
 
 export default function FocusImageCard({
                                          viewModel,

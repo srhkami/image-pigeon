@@ -6,7 +6,7 @@ export type Crop = {
   unit: 'ratio'
 }
 
-export type LayoutPreference = 'stacked-2' | 'side-by-side-2' | 'grid-6'
+export type LayoutPreference = 'stacked-2' | 'side-by-side-2' | 'grid-4' | 'grid-6'
 
 export type Asset = {
   id: string
