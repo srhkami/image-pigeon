@@ -8,7 +8,7 @@ path_semantics: repository-root-relative
 created_at: 2026-09-30
 execution:
   status: partial
-  current_checkpoint: package_verified_windows_uat_pending
+  current_checkpoint: package_330_verified_windows_uat_pending
 result: docs/result/2026-09-30-electron-update-check-result.md
 approval_gates:
   planning_docs: approved_2026-09-30
@@ -17,6 +17,8 @@ approval_gates:
   live_api: closed
   app_runtime: closed
   package_build: approved_consumed_2026-09-30
+  repack_package_build: approved_consumed_2026-11-02
+  package_metadata_sync: approved_consumed_2026-11-02
   deployment: closed
   commit: closed
   push: closed
@@ -75,8 +77,18 @@ EXE 只查 `https://api.pigeonhand.tw/web/apps/1/` 的公開版本資訊，不�
 
 前一輪 Word 排版已由使用者回報樣式完善，此處只視為該可見樣式的使用者驗收，不擴張為 Windows／封裝完整驗收，不改其父計畫契約。
 
-## 執行現況
+## 前輪執行現況（2026-09-30 歷史證據）
 
 3.2.0 Windows x64 免安裝 EXE 已實際產出並通過版本、封裝內容與來源一致、PE 格式／x64 應用程式、未簽章狀態、大小與 SHA-256 檢查。打包前基準為 `/tmp/image-pigeon-3.2.0-package-baseline.json`，新產物為 `release/3.2.0/image-pigeon-3.2.0-win-x64-portable.exe`，既有產物與產品原始碼未被改寫。
 
 前輪受審快照聚焦 32/32 與安全複審 PASS 保留為歷史證據；本次打包前的現行 Intro 已不同於受審快照，唯一差異檔案為 `src/features/Intro/Intro.tsx`。本輪聚焦 31/32：舊版型測試要求 `col-span-2` 在連結本身，但現行版型將其放在外層容器；不修改該版型或測試以求全綠。另以 TypeScript 語法樹確認現行唯一更新入口、版本旁兩欄容器、正確 href／target／rel 均成立。lint、build 與靜態驗證通過；詳細證據見結果。計畫保持 active、執行 partial，僅 Windows 人工驗收尚未執行，不要求或查詢真實 API。
+
+## 現行版本重新打包（2026-11-02）
+
+使用者要求「請幫我打包一個exe檔版本」，核准以目前 dev 工作樹產出 Windows x64 免安裝 EXE。來源基線為 `df8a91ad3469d7a1a7396b516f374bbc6145d952`，工作樹與暫存區起始為乾淨。應用程式更新紀錄已是 3.3.0、package.json 仍是 3.2.0；只將 package.json.version 同步為 3.3.0，不改更新紀錄、功能、依賴或鎖定檔。
+
+本輪允許修改 package.json 的版本欄位、本計畫、既有結果與 STATE；產生 dist／既有 TypeScript 建置快取及新的 `release/3.3.0/`，保護所有舊 release 產物。沿用既有打包命令並以 `--config.directories.output=release/3.3.0` 指定新目錄；允許必要公開打包工具鏈取得，不使用憑證、簽章、安裝程式或發布。Agent 應用／瀏覽器／EXE 啟動、正式 API、Windows 實機驗收、部署、commit、push 仍關閉。
+
+最低驗證為既有 Electron 封裝與更新隔離測試、lint、打包內含的 build／verify:static、產物探針、ASAR 實際內容／版本與來源一致性、PE x64 與簽章表、大小／SHA-256、舊產物與來源／暫存區護欄。既有範圍外測試失敗只保留，不為全綠擴修；不重做無關功能矩陣或獨立來源審查。基線及實際日誌位於 `/Users/cksai/.hermes/cache/scratch/image-pigeon-exe-330-20261102/`。
+
+本輪打包與機械驗證已完成：`release/3.3.0/image-pigeon-3.3.0-win-x64-portable.exe` 實際產出，封裝／更新隔離測試 13/13、lint、build、verify:static 與產物探針通過。實際 ASAR 14 檔符合目前 dist／electron 與 3.3.0 metadata，x64 應用程式及啟動器簽章表均為零；舊產物、功能來源及暫存區未變。兩項本輪核准已消耗；結果仍 partial、計畫 active，Windows 啟動、Word／列印、SmartScreen／防毒與斷網驗收未由 Agent 執行，不要求或查詢正式 API。詳細路徑、大小、雜湊與命令見既有結果最後小節。

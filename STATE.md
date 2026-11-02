@@ -51,7 +51,7 @@ workstreams:
     status: waiting_approval
     plan: docs/plans/2026-09-30-electron-update-check.md
     result: docs/result/2026-09-30-electron-update-check-result.md
-    current_checkpoint: package_verified_windows_uat_pending
+    current_checkpoint: package_330_verified_windows_uat_pending
     blocker: null
     approval_gates:
       planning_docs: approved_2026-09-30
@@ -60,6 +60,8 @@ workstreams:
       live_api: closed
       app_runtime: closed
       package_build: approved_consumed_2026-09-30
+      repack_package_build: approved_consumed_2026-11-02
+      package_metadata_sync: approved_consumed_2026-11-02
       deployment: closed
       commit: closed
       push: closed
@@ -68,7 +70,7 @@ workstreams:
       - src/App.tsx
       - docs/architecture/current-architecture.md
     conflicts_with: []
-    next_action: 3.2.0 EXE 已交付於 release/3.2.0，產物檢查通過、既有產物保留；本輪聚焦 31/32 的 Intro 版型斷言差異已記錄且另做語法樹確認，Windows 實機驗收待使用者自行安排，不自動啟動或查詢正式 API
+    next_action: 3.3.0 Windows x64免安裝EXE已產出於release/3.3.0，13項封裝／更新隔離測試、lint、build、靜態及產物檢查通過，舊EXE保留；Windows實機驗收由使用者自行安排，Agent不啟動應用／正式API，不部署、提交或推送
 
   - id: workstream-electron-portable-mvp-2026-08-28
     title: Electron Windows x64 免安裝候選
@@ -178,7 +180,7 @@ last_reconciled: 2026-11-02
 
 ## 目前摘要
 
-本專案已切換至 Project-State v1；`STATE.md` 是目前工作線與下一步的唯一入口。3.0 純前端版本已合併至 `dev` 與 `main`，並作為後續主要更新基線；現行唯一專案交換格式為單檔 `.ipigeon` archive，舊格式與 Python／PyInstaller 執行階段均已退役。網頁版維持 ADR-0002 的零背景請求；Electron Windows x64 免安裝候選已完成原始碼及初版封裝，Windows 人工驗收仍待使用者執行。2026-09-30 新增桌面專用新版偵測，依 `docs/adr/0003-electron-update-check-boundary.md` 及獨立計畫實作，不恢復網頁背景 API 或舊 Python 路徑。既有純前端 build 與 HTTPS 靜態部署保持不變；本輪只核准原始碼與自動驗證，正式 API、應用啟動、新 EXE 打包、部署、提交及推送均關閉。
+本專案已切換至 Project-State v1；`STATE.md` 是目前工作線與下一步的唯一入口。3.0 純前端版本已合併至 `dev` 與 `main`，並作為後續主要更新基線；現行唯一專案交換格式為單檔 `.ipigeon` archive，舊格式與 Python／PyInstaller 執行階段均已退役。網頁版維持 ADR-0002 的零背景請求；Electron Windows x64 免安裝候選已完成原始碼及初版封裝，Windows 人工驗收仍待使用者執行。2026-09-30 新增桌面專用新版偵測，依 `docs/adr/0003-electron-update-check-boundary.md` 及獨立計畫實作，不恢復網頁背景 API 或舊 Python 路徑。既有純前端 build 與 HTTPS 靜態部署保持不變；2026-11-02 依使用者要求完成3.3.0本機EXE打包及必要封裝版本同步，兩項核准已消耗；正式 API、應用啟動、部署、提交及推送仍關閉。
 
 Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並完成 lifecycle closure。焦點式編輯器以滾輪切換圖片前保存備註的修正已通過回歸測試、lint、build 與獨立程式審查，並完成生命週期閉環。「外部圖片拖放導入」已完成來源改動、15 項前端回歸、lint、build、scope guard、focused rereview `PASS` 與 Vite browser UAT；macOS pywebview UAT 已由使用者人工驗收成功（user-attested），工作線已收束。檔案選擇器已改為由應用程式提供可靠的初始資料夾，避免 Windows 缺少 `HOMEPATH` 時由 pywebview 拋出 `KeyError`；source 與自動驗證已完成，Windows GUI 實機確認留待問題環境更新。新版本提示與忽略機制曾隨純前端版本退場；現在只依新的桌面更新計畫恢復，不回復網頁 API 查詢。README 彈窗版本化保存仍未實作。Git 歷史中的舊計畫標籤與既有 `.planning/` 草稿均未被匯入為目前工作。
 

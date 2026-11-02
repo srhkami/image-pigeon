@@ -6,15 +6,15 @@ canonical: true
 scope: image-pigeon
 path_semantics: repository-root-relative
 implements: docs/plans/2026-09-30-electron-update-check.md
-updated_at: 2026-09-30
+updated_at: 2026-11-02
 execution:
-  current_checkpoint: package_verified_windows_uat_pending
+  current_checkpoint: package_330_verified_windows_uat_pending
 review:
   status: pass
   delegation: deleg_2ccf796d
   source_manifest: /tmp/image-pigeon-electron-update-review.json
   source_digest: 925407eec2bfd0e4f44e7953fc7832919fc30d0d2088b62b09e5a3bb50740abd
-  scope_note: 前輪固定來源快照的 PASS；本輪 Intro 版型已不同，另做語法樹檢查，不擴張舊審查至新 bytes
+  scope_note: 僅限2026-09-30固定來源快照的PASS；2026-11-02重新打包未重做獨立來源審查，不擴張舊審查至目前來源或產物
   blocking_findings: []
 approval_gates:
   source_write: approved_consumed_2026-09-30
@@ -22,6 +22,8 @@ approval_gates:
   live_api: closed
   app_runtime: closed
   package_build: approved_consumed_2026-09-30
+  repack_package_build: approved_consumed_2026-11-02
+  package_metadata_sync: approved_consumed_2026-11-02
   deployment: closed
   commit: closed
   push: closed
@@ -29,7 +31,7 @@ approval_gates:
 
 # EXE 更新偵測執行結果
 
-## 已完成的原始碼與自動驗證
+## 更新偵測原始碼與自動驗證（2026-09-30 歷史證據）
 
 - Intro 版本資訊旁固定顯示「檢查新版」，沿用 v2 的 Google 雲端資料夾，不放導覽列、側欄或其他位置，也不依 API 結果隱藏。網頁版可主動點擊，但無橋接時不查詢。
 - EXE 編輯介面啟動時透過沙箱預載的單用途 `checkForUpdates()` 查詢；主程序只接受本機主視窗頂層、無參數請求，整個程序只做一次固定 GET，不外送圖片、專案、備註、本機版本或識別資料。
@@ -86,3 +88,18 @@ git diff --check
 - 本輪 lint exit 0；聚焦重跑 31/32、1 失敗。失敗為 `desktopUpdate.test.ts:34` 要求連結自身含 `col-span-2`，而現行 Intro 已在外層 div 保留兩欄容器。相較前輪受審快照，只有 Intro 不同，且在本輪打包基準建立前已存在；所有桌面橋接、安全、版本邏輯及其他契約均通過。另用 TypeScript 語法樹機械確認唯一固定入口位於版本欄旁、外層兩欄容器、href、target 與安全 rel 均成立，exit 0；不回改使用者版型或調整測試以求全綠。
 - 打包基準 `/tmp/image-pigeon-3.2.0-package-baseline.json`：除本輪三份治理文件外，全部既有來源內容一致；全部舊 release 檔案 SHA-256 保持相同。驗證摘要 `/tmp/image-pigeon-3.2.0-package-verification.json`。
 - 打包交付已完成；未執行 Windows 啟動、SmartScreen／防毒、GUI、列印與 Word 實機驗收，不宣稱這些項目通過。
+
+## 3.3.0 重新打包（2026-11-02）
+
+使用者另行要求打包 EXE，本輪以目前已提交的 dev 來源 `df8a91ad3469d7a1a7396b516f374bbc6145d952` 重新封裝。只將 package.json 的封裝版本同步至既有更新紀錄的 3.3.0；不改功能、依賴或鎖定檔。新輸出目錄為 `release/3.3.0/`，舊產物保持不動。本輪打包及機械驗證完成，不沿用上方 2026-09-30 的產物雜湊或測試計數。
+
+- 最終檔案：`release/3.3.0/image-pigeon-3.3.0-win-x64-portable.exe`；大小 99,241,119 bytes（94.64 MiB）。
+- SHA-256：`3cad9c7940ec34e71ba348d887286f82bc55f42e822f4c5ef921399127c2bca9`。
+- `node --test --test-reporter=tap tests/electronPackagingContract.test.ts tests/electronUpdate.test.ts`：13/13 通過，0 失敗、0 略過，退出 0；僅合成更新回應，不查正式 API。`pnpm run lint`：退出 0。
+- `pnpm run package:electron:win --config.directories.output=release/3.3.0`：退出 0，包含本輪 TypeScript／Vite build 與 verify:static；靜態 8 檔、6 個引用、禁止命中 0。使用 `CSC_IDENTITY_AUTO_DISCOVERY=false`，未使用簽章憑證。
+- `pnpm run verify:electron:package release/3.3.0`：退出 0，檔名、大小與 Windows PE 格式符合。啟動器 machine 為 `0x14c`，內含應用程式為 `0x8664` x64；兩者 certificate table 均為 `[0, 0]`，確認未簽章，不將 signtool 日誌誤認為已簽章。
+- `python3 /Users/cksai/.hermes/cache/scratch/image-pigeon-exe-330-20261102/verify-artifact.py`：退出 0。ASAR 頂層精確為 dist、electron、package.json，共 14 檔；13 個內容檔逐 byte 符合目前 dist／electron，metadata 的 version／main／name 正確，沒有 src、docs、tests 或 node_modules。ASAR SHA-256：`d2520666a8d212899f0a3e8ab63168f076bd1a8f65b4f34d0d80d17c720d937e`。
+- 同一護欄確認 package.json 相對基線只改版本，其他產品來源、依賴與鎖定檔、所有舊 release 產物、HEAD、分支及暫存區保持不變；只有本輪三份治理文件另作必要校正。`git diff --check` 與 staged 差異檢查退出 0。
+- 基線及收據位於 `/Users/cksai/.hermes/cache/scratch/image-pigeon-exe-330-20261102/`，包含 baseline.json、focused-result.json、lint-result.json、package-result.json、artifact-verification.json 及各命令日誌。初次基線蒐集因本機 Python 沒有 hashlib.file_digest 而停止；改用既有 sha256 介面後重跑成功，未影響產品或產物。
+- 保留既有大型區塊、預設 Electron 圖示、缺少 author／description 及建置工具相依性提示；ASAR 實際檢查已確認未打包前端 node_modules。沒有更新工具或依賴，不重跑完整前端矩陣，不將既有列印文案或歷史 Intro 斷言改寫成全綠。
+- 本輪沒有新增獨立來源複審；前輪 PASS 只限其歷史來源快照。計畫 active、結果 partial、目前檢查點為 `package_330_verified_windows_uat_pending`；打包與 metadata 同步閘門已消耗。未啟動應用、EXE、瀏覽器或 Word，未做 Windows 啟動、SmartScreen／防毒、列印或斷網人工驗收，未部署、暫存、提交或推送。
