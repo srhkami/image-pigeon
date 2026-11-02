@@ -8,6 +8,7 @@ import {
   createEmptyProject,
   getOrderedItemViewModels,
   removeItems,
+  updateItemAnnotations,
 } from './state/projectState.ts'
 import {Nav} from '@/layout'
 import {ImagePreview} from '@/features'
@@ -21,7 +22,8 @@ import {SUPPORTED_IMAGE_FILE_EXTENSIONS} from '@/features/Upload/fileAccept.ts'
 import {browserAssetStore} from '@/services/browserAssetStore.ts'
 import {browserImportOperationCoordinator, browserProjectOperationCoordinator} from '@/services/browserProjectOperation.ts'
 import {getActiveItemIdAfterRemovingItems} from '@/features/ImagePreview/wheelNavigation.ts'
-import type {LayoutPreference} from '@/types/project.ts'
+import type {AnnotationEditor, LayoutPreference, MagnificationTool} from '@/types/project.ts'
+import {EMPTY_ANNOTATIONS} from '@/features/ImagePreview/annotationGeometry.ts'
 import ModalDesktopUpdate from '@/features/Intro/ModalDesktopUpdate.tsx'
 
 const DEFAULT_PRINT_OPTIONS: PrintPreviewOptions = {title: '照片黏貼表', fontSize: '18', alignVertical: 'center'}
@@ -41,6 +43,8 @@ function App() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [pendingImportFiles, setPendingImportFiles] = useState<File[]>([])
   const [dragDepth, setDragDepth] = useState(0)
+  const [annotationSelection, setAnnotationSelection] = useState<{scope: string; id: string} | null>(null)
+  const [magnificationSelection, setMagnificationSelection] = useState<{scope: string; tool: MagnificationTool} | null>(null)
 
   projectRef.current = project
   sessionIdRef.current = sessionId
@@ -70,6 +74,37 @@ function App() {
 
   const previewItems = getOrderedItemViewModels(project, sessionId ?? '')
   const projectItemCount = previewItems.length
+  const annotationItem = previewItems.find(item => item.itemId === activeItemId)
+  const activeAnnotations = annotationItem?.annotations ?? EMPTY_ANNOTATIONS
+  const annotationScope = JSON.stringify([sessionId, activeItemId, annotationItem?.assetId, annotationItem?.rotation, isMoveMode, viewMode])
+  const annotationScopeRef = useRef(annotationScope)
+  annotationScopeRef.current = annotationScope
+  useEffect(() => { setAnnotationSelection(null); setMagnificationSelection(null) }, [annotationScope])
+  const annotationEditor: AnnotationEditor = {
+    scope: annotationScope,
+    selectedId: annotationSelection?.scope === annotationScope && activeAnnotations.some(mark => mark.id === annotationSelection.id)
+      ? annotationSelection.id : null,
+    magnificationTool: magnificationSelection?.scope === annotationScope ? magnificationSelection.tool : null,
+    onMagnificationToolChange: tool => {
+      if (annotationScopeRef.current !== annotationScope || sessionIdRef.current !== sessionId || isMoveMode || viewMode !== 'editor') return
+      setAnnotationSelection(null)
+      setMagnificationSelection(tool ? {scope: annotationScope, tool} : null)
+    },
+    onSelect: id => {
+      if (annotationScopeRef.current !== annotationScope || sessionIdRef.current !== sessionId) return
+      setAnnotationSelection(id ? {scope: annotationScope, id} : null)
+      if (id) setMagnificationSelection(null)
+    },
+    onChange: (annotations, expected) => {
+      if (!activeItemId || isMoveMode || viewMode !== 'editor') return
+      setProject(current => {
+        if (annotationScopeRef.current !== annotationScope || sessionIdRef.current !== sessionId) return current
+        const item = current.items.find(candidate => candidate.id === activeItemId)
+        if (!item || item.assetId !== annotationItem?.assetId || item.rotation !== annotationItem.rotation) return current
+        return updateItemAnnotations(current, activeItemId, annotations, expected)
+      })
+    },
+  }
 
   useEffect(() => {
     if (!previewItems.length) {
@@ -172,12 +207,14 @@ function App() {
       <div className='flex min-h-0 flex-1 overflow-hidden'>
         <Sidebar setImages={setImages} itemCount={projectItemCount} project={project} setProject={setProject} sessionId={sessionId} onProjectOpened={startProjectSession}
           isMoveMode={isMoveMode} setIsMoveMode={setIsMoveMode} selectedItemIds={selectedItemIds}
+          annotationEditor={annotationEditor} annotations={activeAnnotations}
           onSelectAll={() => setSelectedItemIds(new Set(project.items.map((item) => item.id)))} onClearSelection={() => setSelectedItemIds(new Set())}
           onBatchRotate={batchRotate} onBatchLayout={batchLayout} onRemoveSelected={removeSelectedItems}
           onPrintPreview={(options) => { setPrintOptions(options); setViewMode('print-preview') }} isImportModalOpen={isImportModalOpen}
           pendingImportFiles={pendingImportFiles} onOpenImport={() => onOpenImport()} onCloseImport={onCloseImport}/>
         <main className='min-w-0 flex-1 overflow-hidden'>
-          <ImagePreview project={project} setProject={setProject} sessionId={sessionId} setImages={setImages} isMoveMode={isMoveMode}
+          <ImagePreview key={sessionId ?? 'initial'} project={project} setProject={setProject} sessionId={sessionId} setImages={setImages} isMoveMode={isMoveMode}
+            annotationEditor={annotationEditor}
             activeItemId={activeItemId} setActiveItemId={setActiveItemId} selectedItemIds={selectedItemIds}
             onToggleSelectedItem={toggleSelectedItem} onRemoveItems={removeSelectedItems}/>
         </main>

@@ -2,6 +2,7 @@ import {unzip, zip, type AsyncZippable, type Unzipped} from 'fflate'
 
 import type {Asset, Item, LayoutPreference, ProjectV2, WordCompatibleGridLayout} from '../types/project.ts'
 import {BrowserAssetStore} from './browserAssetStore.ts'
+import {getAnnotationProjectVersion, validateAnnotations} from '../features/ImagePreview/annotationGeometry.ts'
 import {
   BROWSER_RUNTIME_LIMITS,
   BrowserOperationError,
@@ -204,10 +205,10 @@ function deriveLayoutPreference(asset: Asset, rotation: Item['rotation'], portra
   return portraitSize === 'small' ? 'grid-6' : 'side-by-side-2'
 }
 
-function validateProject(raw: unknown, limits: ArchiveLimits): ProjectV2 {
+function validateProject(raw: unknown, limits: ArchiveLimits, saving = false): ProjectV2 {
   assertRecord(raw, 'project.json 必須是 object')
-  if (raw.schema !== 'image-pigeon.project' || raw.version !== 2) {
-    failSchema('只支援 image-pigeon.project version 2')
+  if (raw.schema !== 'image-pigeon.project' || (raw.version !== 2 && raw.version !== 3 && raw.version !== 4)) {
+    failSchema('只支援 image-pigeon.project version 2、3 或 4')
   }
   assertRecord(raw.document, 'document 不合法')
   if (typeof raw.document.title !== 'string') failSchema('document.title 不合法')
@@ -266,6 +267,14 @@ function validateProject(raw: unknown, limits: ArchiveLimits): ProjectV2 {
       ? deriveLayoutPreference(asset, value.rotation as Item['rotation'], portraitSize)
       : value.layoutPreference
     if (!LAYOUT_PREFERENCES.has(layoutPreference as LayoutPreference)) failSchema(`item layoutPreference 不合法：${value.id}`)
+    let annotations: Item['annotations']
+    try {
+      annotations = validateAnnotations(value.annotations)
+    } catch (cause) {
+      failSchema(`item 標記不合法：${id}`, cause)
+    }
+    if (!saving && raw.version === 2 && annotations!.length) failSchema('含標記的專案必須使用 version 3')
+    if (!saving && raw.version !== 4 && annotations!.some(annotation => annotation.strokeWidthLevel !== undefined)) failSchema('含粗細設定的專案必須使用 version 4')
     return {
       id,
       type: 'image',
@@ -275,6 +284,7 @@ function validateProject(raw: unknown, limits: ArchiveLimits): ProjectV2 {
       crop: validateCrop(value.crop),
       portraitSize,
       layoutPreference: layoutPreference as LayoutPreference,
+      ...(annotations!.length ? {annotations} : {}),
     }
   })
 
@@ -298,7 +308,7 @@ function validateProject(raw: unknown, limits: ArchiveLimits): ProjectV2 {
 
   return {
     schema: 'image-pigeon.project',
-    version: 2,
+    version: saving ? getAnnotationProjectVersion(items) : raw.version as number,
     document: {title: raw.document.title as string},
     assets,
     items,
@@ -391,7 +401,7 @@ export async function createProjectArchive(
 ): Promise<Blob> {
   const limits = BROWSER_RUNTIME_LIMITS.projectArchive
   throwIfAborted(signal)
-  const project = validateProject(projectInput, limits)
+  const project = validateProject(projectInput, limits, true)
   const projectJson = encoder.encode(JSON.stringify(project))
   if (projectJson.byteLength > limits.maxProjectJsonBytes) {
     throw new BrowserOperationError('RESOURCE_LIMIT_EXCEEDED', `project.json 不得超過 ${limits.maxProjectJsonBytes} bytes`)

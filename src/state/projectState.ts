@@ -1,5 +1,6 @@
 import type {
   Asset,
+  ImageAnnotation,
   Item,
   LayoutPreference,
   ProjectImportData,
@@ -8,6 +9,7 @@ import type {
   WordCompatibleGridLayout,
 } from '../types/project.ts'
 import {browserAssetStore} from '../services/browserAssetStore.ts'
+import {EMPTY_ANNOTATIONS, getAnnotationProjectVersion, validateAnnotations} from '../features/ImagePreview/annotationGeometry.ts'
 
 const DEFAULT_LAYOUT_ID = 'layout_word_default'
 const DEFAULT_LAYOUT_TYPE: WordCompatibleGridLayout['type'] = 'word-compatible-grid'
@@ -151,6 +153,7 @@ export function getOrderedItemViewModels(project: ProjectV2, sessionId?: string)
         mime: asset.mime,
         originalName: asset.originalName,
         previewUrl: browserAssetStore.getUrl(asset.id),
+        annotations: item.annotations,
       }
     })
     .filter((item): item is ProjectItemViewModel => Boolean(item))
@@ -242,6 +245,19 @@ export function reorderItem(project: ProjectV2, activeId: string, overId: string
       itemOrder: nextOrder,
     }),
   }
+}
+
+export function updateItemAnnotations(
+  project: ProjectV2,
+  itemId: string,
+  annotations: ImageAnnotation[],
+  expected: readonly ImageAnnotation[],
+): ProjectV2 {
+  const item = project.items.find(candidate => candidate.id === itemId)
+  if (!item || (item.annotations ?? EMPTY_ANNOTATIONS) !== expected) return project
+  const validated = validateAnnotations(annotations)
+  const items = project.items.map(candidate => candidate === item ? {...candidate, annotations: validated} : candidate)
+  return {...project, version: getAnnotationProjectVersion(items), items}
 }
 
 export function updateItemRemark(project: ProjectV2, itemId: string, remark: string): ProjectV2 {

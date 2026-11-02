@@ -8,6 +8,30 @@ export type Crop = {
 
 export type LayoutPreference = 'stacked-2' | 'side-by-side-2' | 'grid-4' | 'grid-6'
 
+export type BasicAnnotationKind = 'ellipse' | 'rectangle' | 'line' | 'arrow' | 'double-arrow'
+export type MagnificationKind = 'magnify-circle' | 'magnify-rectangle'
+export type AnnotationKind = BasicAnnotationKind | MagnificationKind
+export type AnnotationStrokeWidthLevel = 1 | 2 | 3 | 4 | 5
+type AnnotationStrokeStyle = {stroke: string; strokeWidthLevel?: AnnotationStrokeWidthLevel}
+export type AnnotationStyle = AnnotationStrokeStyle & {fill: string | null}
+export type AnnotationRect = {x: number; y: number; width: number; height: number}
+export type MagnificationTool = AnnotationStrokeStyle & {kind: MagnificationKind}
+export type MagnificationAnnotation = AnnotationRect & AnnotationStrokeStyle & {id: string; kind: MagnificationKind; source: AnnotationRect}
+export type ImageAnnotation = (
+  | {kind: 'ellipse' | 'rectangle'; x: number; y: number; width: number; height: number; fill: string | null}
+  | {kind: 'line' | 'arrow' | 'double-arrow'; x1: number; y1: number; x2: number; y2: number}
+  | MagnificationAnnotation
+) & {id: string} & AnnotationStrokeStyle
+
+export type AnnotationEditor = {
+  scope: string
+  selectedId: string | null
+  magnificationTool?: MagnificationTool | null
+  onMagnificationToolChange?: (tool: MagnificationTool | null) => void
+  onSelect: (id: string | null) => void
+  onChange: (annotations: ImageAnnotation[], expected: readonly ImageAnnotation[]) => void
+}
+
 export type Asset = {
   id: string
   file: string
@@ -27,6 +51,7 @@ export type Item = {
   crop: Crop
   portraitSize?: 'large' | 'small'
   layoutPreference?: LayoutPreference
+  annotations?: ImageAnnotation[]
 }
 
 export type WordCompatibleGridLayout = {
@@ -75,4 +100,5 @@ export type ProjectItemViewModel = {
   mime: string
   originalName: string | null
   previewUrl: string
+  annotations?: ImageAnnotation[]
 }

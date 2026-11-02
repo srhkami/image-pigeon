@@ -4,7 +4,7 @@ import test from 'node:test'
 import ts from 'typescript'
 import {createRequire} from 'node:module'
 import {runInNewContext} from 'node:vm'
-import {createElement} from 'react'
+import {createElement, isValidElement} from 'react'
 import type {ComponentType} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
 import type {LayoutPreference, ProjectItemViewModel} from '../../types/project.ts'
@@ -171,7 +171,7 @@ test('四張批次按鈕的語法樹確認四個選項同屬兩欄容器且未�
   }
 })
 
-function loadLayoutComponents() {
+function loadLayoutComponents(reactOverride?: unknown) {
   const require = createRequire(import.meta.url)
   const loadComponent = (relativePath: string, overrides: Record<string, unknown> = {}): ComponentType<Record<string, unknown>> => {
     const output = ts.transpileModule(readSource(relativePath), {
@@ -179,14 +179,111 @@ function loadLayoutComponents() {
       compilerOptions: {module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022, esModuleInterop: true},
     }).outputText
     const exports: Record<string, unknown> = {}
-    runInNewContext(output, {exports, require: (name: string) => Object.prototype.hasOwnProperty.call(overrides, name) ? overrides[name] : require(name)})
+    runInNewContext(output, {exports, require: (name: string) => {
+      if (name === 'react' && reactOverride) return reactOverride
+      if (Object.prototype.hasOwnProperty.call(overrides, name)) return overrides[name]
+      if (name === './ImageAnnotationLayer.tsx' || name === '../ImagePreview/ImageAnnotationLayer.tsx') {
+        return {__esModule: true, default: loadComponent('../ImagePreview/ImageAnnotationLayer.tsx')}
+      }
+      if (name === './annotationGeometry.ts') return require('../ImagePreview/annotationGeometry.ts')
+      return require(name)
+    }})
     return exports.default as ComponentType<Record<string, unknown>>
   }
   const PrintableSlot = loadComponent('./PrintableSlot.tsx', {'./printLayout.ts': {formatPrintImageNumber}})
   const PrintablePage = loadComponent('./PrintablePage.tsx', {'@/features/PrintPreview/PrintableSlot.tsx': {__esModule: true, default: PrintableSlot}})
   const Thumbnail = loadComponent('../ImagePreview/CollagePageThumbnail.tsx')
-  return {PrintablePage, Thumbnail}
+  return {PrintablePage, Thumbnail, PrintableSlot}
 }
+
+test('上下縮圖明確單欄，上下圖片與末頁空格均占滿欄寬', () => {
+  const {Thumbnail} = loadLayoutComponents()
+  for (const count of [1, 2]) {
+    for (const annotated of [false, true]) {
+      const ids = ['top', 'bottom'].slice(0, count)
+      const page = buildAutoCollageLayout(ids.map(id => layoutItem(id, 'stacked-2')))[0]
+      const items = new Map(ids.map(id => [id, {
+        itemId: id, previewUrl: `blob:${id}`, remark: '', rotation: 0, assetWidth: 800, assetHeight: 400,
+        ...(annotated ? {annotations: [{id: `mark-${id}`, kind: 'rectangle', x: 0.1, y: 0.1, width: 0.3, height: 0.3, stroke: '#ef4444', fill: null}]} : {}),
+      } as ProjectItemViewModel]))
+      const html = renderToStaticMarkup(createElement(Thumbnail, {
+        page, pageIndex: 0, activeItemId: 'top', itemById: (id: string) => items.get(id), isActivePage: true, onPageActivate: () => {},
+      }))
+      assert.match(html, /grid-cols-1 grid-rows-2/)
+      const classes = [...html.matchAll(/<div class="([^"]+)"/g)].map(match => match[1]).filter(value => value.includes('min-h-0'))
+      assert.equal(classes.length, 2)
+      classes.forEach((value, index) => {
+        assert.ok(value.includes(`row-start-${index + 1} row-end-${index + 2}`))
+        assert.match(value, /col-start-1 col-end-2/)
+        assert.doesNotMatch(value, /col-span-3/)
+        assert.match(value, /items-center justify-center/)
+      })
+      assert.deepEqual([...html.matchAll(/<(?:img|image)\b[^>]*(?:src|href)="blob:([^"]+)"/g)].map(match => match[1]), ids)
+      assert.equal((html.match(/>空<\/span>/g) ?? []).length, 2 - count)
+      assert.doesNotMatch(html, /data-annotation-handle/)
+    }
+  }
+})
+
+test('上下六張縮圖混排仍保留三欄與橫圖跨三欄', () => {
+  const {Thumbnail} = loadLayoutComponents()
+  for (const preferences of [['stacked-2', 'grid-6'], ['grid-6', 'stacked-2']] as const) {
+    const page = buildAutoCollageLayout(preferences.map((value, index) => layoutItem(String(index), value)))[0]
+    const html = renderToStaticMarkup(createElement(Thumbnail, {
+      page, pageIndex: 0, activeItemId: null, itemById: (id: string) => ({itemId: id, previewUrl: `blob:${id}`, rotation: 0}),
+      isActivePage: false, onPageActivate: () => {},
+    }))
+    assert.match(html, /grid-cols-3 grid-rows-2/)
+    assert.equal((html.match(/col-span-3/g) ?? []).length, 1)
+    assert.equal((html.match(/>空<\/span>/g) ?? []).length, 2)
+  }
+})
+
+test('標記在實際頁面縮圖及列印呈現一致，列印不包含編輯控制點', () => {
+  const {PrintablePage, Thumbnail} = loadLayoutComponents()
+  const page = buildAutoCollageLayout([layoutItem('annotated', 'grid-4')])[0]
+  const item = {
+    itemId: 'annotated', previewUrl: 'blob:annotated', remark: '標記圖片', rotation: 90, assetWidth: 400, assetHeight: 800,
+    annotations: [{id: 'one', kind: 'rectangle', x: 0.1, y: 0.2, width: 0.4, height: 0.4, stroke: '#123456', fill: '#654321'}],
+  } as ProjectItemViewModel
+  const thumbnail = renderToStaticMarkup(createElement(Thumbnail, {
+    page, pageIndex: 0, activeItemId: item.itemId, itemById: () => item, isActivePage: true, onPageActivate: () => {},
+  }))
+  const printed = renderToStaticMarkup(createElement(PrintablePage, {
+    page, title: '標記列印', pageIndex: 0, totalPages: 1, slotIndexMap: {[page.slots[0].slotId]: 1},
+    itemById: new Map([[item.itemId, item]]), fontSize: '18', alignVertical: 'center', onImageLoaded: () => {}, onImageErrored: () => {},
+  }))
+  for (const html of [thumbnail, printed]) {
+    assert.match(html, /viewBox="0 0 400 800"/)
+    assert.match(html, /href="blob:annotated"/)
+    assert.match(html, /stroke="#123456" fill="#654321"/)
+    assert.doesNotMatch(html, /data-annotation-handle|data-annotation-editing/)
+  }
+})
+
+test('含標記列印只由可見 SVG 底圖載入解鎖，不被隱藏預載圖提早解鎖', () => {
+  const require = createRequire(import.meta.url)
+  const effects: Array<() => void> = []
+  const {PrintableSlot} = loadLayoutComponents({...require('react'),
+    useRef: () => ({current: {complete: true, naturalWidth: 800, naturalHeight: 400}}),
+    useEffect: (callback: () => void) => effects.push(callback),
+  })
+  const item = {itemId: 'annotated', previewUrl: 'blob:annotated', remark: '', rotation: 0, assetWidth: 800, assetHeight: 400,
+    annotations: [{id: 'one', kind: 'line', x1: 0.1, y1: 0.2, x2: 0.7, y2: 0.8, stroke: '#123456'}]} as ProjectItemViewModel
+  const slot = buildAutoCollageLayout([layoutItem(item.itemId, 'grid-4')])[0].slots[0]
+  let loaded = 0
+  const tree = (PrintableSlot as (props: Record<string, unknown>) => unknown)({slot, item, indexInPrint: 1, fontSize: '18', alignVertical: 'center', onImageLoaded: () => { loaded++ }, onImageErrored: () => {}})
+  effects.forEach(effect => effect())
+  assert.equal(loaded, 0, '可見 SVG 尚未載入，不得由隱藏圖提早解鎖')
+  const flatten = (root: unknown): Array<{type: unknown; props: Record<string, unknown>}> => {
+    if (Array.isArray(root)) return root.flatMap(flatten)
+    return isValidElement<Record<string, unknown>>(root) ? [root, ...flatten(root.props.children)] : []
+  }
+  const layer = flatten(tree).find(node => node.props.viewModel === item)
+  assert.ok(layer)
+  ;(layer.props.onLoad as () => void)()
+  assert.equal(loaded, 1)
+})
 
 test('四張縮圖與列印實際元件渲染保留四格順序、末頁空格、編號、備註與旋轉', () => {
   const {PrintablePage, Thumbnail} = loadLayoutComponents()

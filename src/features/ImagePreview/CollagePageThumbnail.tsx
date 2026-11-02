@@ -1,6 +1,7 @@
 import {ProjectItemViewModel} from '@/types/project.ts'
 import {twMerge} from 'tailwind-merge'
 import clsx from 'clsx'
+import ImageAnnotationLayer from './ImageAnnotationLayer.tsx'
 import type {
   AutoCollagePage,
   AutoCollageSlot
@@ -65,7 +66,10 @@ const getSlotClass = (role: AutoCollageSlot['role'], template: AutoCollagePage['
     return 'row-start-2 row-end-3 col-start-2 col-end-3'
   }
   if (role === 'landscape-top') {
-    return 'row-start-1 row-end-2 col-span-3'
+    return 'row-start-1 row-end-2 col-start-1 col-end-2'
+  }
+  if (role === 'landscape-bottom') {
+    return 'row-start-2 row-end-3 col-start-1 col-end-2'
   }
   if (role === 'mixed-landscape-top') {
     return 'row-start-1 row-end-2 col-span-3'
@@ -100,7 +104,7 @@ const getGridClass = (template: AutoCollagePage['template']) => {
     return 'grid grid-cols-6 grid-rows-2 gap-1'
   }
   if (template === 'landscape-2') {
-    return 'grid grid-rows-2 gap-1'
+    return 'grid grid-cols-1 grid-rows-2 gap-1'
   }
   if (template === 'portrait-large-2') {
     return 'grid grid-cols-2 gap-1'
@@ -147,14 +151,14 @@ export default function CollagePageThumbnail({
     const slotTitle = item.remark ? `${slotItemId}: ${item.remark}` : slotItemId
     return (
       <div key={slot.slotId} className={slotClassName} title={slotTitle}>
-        <img
+        {item.annotations?.length ? <ImageAnnotationLayer viewModel={item}/> : <img
           src={item.previewUrl}
           alt={slotTitle}
           className='h-full w-full object-contain'
           style={{
             transform: `rotate(${item.rotation}deg)`,
           }}
-        />
+        />}
       </div>
     )
   }

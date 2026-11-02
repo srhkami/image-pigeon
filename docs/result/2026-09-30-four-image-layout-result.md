@@ -6,11 +6,21 @@ canonical: true
 scope: image-pigeon
 path_semantics: repository-root-relative
 implements: docs/plans/2026-09-30-four-image-layout.md
-updated_at: 2026-09-30
+updated_at: 2026-11-02
 execution:
-  current_checkpoint: word_side_stacked_grid_review_pass_waiting_user_manual
+  current_checkpoint: closed_with_validation_gaps
+thumbnail_fix:
+  status: user_attested_complete
+  review_used: false
+  manual_acceptance: user_attested_complete_2026-11-02
+closure:
+  status: closed_with_validation_gaps
+  completed_at: 2026-11-02
+  authority: 使用者確認問題已解決，可以收束當前計畫
+  remaining_manual_validation: deferred_no_pass
 review:
   status: pass
+  applies_to: word_side_stacked_grid_correction
   delegation: deleg_c0fcd197
   used: true
   blocking_findings: []
@@ -35,8 +45,10 @@ historical_reviews:
 approval_gates:
   source_write: approved_consumed_2026-09-30
   automated_test: approved_consumed_2026-09-30
+  thumbnail_fix_source_write: approved_consumed_2026-11-02
+  thumbnail_fix_automated_test: approved_consumed_2026-11-02
   local_browser_runtime: closed
-  manual_uat: pending_user_approval
+  manual_uat: thumbnail_user_attested_remaining_deferred_2026-11-02
   electron_package_build: closed
   deployment: closed
   commit: closed
@@ -47,7 +59,17 @@ approval_gates:
 
 ## 目前結論
 
-Word 左右圖片內寬與六張／上下雙向混排已補正，預覽與列印未修改。首輪審查要求的明示欄寬測試已補強；相關集合 38/38、lint／build 通過，聚焦複審 `deleg_c0fcd197` 為 PASS，唯一驗證缺口已關閉。主代理核對來源及受保護內容符合受審快照；人工驗收未執行，整體仍為 `partial`、計畫 `active`，不宣稱 Word 實機相容性通過。
+2026-11-02 使用者回覆「確認問題已解決，可以收束當前計畫。」純上下縮圖與末頁空格修正記為使用者人工驗收通過（user-attested）；計畫生命週期已完成，結案分類為 `closed_with_validation_gaps`。先前直接回歸 48/48、lint／build 通過；本次只收束文件，未修改產品或啟動應用。
+
+先前 Word 左右圖片內寬與六張／上下雙向混排已補正，當時預覽與列印未修改。首輪審查要求的明示欄寬測試已補強；相關集合 38/38、lint／build 通過，聚焦複審 `deleg_c0fcd197` 為 PASS，該輪來源測試缺口已關閉。該歷史審查不涵蓋本輪縮圖修正；Word／列印等完整人工矩陣未取得逐項回報，結果仍為 `partial`，不宣稱 Word 實機相容性或完整矩陣通過。以下各輪當時的待驗敘述保留為歷史，現行處置以下方結案小節為準。
+
+## 上下排版縮圖補正（2026-11-02）
+
+- 原因是純上下未指定單欄，上方格卻跨三欄、下方格沒有對應定位，產生隱含欄位。只在 `CollagePageThumbnail.tsx` 明確指定 `grid-cols-1 grid-rows-2`，並讓上下兩格各占第一欄的第一／第二列；空格沿用相同定位及置中。保留原圖片等比例顯示、標記覆蓋層、其他模板、分頁及輸出程式。
+- 在既有 `printPreview.test.ts` 共用的真實元件載入器補兩項回歸。修正前執行具名兩項為 1 通過、1 預期失敗、退出 1，原因為上下縮圖缺少單欄；混排基線已通過。修正後涵蓋一／兩張、有／無標記、圖片順序、兩格欄位及列位、空格置中與唯讀無控制點；另確認上下／六張兩方向保留三欄及橫圖跨三欄。
+- `node --test --test-reporter=tap --test-skip-pattern='列印預覽不依賴後端 session' src/features/PrintPreview/printPreview.test.ts src/features/ImagePreview/manualLayoutPreference.test.ts src/features/ImagePreview/imageAnnotations.test.ts`：48/48、退出 0。`node --test --test-reporter=tap src/features/PrintPreview/printPreview.test.ts`：13/14、退出 1，唯一失敗仍是「列印預覽不依賴後端 session 並明確說明系統列印另存 PDF 邊界」，沒有刪除或放寬斷言。
+- `pnpm run lint`、`pnpm run build` 各退出 0；大型區塊警告保留。基線、紅階段、直接回歸、完整列印與品質日誌保存於 `/Users/cksai/.hermes/cache/scratch/image-pigeon-stacked-thumbnail-fix-20261102/`，命令與數量見 `tests.json`、`quality.json`。本輪保護 30 筆既有變更，暫存區不動；來源採基線相對的精確轉換驗證，既有測試只插入本輪兩項，其他內容保留。
+- 本輪為局部格線修正，由主代理自檢，`thumbnail_fix.review_used: false`；不借用先前 Word 的獨立 PASS。來源／自動驗證核准已消耗。來源交付當時保留縮圖視覺與原 Word 人工驗收缺口；其後縮圖已由使用者確認，原 Word 等缺口維持未取得證據。Agent 未啟動正式應用／瀏覽器、打包、部署、提交或推送。
 
 ## Word 左右內寬及六張／上下欄寬補正
 
@@ -197,12 +219,20 @@ git diff --check
 
 PASS 後僅校正結果、計畫與 STATE 的審查處置／下一步；文件前置資料、相互引用、人工待驗狀態、未追蹤文件空白格式、非目標工作線保留、來源快照及差異／暫存區護欄均通過。未重跑產品測試或擴張審查範圍。
 
-## 尚未執行範圍與下一步
+## 結案時保留的驗證缺口
 
-人工驗收仍待使用者另行核准，使用原計畫的精簡組合：滿四張、末頁留空、跨頁、與舊版型相鄰、橫直圖片、旋轉及多行備註。
+以下原人工矩陣沒有逐項回報，依使用者明確結案要求保留為 `deferred_no_pass`，不再作為本計畫的強制補驗待辦；未來要補驗須另行核准。純上下縮圖及末頁空格已由使用者確認，不列為待驗。
 
-1. 使用者確認單張／批次四張設定、整理標籤與 `.ipigeon` 重新開啟。
-2. 使用者確認純四張、四張／上下及四張／六張各兩方向混排的縮圖與列印預覽、留空及跨頁；系統列印／另存 PDF 無意外跨頁。
-3. 使用者重新匯出 DOCX，在 Microsoft Word 確認左右、純四張、純六張及相關混排的橫式照片利用可用內寬，直式照片仍保留比例及高度上限；六張／上下兩方向三格等寬且上下編號為窄欄，編號、備註、跨欄及原高度保留且無意外溢頁。
+1. 單張／批次四張設定、整理標籤與 `.ipigeon` 重新開啟的完整人工組合。
+2. 純四張、四張／上下及四張／六張各兩方向混排的完整視覺、列印／另存 PDF、留空及跨頁組合。
+3. Microsoft Word 實機開啟 DOCX 的內寬、比例、混排等寬、窄編號欄、備註及無意外溢頁組合。
 
-Agent 未啟動應用程式、瀏覽器、系統列印或 Word GUI；未執行 Electron 重新打包、部署、commit 或 push。完整人工證據缺失前，工作線不關閉，不把自動驗證擴張為人工 PASS。
+完整列印相關測試 13/14 的既有提示文案斷言失敗亦保留，未修改或放寬斷言。上述缺口不是本次新增功能故障的判定，也不等於已驗收通過。
+
+## 使用者確認與文件收束（2026-11-02）
+
+- 使用者原文：「確認問題已解決，可以收束當前計畫。」人工通過範圍限剛交付的純上下縮圖及末頁「空」提示，不擴張為全部 Word／PDF 或保存重開驗收。
+- 收束前直接從磁碟核對縮圖來源及直接測試的 SHA-256，符合前輪 `verification.json` 的兩份來源記錄。既有 48/48、lint／build 與前輪範圍驗證證據不變，本次沒有重跑產品測試或新增獨立複審。
+- 僅修改本結果、原計畫及 `STATE.md`；計畫為 `completed`、結果維持 `partial`，現行檢查點為 `closed_with_validation_gaps`。STATE 移除本工作線、保留近期結果導航，並清理其他工作線指向本已結案工作線的衝突引用；不關閉其他工作線。
+- 本輪文件驗證命令為 `node /Users/cksai/.hermes/cache/scratch/image-pigeon-layout-closure-20261102/verify.mjs`，涵蓋 YAML 前置資料、狀態／指標、歷史審查保留、非目標工作線、檔案雜湊、路徑／連結、過期現況、空白、Git 差異與暫存區護欄；實際收據保存於同目錄 `verification.json`。原計畫與結果保留，不刪除歷史證據。
+- Agent 未啟動應用程式、瀏覽器、系統列印或 Word GUI；未執行 Electron 重新打包、部署、暫存、commit 或 push。使用者人工驗收不轉寫為 Agent 執行階段 PASS，亦不開啟任何未核准副作用。

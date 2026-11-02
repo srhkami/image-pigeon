@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import {zipSync} from 'fflate'
+import {unzipSync, zipSync} from 'fflate'
 
 import {BrowserAssetStore} from './browserAssetStore.ts'
 import {BROWSER_RUNTIME_LIMITS, BrowserOperationError} from './browserRuntimeContract.ts'
@@ -43,6 +43,70 @@ const projectFixture = (): ProjectV2 => ({
 
 const grid4LayoutPreference = 'grid-4' as const
 
+const annotations = [
+  {id: 'box', kind: 'ellipse' as const, x: 0.1, y: 0.2, width: 0.3, height: 0.4, stroke: '#123456', fill: '#654321'},
+  {id: 'line', kind: 'double-arrow' as const, x1: 0.2, y1: 0.8, x2: 0.7, y2: 0.3, stroke: '#ef4444'},
+]
+
+test('標記專案保存為 version 3 並完整往返；刪除全部標記後回存 version 2', async () => {
+  const project = projectFixture()
+  project.items[0].annotations = annotations
+  const store = new BrowserAssetStore(urlApi)
+  store.register('asset-1', new Blob([WEBP_BYTES], {type: 'image/webp'}))
+  const archive = await createProjectArchive(project, store)
+  const raw = JSON.parse(new TextDecoder().decode(unzipSync(new Uint8Array(await archive.arrayBuffer()))['project.json']))
+  assert.equal(raw.version, 3, '含標記的專案不得仍包成 version 2')
+  assert.deepEqual(raw.items[0].annotations, annotations)
+  const opened = await openProjectArchive(archive, undefined, inspectFixtureImage)
+  assert.deepEqual(opened.project.items[0].annotations, annotations)
+  assert.equal(opened.project.version, 3)
+  opened.project.items[0].annotations = []
+  const empty = await createProjectArchive(opened.project, store)
+  const reopened = await openProjectArchive(empty, undefined, inspectFixtureImage)
+  assert.equal(reopened.project.version, 2)
+  assert.deepEqual(reopened.project.items[0].annotations ?? [], [])
+})
+
+test('兩種局部副本與既有標記同存 version 3，重開保留來源與縮放且底圖資產不增生', async () => {
+  const project = projectFixture()
+  const copies = (['magnify-circle', 'magnify-rectangle'] as const).map(kind => ({
+    id: kind, kind, stroke: '#123456', x: 0.5, y: 0.25, width: 0.5, height: 0.5,
+    source: {x: 0.125, y: 0.25, width: 0.25, height: 0.25},
+  }))
+  project.items[0].annotations = [...annotations, ...copies]
+  const store = new BrowserAssetStore(urlApi)
+  store.register('asset-1', new Blob([WEBP_BYTES], {type: 'image/webp'}))
+  const saved = await createProjectArchive(project, store)
+  const opened = await openProjectArchive(saved, undefined, inspectFixtureImage)
+  assert.equal(opened.project.version, 3)
+  assert.deepEqual(opened.project.items[0].annotations, [...annotations, ...copies])
+  assert.equal(opened.assets.length, 1)
+  assert.deepEqual(new Uint8Array(await opened.assets[0].blob.arrayBuffer()), WEBP_BYTES)
+  for (const source of [null, {x: 0, y: 0, width: 0, height: 0.25}, {...copies[0].source, x: 1}]) {
+    const raw = {...project, version: 3, items: [{...project.items[0], annotations: [{...copies[0], source}]}]}
+    let inspected = false
+    await assert.rejects(openProjectArchive(makeArchive({'project.json': encoder.encode(JSON.stringify(raw)), 'images/asset-1.webp': WEBP_BYTES}), undefined,
+      async () => { inspected = true; return inspectFixtureImage() }),
+    (error: unknown) => error instanceof BrowserOperationError && error.code === 'INVALID_PROJECT_SCHEMA')
+    assert.equal(inspected, false)
+  }
+})
+
+test('拒絕 version 2 偷帶標記、未知版本與非法物件，開啟前不影響現有資產', async () => {
+  for (const [version, values] of [
+    [2, annotations], [5, []], [3, [...annotations, annotations[0]]],
+    [3, [{...annotations[0], kind: 'unknown'}]], [3, [{...annotations[0], width: -1}]],
+    [3, [{...annotations[0], x: 0.9}]], [3, [{...annotations[0], stroke: 'url(x)'}]],
+  ] as const) {
+    const raw = {...projectFixture(), version, items: [{...projectFixture().items[0], annotations: values}]}
+    let inspections = 0
+    const archive = makeArchive({'project.json': encoder.encode(JSON.stringify(raw)), 'images/asset-1.webp': WEBP_BYTES})
+    await assert.rejects(openProjectArchive(archive, undefined, async () => { inspections++; return inspectFixtureImage() }),
+      (error: unknown) => error instanceof BrowserOperationError && error.code === 'INVALID_PROJECT_SCHEMA')
+    assert.equal(inspections, 0)
+  }
+})
+
 const urlApi = {
   next: 0,
   createObjectURL() {
@@ -55,6 +119,41 @@ const urlApi = {
 const makeArchive = (entries: Record<string, Uint8Array>): Blob => new Blob([
   zipSync(entries, {level: 0}),
 ], {type: 'application/zip'})
+
+test('五段粗細與局部副本完整往返 version 4，無粗細及無物件仍保存舊格式', async () => {
+  const project = projectFixture()
+  const styled = ([1, 2, 3, 4, 5] as const).flatMap(strokeWidthLevel => [
+    ...annotations.map(annotation => ({...annotation, id: `${annotation.id}-${strokeWidthLevel}`, strokeWidthLevel})),
+    ...(['magnify-circle', 'magnify-rectangle'] as const).map(kind => ({
+      id: `${kind}-${strokeWidthLevel}`, kind, stroke: '#123456', strokeWidthLevel,
+      x: 0.5, y: 0.25, width: 0.5, height: 0.5, source: {x: 0.125, y: 0.25, width: 0.25, height: 0.25},
+    })),
+  ])
+  project.items[0].annotations = styled
+  const store = new BrowserAssetStore(urlApi)
+  store.register('asset-1', new Blob([WEBP_BYTES], {type: 'image/webp'}))
+  const archive = await createProjectArchive(project, store)
+  const opened = await openProjectArchive(archive, undefined, inspectFixtureImage)
+  assert.equal(opened.project.version, 4)
+  assert.deepEqual(opened.project.items[0].annotations, styled)
+  assert.equal(opened.assets.length, 1)
+  assert.deepEqual(new Uint8Array(await opened.assets[0].blob.arrayBuffer()), WEBP_BYTES)
+  opened.project.items[0].annotations = annotations
+  assert.equal((await openProjectArchive(await createProjectArchive(opened.project, store), undefined, inspectFixtureImage)).project.version, 3)
+  opened.project.items[0].annotations = []
+  assert.equal((await openProjectArchive(await createProjectArchive(opened.project, store), undefined, inspectFixtureImage)).project.version, 2)
+})
+
+test('舊版號不得偷帶粗細，version 4 的非法檔位在圖片解碼前拒絕', async () => {
+  for (const [version, strokeWidthLevel] of [[2, 5], [3, 5], [4, 0], [4, 6], [4, 1.5], [4, null], [4, '3']] as const) {
+    const raw = {...projectFixture(), version, items: [{...projectFixture().items[0], annotations: [{...annotations[0], strokeWidthLevel}]}]}
+    let inspections = 0
+    const archive = makeArchive({'project.json': encoder.encode(JSON.stringify(raw)), 'images/asset-1.webp': WEBP_BYTES})
+    await assert.rejects(openProjectArchive(archive, undefined, async () => { inspections++; return inspectFixtureImage() }),
+      (error: unknown) => error instanceof BrowserOperationError && error.code === 'INVALID_PROJECT_SCHEMA')
+    assert.equal(inspections, 0)
+  }
+})
 
 const findZipSignature = (bytes: Uint8Array, signature: number, from = 0): number => {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)

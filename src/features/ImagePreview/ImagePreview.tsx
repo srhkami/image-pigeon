@@ -19,7 +19,7 @@ import {
 import {CustomImage} from '@/utils/type.ts'
 import FocusImageEditor from '@/features/ImagePreview/FocusImageEditor.tsx'
 import SortableImageList from '@/features/ImagePreview/SortableImageList.tsx'
-import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
+import {AnnotationEditor, ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
 import {getOrderedItemViewModels, reorderItem} from '@/state/projectState.ts'
 import CollagePagePreviewRail from '@/features/ImagePreview/CollagePagePreviewRail.tsx'
 import {buildAutoCollageLayout, findPageIndexByItemId} from '@/features/ImagePreview/autoCollageLayout.ts'
@@ -36,6 +36,7 @@ type Props = {
   readonly selectedItemIds: ReadonlySet<string>,
   readonly onToggleSelectedItem: (itemId: string) => void,
   readonly onRemoveItems: (itemIds: ReadonlySet<string>) => void,
+  readonly annotationEditor?: AnnotationEditor,
 }
 
 const WHEEL_THRESHOLD = 45
@@ -66,7 +67,7 @@ const isEditableTarget = (target: EventTarget | null) => {
 
 export default function ImagePreview({
   project, setProject, sessionId, setImages, isMoveMode, activeItemId, setActiveItemId,
-  selectedItemIds, onToggleSelectedItem, onRemoveItems,
+  selectedItemIds, onToggleSelectedItem, onRemoveItems, annotationEditor,
 }: Props) {
 
   const viewModels: ProjectItemViewModel[] = getOrderedItemViewModels(project, sessionId ?? "")
@@ -106,6 +107,12 @@ export default function ImagePreview({
   }, [activeItemIndex, setActiveItemId, sortableItemIds])
 
   const handlePreviewWheel = (event: WheelEvent<HTMLDivElement>) => {
+    if ((event.target as Element | null)?.closest?.('[data-annotation-style-panel]')) return
+    if (document.querySelector('[data-annotation-gesture="true"]')) {
+      event.preventDefault()
+      wheelAccumulatorRef.current = 0
+      return
+    }
     if (isMoveMode || !viewModels.length || activeItemIndex < 0 || isEditableTarget(event.target)) {
       return
     }
@@ -196,6 +203,7 @@ export default function ImagePreview({
           setProject={setProject}
           setImages={setImages}
           onRemoveItem={handleRemoveItem}
+          annotationEditor={annotationEditor}
         />
       </div>
       <CollagePagePreviewRail

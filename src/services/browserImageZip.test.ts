@@ -34,6 +34,29 @@ const makeProject = (): ProjectV2 => ({
   layouts: [{id: 'layout_word_default', type: 'word-compatible-grid', itemOrder: ['item-b', 'item-a', 'item-c']}],
 })
 
+test('圖片 ZIP 把每張標記與旋轉一起交給共用轉換器；合成失敗不交付 ZIP', async () => {
+  const project = makeProject()
+  const annotations = [
+    {id: 'line', kind: 'arrow' as const, x1: 0.1, y1: 0.2, x2: 0.7, y2: 0.9, stroke: '#123456'},
+    {id: 'copy', kind: 'magnify-circle' as const, stroke: '#123456', x: 0.5, y: 0.25, width: 0.5, height: 0.5,
+      source: {x: 0.125, y: 0.25, width: 0.25, height: 0.25}},
+  ]
+  project.items[1].annotations = annotations
+  const store = new BrowserAssetStore(urlApi)
+  for (const asset of project.assets) store.register(asset.id, new Blob(['base']))
+  const seen: unknown[] = []
+  await createImageExportZip(project, store, {title: '標記', isRemarkMode: false}, {
+    async convert(_source, rotation, _signal, marks) {
+      seen.push([rotation, marks])
+      return new Blob(['jpeg'], {type: 'image/jpeg'})
+    },
+  })
+  assert.deepEqual(seen[0], [270, annotations])
+  await assert.rejects(createImageExportZip(project, store, {title: '標記', isRemarkMode: false}, {
+    async convert() { throw new Error('標記合成失敗') },
+  }), /標記合成失敗/)
+})
+
 test('輸出檔名正規化換行、Windows 非法字元與空白', () => {
   assert.equal(normalizeImageExportFilename(' 甲\n乙<丙>:"/\\|?* '), '甲_乙_丙________')
   assert.equal(normalizeImageExportFilename('   \n\t '), '')

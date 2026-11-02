@@ -1,7 +1,7 @@
 ---
 type: plan
 id: plan-image-pigeon-four-image-layout-2026-09-30
-status: active
+status: completed
 canonical: true
 scope: image-pigeon
 path_semantics: repository-root-relative
@@ -12,14 +12,23 @@ branch:
   status: existing_dirty_governance_only
 execution:
   status: partial
-  current_checkpoint: word_side_stacked_grid_review_pass_waiting_user_manual
+  current_checkpoint: closed_with_validation_gaps
+  word_checkpoint: word_source_verified_manual_not_attested
+  thumbnail_fix_status: user_attested_complete
+closure:
+  status: closed_with_validation_gaps
+  completed_at: 2026-11-02
+  authority: 使用者確認問題已解決，可以收束當前計畫
+  remaining_manual_validation: deferred_no_pass
 result: docs/result/2026-09-30-four-image-layout-result.md
 approval_gates:
   planning_docs: approved_2026-09-30
   source_write: approved_consumed_2026-09-30
   automated_test: approved_consumed_2026-09-30
+  thumbnail_fix_source_write: approved_consumed_2026-11-02
+  thumbnail_fix_automated_test: approved_consumed_2026-11-02
   local_browser_runtime: closed
-  manual_uat: pending_user_approval
+  manual_uat: thumbnail_user_attested_remaining_deferred_2026-11-02
   electron_package_build: closed
   deployment: closed
   commit: closed
@@ -81,7 +90,7 @@ Word 圖片寬度補正只修改 `browserWordExporter.ts` 與其測試及本工�
 
 自動驗證優先執行上述聚焦測試；未涉及的完整測試不預設重跑，若實際執行遇到既有範圍外失敗，只記錄而不順便修正。人工驗收使用滿頁、末頁留空、跨頁、與其他版型相鄰、橫直圖、旋轉與多行備註的精簡組合，不擴張為全系統驗收。
 
-人工瀏覽器／列印及 Word 驗收由使用者操作，Agent 不在未核准時啟動應用程式或系統列印。本計畫無法在必要人工證據缺失時標記完整完成；原始碼與自動驗證通過但人工待驗時，結果維持 `partial`，列出具體缺口。
+人工瀏覽器／列印及 Word 驗收由使用者操作，Agent 不在未核准時啟動應用程式或系統列印。原始碼與自動驗證通過但人工證據不足時，不宣稱完整驗收通過；使用者於第 7 節明確要求結案後，計畫生命週期為 `completed`，執行／結果仍維持 `partial` 並保留具體缺口，不再以未補驗項目阻擋本計畫收束。
 
 ## 4. 核准、執行與停止條件
 
@@ -96,8 +105,26 @@ Word 圖片寬度補正只修改 `browserWordExporter.ts` 與其測試及本工�
 - 若需新增四張／上下及四張／六張以外混排、舊版相容、依賴、格式版本遷移或允許清單外修改，或既有頁面尺寸無法滿足驗收，停止受影響工作並提出最小修訂，不自行擴張範圍。
 - 完成後先保存同範圍結果並校正計畫生命週期，最後更新或關閉 STATE 工作線；只記錄實際執行證據，不把文件或自動測試通過擴張為人工驗收通過。
 
-## 5. 執行現況
+## 5. 前輪 Word 執行現況（保留當時證據）
 
 已完成 Word 左右圖片內寬及六張／上下雙向混排欄寬補正，不改預覽／列印。明示編號／備註欄寬的測試已補強，相關集合 38/38、lint／build 通過，聚焦複審 `deleg_c0fcd197` 為 PASS，唯一驗證缺口已關閉。含既有文案失敗集合為 38/39；來源及保護內容符合受審快照。等待使用者重新匯出 Word 確認呈現；詳細歷程見 `docs/result/2026-09-30-four-image-layout-result.md`。
 
 瀏覽器／列印／系統另存 PDF 與 Microsoft Word 人工驗收仍待使用者另行核准，計畫保持 `active`、執行為 `partial`；Agent 不啟動應用程式。Electron 打包、部署、commit 及 push 保持關閉。
+
+## 6. 上下排版縮圖補正（2026-11-02）
+
+使用者確認此次問題是「上下」而非「左右」，並要求直接修正。此核准只取代前輪禁止修改預覽的限制：將純上下縮圖明確設定為單欄、兩列，上下圖片及末頁空格都占滿同一欄；不改圖片等比例完整顯示、混排、左右、分頁、Word 或列印來源。
+
+精確允許路徑為 `src/features/ImagePreview/CollagePageThumbnail.tsx`、`src/features/PrintPreview/printPreview.test.ts`、本計畫、既有結果與 `STATE.md`。先在既有元件呈現測試重現上下圖片／空格欄位錯誤，再作最小修正，執行直接回歸、lint、build、差異及保護基線檢查；此低風險局部修正由主代理自檢，不將既有 Word 獨立審查擴稱為本輪審查。基線與收據位於 `/Users/cksai/.hermes/cache/scratch/image-pigeon-stacked-thumbnail-fix-20261102/`。
+
+交付修正來源時，既有 Word 待人工項目與歷史證據保持不變；Agent 正式應用／瀏覽器、打包、部署、提交及推送仍關閉。來源驗證不冒稱瀏覽器版面實測，修正後請使用者確認上下兩張及末頁「空」的位置；後續回報與結案處置見第 7 節。
+
+本輪來源已完成：純上下明確單欄、上下兩格分別定位至第一／第二列且占滿同一欄；標記覆蓋層與原圖片路徑不變。新增回歸先取得預期失敗，修正後直接集合 48/48、lint／build 通過；完整列印為 13/14，唯一失敗仍是既有提示文案斷言，未擴修。來源與測試核准已消耗；來源交付當時為等待人工驗收，詳細證據見既有結果新增的小節。
+
+## 7. 使用者確認與計畫收束（2026-11-02）
+
+使用者回覆「確認問題已解決，可以收束當前計畫。」將純上下縮圖及末頁空格修正記為使用者人工驗收通過（user-attested），不補造 Agent 瀏覽器證據。收束前已核對縮圖來源與直接測試符合前輪驗證指紋；本次僅校正計畫、結果及 STATE，不修改產品或重跑已完成的產品驗證。
+
+本計畫生命週期改為 `completed`，執行與結果仍為 `partial`，結案分類為 `closed_with_validation_gaps`。原 Word／列印／系統另存 PDF、保存重開等未逐項回報的人工矩陣，以及既有列印提示文案斷言失敗，保留為結案驗證缺口，不視為 PASS，也不再作為本計畫的強制待辦；未來若要補驗或修正，須另行核准。第 5 節的待驗狀態屬前輪歷史，不是目前下一步。
+
+結果保留於原 canonical 路徑，STATE 移除本工作線並加入近期結果；其他工作線不受此結案涵蓋。Agent 應用／瀏覽器、Electron 打包、部署、commit 與 push 閘門保持關閉。

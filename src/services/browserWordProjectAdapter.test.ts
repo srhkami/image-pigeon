@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {BrowserAssetStore} from './browserAssetStore.ts'
 import {createBrowserWordItems} from './browserWordProjectAdapter.ts'
+import type {ProjectV2} from '../types/project.ts'
 
 const project = {
   schema: 'image-pigeon.project' as const,
@@ -18,6 +19,27 @@ const project = {
   ],
   layouts: [{id: 'layout_word_default', type: 'word-compatible-grid' as const, itemOrder: ['item-b', 'item-a']}],
 }
+
+test('Word 轉接傳遞標記到共用合成，不改備註、排版與尺寸，合成錯誤拒絕整批', async () => {
+  const annotations = [
+    {id: 'circle', kind: 'ellipse' as const, x: 0.1, y: 0.2, width: 0.3, height: 0.4, stroke: '#123456', fill: null},
+    {id: 'copy', kind: 'magnify-rectangle' as const, stroke: '#123456', x: 0.5, y: 0.25, width: 0.5, height: 0.5,
+      source: {x: 0.125, y: 0.25, width: 0.25, height: 0.25}},
+  ]
+  const annotated: ProjectV2 = {...project, items: project.items.map(item => ({...item, annotations}))}
+  const store = new BrowserAssetStore({createObjectURL: () => 'blob:test', revokeObjectURL: () => {}})
+  for (const asset of project.assets) store.register(asset.id, new Blob(['base']))
+  const seen: unknown[] = []
+  const output = await createBrowserWordItems(annotated, store, {}, {
+    async convert(_source, rotation, _signal, marks) {
+      seen.push([rotation, marks])
+      return new Blob(['jpeg'], {type: 'image/jpeg'})
+    },
+  })
+  assert.deepEqual(seen, [[0, annotations], [90, annotations]])
+  assert.deepEqual(output.map(item => [item.width, item.height, item.remark]), [[400, 900, '第二張'], [480, 640, '第一張']])
+  await assert.rejects(createBrowserWordItems(annotated, store, {}, {async convert() { throw new Error('標記合成失敗') }}), /標記合成失敗/)
+})
 
 test('Word project adapter 依 project order 轉 JPEG、保留備註與 layout，並回報完成張數', async () => {
   const store = new BrowserAssetStore({createObjectURL: () => 'blob:test', revokeObjectURL: () => {}})

@@ -67,7 +67,7 @@ export default function SaveWord({project, itemCount}: Props) {
   }
 
   return <Row>
-    <Col xs={12}><Alert color='info'><IoMdAlert className='text-lg'/>會生成一個 WORD 檔提供下載</Alert></Col>
+    <Col xs={12}><Alert color='info'><IoMdAlert className='text-lg'/>會生成一個 WORD 檔提供下載。請注意，圖片標記無法在 Word 裡編輯。</Alert></Col>
     <FormInputCol xs={12} label='文件標題 / 檔案名稱' error={errors.title?.message}>
       <input type='text' className='input w-full' disabled={isLoading} {...register('title')}/>
     </FormInputCol>

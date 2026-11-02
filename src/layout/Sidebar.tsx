@@ -5,13 +5,14 @@ import toast from 'react-hot-toast'
 import {FaArrowRotateLeft, FaArrowRotateRight} from 'react-icons/fa6'
 import {MdDeleteForever} from 'react-icons/md'
 import {ProjectV2} from '@/types/project.ts'
-import type {LayoutPreference} from '@/types/project.ts'
+import type {AnnotationEditor, ImageAnnotation, LayoutPreference} from '@/types/project.ts'
 import {CustomImage} from '@/utils/type.ts'
 import OpenProject from '../features/Upload/OpenProject.tsx'
 import ModalImport from '@/features/Upload/ModalImport.tsx'
 import {PrintPreviewOptions} from '@/features/PrintPreview/printLayout.ts'
 import {LuImageUp, LuListOrdered} from 'react-icons/lu'
 import {FaEdit} from "react-icons/fa";
+import ImageAnnotationToolbar from '@/features/ImagePreview/ImageAnnotationToolbar.tsx'
 
 type Props = {
   readonly setImages: Dispatch<SetStateAction<CustomImage[]>>
@@ -33,6 +34,8 @@ type Props = {
   readonly pendingImportFiles: File[]
   readonly onOpenImport: () => void
   readonly onCloseImport: () => void
+  readonly annotationEditor?: AnnotationEditor
+  readonly annotations?: readonly ImageAnnotation[]
 }
 
 export default function Sidebar({
@@ -55,6 +58,8 @@ export default function Sidebar({
                                   pendingImportFiles,
                                   onOpenImport,
                                   onCloseImport,
+                                  annotationEditor,
+                                  annotations = [],
                                 }: Props) {
   const hasSelection = selectedItemIds.size > 0
   const confirmRemoveSelected = () => {
@@ -80,7 +85,7 @@ export default function Sidebar({
 
   return (
     <aside
-      className='m-3 flex h-[calc(100%-1.5rem)] w-50 shrink-0 flex-col items-stretch gap-3 overflow-y-auto overscroll-contain rounded-lg border border-base-300 bg-base-100/70 p-4 backdrop-blur-lg'>
+      className='m-3 flex h-[calc(100%-1.5rem)] w-49 shrink-0 flex-col items-stretch gap-3 overflow-y-auto overscroll-contain rounded-lg border border-base-300 bg-base-100/70 p-4 backdrop-blur-lg min-[521px]:w-56'>
       <Button color='primary' onClick={onOpenImport}><LuImageUp/>導入圖片</Button>
       <ModalImport setImages={setImages} setProject={setProject} isShow={isImportModalOpen}
                    pendingFiles={pendingImportFiles} onHide={onCloseImport}/>
@@ -97,7 +102,13 @@ export default function Sidebar({
               onClick={() => setIsMoveMode((current) => !current)}>
         <LuListOrdered /> 整理模式
       </Button>
-      {isMoveMode && <>
+      <div className='flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain'>
+        {!isMoveMode && <ImageAnnotationToolbar key={sessionId ?? 'initial'} disabled={itemCount === 0}
+          selectedAnnotation={annotations.find(annotation => annotation.id === annotationEditor?.selectedId)}
+          magnificationTool={annotationEditor?.magnificationTool}
+          onMagnificationToolChange={annotationEditor?.onMagnificationToolChange}
+          onClearSelection={() => annotationEditor?.onSelect(null)}/>}
+        {isMoveMode && <>
           <div className='divider m-0'/>
           <div className='text-sm text-center'>已選取 {selectedItemIds.size} / {itemCount} 張</div>
           <div className='grid grid-cols-2 gap-2'>
@@ -134,11 +145,13 @@ export default function Sidebar({
                   onClick={confirmRemoveSelected}>
               <MdDeleteForever/>刪除已選圖片
           </button>
-      </>}
-      <div className='divider m-0 mt-auto'/>
-      <div className='text-sm text-center'>共 {itemCount} 張圖片</div>
-      <ModalOutput project={project} setProject={setProject} itemCount={itemCount}
-                   onEnterPrintPreview={onPrintPreview}/>
+        </>}
+      </div>
+      <div className='flex shrink-0 flex-col gap-3 border-t border-base-300 pt-3'>
+        <div className='text-sm text-center'>共 {itemCount} 張圖片</div>
+        <ModalOutput project={project} setProject={setProject} itemCount={itemCount}
+                     onEnterPrintPreview={onPrintPreview}/>
+      </div>
     </aside>
   )
 }

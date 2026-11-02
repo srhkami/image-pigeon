@@ -12,6 +12,40 @@ scope:
     - image-pigeon
 parent_state: null
 workstreams:
+  - id: workstream-image-annotation-2026-10-30
+    title: 圖片標記與局部放大（方案 B）
+    status: waiting_approval
+    plan: docs/plans/2026-10-30-image-annotation.md
+    result: docs/result/2026-10-30-image-annotation-result.md
+    affected_projects:
+      - image-pigeon
+    affected_areas:
+      - 編輯模式側邊欄介面
+      - 圖片標記與局部放大、專案保存及輸出
+    current_checkpoint: annotation_style_source_verified_waiting_manual
+    blocker: null
+    approval_gates:
+      planning_docs: approved_2026-10-30
+      ui_source_write: approved_consumed_2026-10-30
+      ui_automated_test: approved_consumed_2026-10-30
+      local_browser_runtime: closed
+      annotation_source_write: approved_consumed_2026-10-31
+      annotation_automated_test: approved_consumed_2026-10-31
+      magnification_source_write: approved_consumed_2026-11-02
+      magnification_automated_test: approved_consumed_2026-11-02
+      project_format_change: approved_consumed_magnification_version_3_extension_2026-11-02
+      annotation_style_source_write: approved_consumed_2026-11-02
+      annotation_style_automated_test: approved_consumed_2026-11-02
+      annotation_style_project_format: approved_consumed_version_4_2026-11-02
+      electron_package_build: closed
+      deployment: closed
+      commit: closed
+      push: closed
+    shared_paths:
+      - STATE.md
+      - src/layout/Sidebar.tsx
+    conflicts_with: []
+    next_action: 本輪來源、102項聚焦回歸及獨立審查已通過；使用者確認正式橫向面板、粗細與色票、取消／刪除、保存重開及各輸出樣式後回報，再校正人工驗收；Agent正式應用／瀏覽器、打包、部署與Git寫入仍關閉
   - id: workstream-electron-update-check-2026-09-30
     title: EXE 更新偵測與首頁檢查新版
     status: waiting_approval
@@ -35,34 +69,7 @@ workstreams:
       - docs/architecture/current-architecture.md
     conflicts_with: []
     next_action: 3.2.0 EXE 已交付於 release/3.2.0，產物檢查通過、既有產物保留；本輪聚焦 31/32 的 Intro 版型斷言差異已記錄且另做語法樹確認，Windows 實機驗收待使用者自行安排，不自動啟動或查詢正式 API
-  - id: workstream-four-image-layout-2026-09-30
-    title: 一頁四張排版
-    status: waiting_approval
-    plan: docs/plans/2026-09-30-four-image-layout.md
-    result: docs/result/2026-09-30-four-image-layout-result.md
-    affected_projects:
-      - image-pigeon
-    affected_areas:
-      - 排版偏好與分頁
-      - 單張及批次編輯
-      - 預覽、列印與 Word
-      - 專案封存
-    current_checkpoint: word_side_stacked_grid_review_pass_waiting_user_manual
-    blocker: null
-    approval_gates:
-      planning_docs: approved_2026-09-30
-      source_write: approved_consumed_2026-09-30
-      automated_test: approved_consumed_2026-09-30
-      local_browser_runtime: closed
-      manual_uat: pending_user_approval
-      electron_package_build: closed
-      deployment: closed
-      commit: closed
-      push: closed
-    shared_paths:
-      - STATE.md
-    conflicts_with: []
-    next_action: 使用者重新匯出 Word 確認左右圖片內寬、六張／上下兩方向三格等寬及編號窄欄；其餘原計畫必要人工驗收仍待核准，回報後校正結果
+
   - id: workstream-electron-portable-mvp-2026-08-28
     title: Electron Windows x64 免安裝候選
     status: partial
@@ -71,6 +78,12 @@ workstreams:
     blocker: Windows GUI、Word、列印、SmartScreen 與防毒仍需後續人工驗收
     next_action: 使用者在 Windows x64 完成斷網與功能人工驗收後回報結果
 recent_results:
+  - id: result-image-pigeon-four-image-layout-2026-09-30
+    path: docs/result/2026-09-30-four-image-layout-result.md
+    status: partial
+    completed_at: 2026-11-02
+    closure_status: closed_with_validation_gaps
+    note: 使用者確認上下縮圖及末頁空格修正已解決並要求收束；計畫 completed，直接回歸48/48與lint／build證據保留，完整列印13/14的既有文案斷言及Word／列印等未逐項回報矩陣留作驗證缺口，不再作本計畫強制待辦；其他工作線、Agent執行階段、打包、部署及Git閘門不變
   - id: result-image-pigeon-electron-portable-mvp-2026-08-28
     path: docs/result/2026-08-28-electron-portable-mvp-result.md
     status: partial
@@ -158,7 +171,7 @@ recent_results:
     path: docs/result/2026-07-29-project-state-v1-trial-result.md
     status: completed
     completed_at: 2026-07-29
-last_reconciled: 2026-09-30
+last_reconciled: 2026-11-02
 ---
 
 # image-pigeon 專案狀態
@@ -177,7 +190,9 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
-Word 左右內寬與六張／上下欄寬補正已完成，明示欄寬測試缺口已補強；相關集合 38/38、lint／build 通過，聚焦複審 `deleg_c0fcd197` 為 PASS，主代理核對受審來源及保護內容相符。結果見 `docs/result/2026-09-30-four-image-layout-result.md`；計畫 active、執行 partial，等待使用者重新匯出 Word 確認呈現及其餘必要人工驗收。預覽／列印、其他工作線及所有未核准副作用保持原狀。
+圖片標記方案 B 前兩階段已人工驗收；第三階段來源、92 項聚焦回歸及獨立審查通過，使用者其後回報「目前功能良好」，不補寫未提供的逐項輸出驗收。本輪第 10 節橫向懸浮面板、五段粗細、快速色票與指定操作提示已完成來源整合，102/102 聚焦回歸、品質檢查及 v4 舊讀取器拒讀驗證通過；獨立聚焦審查 `deleg_707a10f8` 為 PASS，主代理核對 24 份來源／測試及架構未漂移，目前等待使用者確認本輪樣式。既有列印文案失敗保留；Agent 正式應用／瀏覽器仍未核准，獨立 DEMO 的瀏覽器證據不等同正式實測。其他工作線及各自驗收保持原狀。
+
+一頁四張排版計畫於 2026-11-02 依使用者「確認問題已解決，可以收束當前計畫」完成收束。純上下縮圖與末頁空格修正已由使用者人工驗收通過；直接回歸 48/48、lint／build 及前輪 Word 獨立審查證據保留。計畫 completed、結果 partial，分類為 closed_with_validation_gaps；Word／列印等未逐項回報矩陣與既有列印文案斷言失敗只保留驗證邊界，不再作本計畫強制待辦。結果見 `docs/result/2026-09-30-four-image-layout-result.md`；其他工作線與未核准副作用保持原狀。
 
 Electron Windows x64 免安裝候選工作線已進入執行：使用者於 2026-08-28 核准依正式計畫開始實作，source、依賴安裝、自動驗證與本機打包閘門已消耗。第一輪計畫健全性審查為 `REQUEST_CHANGES`，必要修正已寫回，聚焦複審 `deleg_e1ea7501` 為 `PASS`。Windows 人工 UAT、commit、push 與部署仍未核准；現有 `src/utils/log.ts` 未暫存修改屬使用者既有工作，必須完整保護。
 
@@ -187,6 +202,7 @@ Electron Windows x64 免安裝候選工作線已進入執行：使用者於 2026
 
 ## Recent results
 
+- `docs/result/2026-09-30-four-image-layout-result.md`
 - `docs/result/2026-08-26-project-resource-limits-result.md`
 - `docs/result/2026-08-26-batch-image-editing-result.md`
 - `docs/result/2026-08-25-wheel-sensitivity-result.md`
@@ -206,6 +222,7 @@ Electron Windows x64 免安裝候選工作線已進入執行：使用者於 2026
 
 ## 導航
 
+- 圖片標記與局部放大計畫（方案 B）：`docs/plans/2026-10-30-image-annotation.md`
 - 一頁四張排版計畫：`docs/plans/2026-09-30-four-image-layout.md`
 - Electron Windows x64 免安裝候選計畫：`docs/plans/2026-08-28-electron-portable-mvp.md`
 - 整理模式批次圖片編輯計畫：`docs/plans/2026-08-26-batch-image-editing.md`

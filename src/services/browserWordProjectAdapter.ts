@@ -36,7 +36,7 @@ export async function createBrowserWordItems(
     throwIfAborted(options.signal)
     const asset = project.assets.find(candidate => candidate.id === item.assetId)
     if (!asset) throw new Error(`找不到圖片資產資訊：${item.assetId}`)
-    const jpeg = await converter.convert(assetStore.getBlob(item.assetId), item.rotation, options.signal)
+    const jpeg = await converter.convert(assetStore.getBlob(item.assetId), item.rotation, options.signal, item.annotations)
     throwIfAborted(options.signal)
     if (jpeg.type && jpeg.type !== 'image/jpeg') throw new Error('圖片轉換器未產生 JPEG')
     const imageData = new Uint8Array(await jpeg.arrayBuffer())

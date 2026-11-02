@@ -2,6 +2,13 @@ import {TVersionObject} from "@/utils/type.ts";
 
 export const CHANGELOG_LIST: Array<TVersionObject> = [
   {
+    version: '3.3.0',
+    date: '1151102',
+    logs: [
+      {color: 'new', text: '加入「圖片標記」與「局部放大」功能。'},
+    ],
+  },
+  {
     version: '3.2.0',
     date: '1150930',
     logs: [

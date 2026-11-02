@@ -1,6 +1,7 @@
 import {Zip, ZipPassThrough} from 'fflate'
 
-import type {Item, ProjectV2} from '../types/project.ts'
+import type {ImageAnnotation, Item, ProjectV2} from '../types/project.ts'
+import {drawAnnotations} from './browserAnnotationRenderer.ts'
 import {BrowserAssetStore} from './browserAssetStore.ts'
 import {
   BROWSER_RUNTIME_LIMITS,
@@ -23,7 +24,7 @@ export type ImageExportOptions = {
 }
 
 export type BrowserJpegConverter = {
-  convert(source: Blob, rotation: Item['rotation'], signal?: AbortSignal): Promise<Blob>
+  convert(source: Blob, rotation: Item['rotation'], signal?: AbortSignal, annotations?: readonly ImageAnnotation[]): Promise<Blob>
 }
 
 function releaseCanvas(canvas: HTMLCanvasElement): void {
@@ -47,7 +48,7 @@ function encodeJpeg(canvas: HTMLCanvasElement, signal?: AbortSignal): Promise<Bl
 }
 
 export const browserJpegConverter: BrowserJpegConverter = {
-  async convert(source, rotation, signal) {
+  async convert(source, rotation, signal, annotations = []) {
     throwIfAborted(signal)
     let bitmap: ImageBitmap
     try {
@@ -70,7 +71,14 @@ export const browserJpegConverter: BrowserJpegConverter = {
         context.translate(canvas.width / 2, canvas.height / 2)
         context.rotate(rotation * Math.PI / 180)
         context.drawImage(bitmap, -bitmap.width / 2, -bitmap.height / 2)
+        if (annotations.length) {
+          context.translate(-bitmap.width / 2, -bitmap.height / 2)
+          drawAnnotations(context, annotations, bitmap.width, bitmap.height, signal, bitmap)
+        }
         return await encodeJpeg(canvas, signal)
+      } catch (cause) {
+        if (cause instanceof BrowserOperationError) throw cause
+        throw new BrowserOperationError('CANVAS_OPERATION_FAILED', '圖片與標記合成失敗', cause)
       } finally {
         releaseCanvas(canvas)
       }
@@ -205,7 +213,7 @@ export async function createImageExportZip(
     const remark = normalizeImageExportFilename(item.remark)
     const baseName = options.isRemarkMode && remark ? remark : `${title}_${index + 1}`
     const filename = uniqueFilename(baseName, usedNames)
-    const jpeg = await converter.convert(blob, item.rotation, options.signal)
+    const jpeg = await converter.convert(blob, item.rotation, options.signal, item.annotations)
     throwIfAborted(options.signal)
     if (jpeg.type && jpeg.type !== 'image/jpeg') {
       throw new BrowserOperationError('CANVAS_OPERATION_FAILED', '圖片轉換器未產生 JPEG')

@@ -103,6 +103,14 @@
   animation: focus-image-card-enter-previous 220ms ease-out;
 }
 
+.annotation-editor:has([data-annotation-gesture='true']) .annotation-style-overlay {
+  display: none;
+}
+
+.annotation-no-fill {
+  background: linear-gradient(135deg, transparent 46%, var(--color-error) 47%, var(--color-error) 53%, transparent 54%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .focus-image-card-enter-next,
   .focus-image-card-enter-previous {

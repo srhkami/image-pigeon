@@ -3,7 +3,8 @@ import {SubmitHandler, useForm} from 'react-hook-form'
 import {CustomImage} from '@/utils/type.ts'
 import {FaArrowRotateLeft, FaArrowRotateRight, FaXmark} from 'react-icons/fa6'
 import clsx from 'clsx'
-import {ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
+import {AnnotationEditor, ProjectItemViewModel, ProjectV2} from '@/types/project.ts'
+import ImageAnnotationLayer from './ImageAnnotationLayer.tsx'
 import {updateItemLayoutPreference, updateItemRemark, updateItemRotation} from '@/state/projectState.ts'
 import {Button} from '@/component'
 import type {FocusSwitchDirection} from '@/features/ImagePreview/FocusImageEditor.tsx'
@@ -19,6 +20,7 @@ type Props = {
   readonly onRemoveItem: (itemId: string) => void;
   readonly onActivate: () => void;
   readonly isActive: boolean
+  readonly annotationEditor?: AnnotationEditor
 }
 type RemarkForm = { remark: string }
 const VISUAL_CLASS: Record<number, string> = {
@@ -45,7 +47,8 @@ export default function FocusImageCard({
                                          setImages,
                                          onRemoveItem,
                                          onActivate,
-                                         isActive
+                                         isActive,
+                                         annotationEditor,
                                        }: Props) {
   const {register, getValues, reset} = useForm<RemarkForm>({defaultValues: {remark: viewModel.remark}})
   useEffect(() => reset({remark: viewModel.remark}), [reset, viewModel.remark, viewModel.itemId])
@@ -78,10 +81,12 @@ export default function FocusImageCard({
             </button>}
       </div>
       <figure className='relative aspect-video w-full overflow-hidden rounded-box bg-base-200/20'>
-        <div className='absolute inset-0 flex items-center justify-center'
+        {isActive || viewModel.annotations?.length ? <div className='absolute inset-0'>
+          <ImageAnnotationLayer key={annotationEditor?.scope ?? 'readonly'} viewModel={viewModel} editor={isActive ? annotationEditor : undefined}/>
+        </div> : <div className='absolute inset-0 flex items-center justify-center'
              style={{transform: `rotate(${viewModel.rotation}deg)`, transformOrigin: 'center'}}><img
           src={viewModel.previewUrl} alt={viewModel.remark}
-          className={clsx('object-contain max-w-full max-h-full', isActive ? 'max-h-96' : 'max-h-20')}/></div>
+          className={clsx('object-contain max-w-full max-h-full', isActive ? 'max-h-96' : 'max-h-20')}/></div>}
       </figure>
       {isActive && <>
           <div className='divider my-1'/>

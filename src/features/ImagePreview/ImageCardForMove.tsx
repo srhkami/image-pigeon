@@ -5,6 +5,7 @@ import {CSS} from '@dnd-kit/utilities'
 import clsx from 'clsx'
 import {twMerge} from 'tailwind-merge'
 import {ProjectItemViewModel} from '@/types/project.ts'
+import ImageAnnotationLayer from './ImageAnnotationLayer.tsx'
 
 type Props = {
   readonly viewModel: ProjectItemViewModel
@@ -60,10 +61,10 @@ export default function ImageCardForMove({viewModel, index, isSelected, onToggle
 
       <figure
         className='mx-auto flex aspect-video h-72 w-[32rem] max-w-full items-center justify-center overflow-hidden rounded-lg bg-base-200/50'>
-        <div className='flex h-full w-full items-center justify-center'
+        {viewModel.annotations?.length ? <ImageAnnotationLayer viewModel={viewModel}/> : <div className='flex h-full w-full items-center justify-center'
              style={{transform: `rotate(${viewModel.rotation}deg)`, transformOrigin: 'center'}}>
           <img src={viewModel.previewUrl} alt={`圖片 ${index + 1}`} className='object-contain w-full h-full'/>
-        </div>
+        </div>}
       </figure>
       <span className={`absolute bottom-3 right-3 z-10 badge ${layoutTag.style}`}>{layoutTag.label}</span>
     </div>

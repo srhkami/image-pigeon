@@ -4,6 +4,7 @@ import {twMerge} from 'tailwind-merge'
 import clsx from 'clsx'
 import {AutoCollageSlot} from '@/features/ImagePreview/autoCollageLayout.ts'
 import {formatPrintImageNumber} from './printLayout.ts'
+import ImageAnnotationLayer from '../ImagePreview/ImageAnnotationLayer.tsx'
 
 type Props = {
   readonly slot: AutoCollageSlot
@@ -55,7 +56,7 @@ export default function PrintableSlot({
   const imageRef = useRef<HTMLImageElement | null>(null)
 
   useEffect(() => {
-    if (!item) {
+    if (!item || item.annotations?.length) {
       return
     }
 
@@ -99,8 +100,10 @@ export default function PrintableSlot({
 
   return (
     <div className={slotClassName} style={slotStyle}>
-      <div className='print-slot-media'>
-        <img
+      <div className='print-slot-media' style={{position: 'relative'}}>
+        {Boolean(item.annotations?.length) && <ImageAnnotationLayer viewModel={item}
+          onLoad={() => onImageLoaded(item.itemId)} onError={() => onImageErrored(item.itemId)}/>}
+        {!item.annotations?.length && <img
           ref={imageRef}
           src={item.previewUrl}
           alt={item.remark || `圖片 ${slot.itemId}`}
@@ -109,7 +112,7 @@ export default function PrintableSlot({
           onLoad={() => onImageLoaded(item.itemId)}
           onError={() => onImageErrored(item.itemId)}
           loading='eager'
-        />
+        />}
       </div>
       <div className={remarkStyleClass}>
         <div className='print-slot-number'>
