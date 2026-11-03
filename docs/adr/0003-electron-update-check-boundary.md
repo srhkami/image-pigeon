@@ -1,8 +1,10 @@
 ---
 type: adr
 id: adr-image-pigeon-electron-update-check-boundary-0003
-status: accepted
-canonical: true
+status: superseded
+canonical: false
+superseded_by: docs/adr/0004-retire-electron.md
+superseded_at: 2026-11-03
 scope: image-pigeon
 decided_at: 2026-09-30
 extends: docs/adr/0002-pure-frontend-runtime-boundary.md
@@ -10,7 +12,9 @@ extends: docs/adr/0002-pure-frontend-runtime-boundary.md
 
 # ADR-0003：桌面專用版本查詢邊界
 
-## 決策
+## 歷史決策（2026-11-03 由 ADR-0004 取代）
+
+Electron 與桌面版本查詢已退役，下列內容保留當時決策與證據，不再授權恢復桌面依賴；首頁手動下載入口繼續保留。
 
 使用者核准恢復 EXE 的新版偵測及首頁 Intro 的「檢查新版」入口。此決策只增加桌面版本查詢能力，不恢復 Python／本機伺服器，也不改變圖片、專案、備註與輸出在本機處理的邊界。
 

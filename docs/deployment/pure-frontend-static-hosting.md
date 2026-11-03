@@ -5,7 +5,7 @@ status: current
 canonical: true
 scope: image-pigeon
 path_semantics: repository-root-relative
-updated_at: 2026-08-24
+updated_at: 2026-11-03
 ---
 
 # 純前端靜態主機部署指南
@@ -16,7 +16,7 @@ updated_at: 2026-08-24
 
 正式應用程式只需要靜態檔案服務，不需要 Python、Node、FastAPI、uvicorn、資料庫、本機 HTTP server、寫入目錄或背景工作程序。Node 僅用於建置階段，不是正式執行階段依賴。
 
-`vite.config.ts` 使用 `base: './'`，因此同一份 `dist/` 可掛載在 HTTPS 網站根目錄或子路徑，例如 `https://example.gov.tw/image-pigeon/`。不支援也不承諾直接以 `file://` 雙擊 `index.html`；必須由 HTTP(S) 靜態主機提供。
+`vite.config.ts` 使用 `base: './'`，因此同一份 `dist/` 可掛載在 HTTPS 網站根目錄或子路徑，例如 `https://example.gov.tw/image-pigeon/`。此網站版不支援也不承諾直接以 `file://` 雙擊 `dist/index.html`；必須由 HTTP(S) 靜態主機提供。另有獨立的單一 HTML 離線建置，見下節；不可把兩種交付混為同一產物。
 
 子路徑網址必須保留尾端斜線。主機應將 `/image-pigeon` 以 301 或 308 導向 `/image-pigeon/`；否則瀏覽器會把 `./assets/*` 相對於上一層路徑解析。上線前必須同時探測無尾端斜線的導向，以及尾端有斜線頁面的 JavaScript、CSS、Logo 與圖片回應。
 
@@ -30,6 +30,14 @@ pnpm run build
 ```
 
 只發布 `dist/` 內的檔案。不要發布 `src/`、Python 原始碼、`node_modules/`、測試、Git 資料或本機設定。正式部署仍是獨立核准閘門，本文件不授權上傳或切換流量。
+
+## 單一 HTML 離線交付（不是網站 dist）
+
+執行 `pnpm run build:singlefile`，產物為 `release/html-<version>/image-pigeon-<version>.html`；目前 3.3.0 對應 `release/html-3.3.0/image-pigeon-3.3.0.html`。只需交付這份 HTML，不需要 node_modules、專案來源、assets 資料夾或 EXE。`pnpm run verify:singlefile` 可重跑靜態單檔驗證，`pnpm run test:singlefile` 執行建置契約、污染案例及設定儲存回歸。
+
+此建置另將 JavaScript、CSS、圖示與必要圖片內嵌，不修改原 `pnpm run build`、網站 CSP 或部署設定。Electron 打包流程已退役，網站與單檔建置均不需要桌面依賴。使用者於 2026-11-03 回報單檔版驗收通過（user_attested）；靜態驗證仍不等於 Agent 瀏覽器實測。設定儲存被拒絕時可能無法跨次保留主題／已讀狀態，但不應阻擋目前頁面；專案仍須明確下載保存為 .ipigeon，HTML 本身不會保存使用者圖片。
+
+建議把 HTML 單獨移到其他資料夾、斷網開啟，確認圖片匯入、標記／局部放大、專案保存重開、ZIP、DOCX 與列印。單檔沒有 Electron 啟動新版提示；手動「檢查新版」及其他外站連結仍需網路。未執行瀏覽器／正式部署，不以本說明授權啟動或上傳。
 
 ## MIME 類型
 

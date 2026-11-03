@@ -46,40 +46,17 @@ workstreams:
       - src/layout/Sidebar.tsx
     conflicts_with: []
     next_action: 本輪來源、102項聚焦回歸及獨立審查已通過；使用者確認正式橫向面板、粗細與色票、取消／刪除、保存重開及各輸出樣式後回報，再校正人工驗收；Agent正式應用／瀏覽器、打包、部署與Git寫入仍關閉
-  - id: workstream-electron-update-check-2026-09-30
-    title: EXE 更新偵測與首頁檢查新版
-    status: waiting_approval
-    plan: docs/plans/2026-09-30-electron-update-check.md
-    result: docs/result/2026-09-30-electron-update-check-result.md
-    current_checkpoint: package_330_verified_windows_uat_pending
-    blocker: null
-    approval_gates:
-      planning_docs: approved_2026-09-30
-      source_write: approved_2026-09-30
-      automated_test: approved_2026-09-30
-      live_api: closed
-      app_runtime: closed
-      package_build: approved_consumed_2026-09-30
-      repack_package_build: approved_consumed_2026-11-02
-      package_metadata_sync: approved_consumed_2026-11-02
-      deployment: closed
-      commit: closed
-      push: closed
-    shared_paths:
-      - STATE.md
-      - src/App.tsx
-      - docs/architecture/current-architecture.md
-    conflicts_with: []
-    next_action: 3.3.0 Windows x64免安裝EXE已產出於release/3.3.0，13項封裝／更新隔離測試、lint、build、靜態及產物檢查通過，舊EXE保留；Windows實機驗收由使用者自行安排，Agent不啟動應用／正式API，不部署、提交或推送
-
-  - id: workstream-electron-portable-mvp-2026-08-28
-    title: Electron Windows x64 免安裝候選
-    status: partial
-    plan: docs/plans/2026-08-28-electron-portable-mvp.md
-    current_checkpoint: windows_manual_uat_pending
-    blocker: Windows GUI、Word、列印、SmartScreen 與防毒仍需後續人工驗收
-    next_action: 使用者在 Windows x64 完成斷網與功能人工驗收後回報結果
 recent_results:
+  - id: result-image-pigeon-retire-electron-2026-11-03
+    path: docs/result/2026-11-03-retire-electron-result.md
+    status: completed
+    completed_at: 2026-11-03
+    note: Electron 專用來源、更新接線與依賴已退役，移除198個套件；70項聚焦回歸、lint、網站與隔離單檔建置／驗證通過；既有HTML與EXE原樣保留，桌面人工驗收因退役取消；後續本機提交已核准、提交前記為authorized_pending，實際紀錄以Git為準，推送與發布未核准
+  - id: result-image-pigeon-singlefile-html-2026-11-03
+    path: docs/result/2026-11-03-singlefile-html-result.md
+    status: completed
+    completed_at: 2026-11-03
+    note: 使用者回報單檔版驗收通過（user_attested）；初次交付50項自動回歸及原HTML指紋保留，不擴張為Agent瀏覽器實測或未具名的平台矩陣
   - id: result-image-pigeon-four-image-layout-2026-09-30
     path: docs/result/2026-09-30-four-image-layout-result.md
     status: partial
@@ -90,7 +67,8 @@ recent_results:
     path: docs/result/2026-08-28-electron-portable-mvp-result.md
     status: partial
     completed_at: 2026-08-28
-    note: Electron 最小安全殼與 Windows x64 portable 候選已完成；Electron 契約 6/6、範圍內前端測試 110/110、lint、build、static、package、產物探針及獨立複審 PASS；完整前端 114/116 的兩項既有失敗保留，Windows 人工 UAT 待使用者執行，commit／push／部署未核准
+    closure_status: retired_with_validation_gaps
+    note: 保留退役前Electron候選、契約6/6、範圍內110/110與封裝／複審證據；2026-11-03專用來源及依賴已退役，Windows人工驗收取消而非通過，完整前端當時114/116的既有缺口仍保留，舊EXE未刪
   - id: result-image-pigeon-project-resource-limits-2026-08-26
     path: docs/result/2026-08-26-project-resource-limits-result.md
     status: completed_with_known_test_gap
@@ -173,16 +151,18 @@ recent_results:
     path: docs/result/2026-07-29-project-state-v1-trial-result.md
     status: completed
     completed_at: 2026-07-29
-last_reconciled: 2026-11-02
+last_reconciled: 2026-11-03
 ---
 
 # image-pigeon 專案狀態
 
 ## 目前摘要
 
-本專案已切換至 Project-State v1；`STATE.md` 是目前工作線與下一步的唯一入口。3.0 純前端版本已合併至 `dev` 與 `main`，並作為後續主要更新基線；現行唯一專案交換格式為單檔 `.ipigeon` archive，舊格式與 Python／PyInstaller 執行階段均已退役。網頁版維持 ADR-0002 的零背景請求；Electron Windows x64 免安裝候選已完成原始碼及初版封裝，Windows 人工驗收仍待使用者執行。2026-09-30 新增桌面專用新版偵測，依 `docs/adr/0003-electron-update-check-boundary.md` 及獨立計畫實作，不恢復網頁背景 API 或舊 Python 路徑。既有純前端 build 與 HTTPS 靜態部署保持不變；2026-11-02 依使用者要求完成3.3.0本機EXE打包及必要封裝版本同步，兩項核准已消耗；正式 API、應用啟動、部署、提交及推送仍關閉。
+後續 Git 授權：使用者要求「請幫我提交GIT」，核准單檔版及 Electron 退役相關來源、測試與文件合併為本機提交，提交前為 authorized_pending，成功與否以 Git 讀回紀錄為準。以下關於本次兩項工作未提交／提交關閉的文字為先前階段紀錄，由本授權取代；其他工作線、release 成品、推送與部署不在此核准範圍。
 
-Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並完成 lifecycle closure。焦點式編輯器以滾輪切換圖片前保存備註的修正已通過回歸測試、lint、build 與獨立程式審查，並完成生命週期閉環。「外部圖片拖放導入」已完成來源改動、15 項前端回歸、lint、build、scope guard、focused rereview `PASS` 與 Vite browser UAT；macOS pywebview UAT 已由使用者人工驗收成功（user-attested），工作線已收束。檔案選擇器已改為由應用程式提供可靠的初始資料夾，避免 Windows 缺少 `HOMEPATH` 時由 pywebview 拋出 `KeyError`；source 與自動驗證已完成，Windows GUI 實機確認留待問題環境更新。新版本提示與忽略機制曾隨純前端版本退場；現在只依新的桌面更新計畫恢復，不回復網頁 API 查詢。README 彈窗版本化保存仍未實作。Git 歷史中的舊計畫標籤與既有 `.planning/` 草稿均未被匯入為目前工作。
+本專案已切換至 Project-State v1；`STATE.md` 是目前工作線與下一步的唯一入口。3.0 純前端版本已合併至 `dev` 與 `main`，並作為後續主要更新基線；現行唯一專案交換格式為單檔 `.ipigeon` archive，舊格式與 Python／PyInstaller 執行階段均已退役。2026-11-03 使用者確認單一 HTML 版驗收通過並核准退役 Electron；桌面殼、打包依賴與啟動版本查詢已移除，現行交付為 HTTPS 網站與單一 HTML 離線版。依 ADR-0002 與 ADR-0004 維持零背景請求及本機資料處理，首頁手動下載入口保留。既有 HTML／EXE 成品不變；正式 API、應用啟動、部署、提交及推送仍關閉。
+
+Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並完成 lifecycle closure。焦點式編輯器以滾輪切換圖片前保存備註的修正已通過回歸測試、lint、build 與獨立程式審查，並完成生命週期閉環。「外部圖片拖放導入」已完成來源改動、15 項前端回歸、lint、build、scope guard、focused rereview `PASS` 與 Vite browser UAT；macOS pywebview UAT 已由使用者人工驗收成功（user-attested），工作線已收束。檔案選擇器已改為由應用程式提供可靠的初始資料夾，避免 Windows 缺少 `HOMEPATH` 時由 pywebview 拋出 `KeyError`；source 與自動驗證已完成，Windows GUI 實機確認留待問題環境更新。新版本提示與忽略機制曾隨純前端版本退場，後來曾於桌面版恢復；目前已隨 Electron 再次退役，不恢復網頁 API 查詢。README 彈窗版本化保存仍未實作。Git 歷史中的舊計畫標籤與既有 `.planning/` 草稿均未被匯入為目前工作。
 
 ## Scope map
 
@@ -192,11 +172,13 @@ Project-State v1 遷移與 README 低風險閉環試行已通過獨立審查並�
 
 ## 目前工作與阻擋
 
+單一 HTML 離線版已由使用者確認驗收通過（user_attested），計畫與結果 completed，原產物 `release/html-3.3.0/image-pigeon-3.3.0.html` 保持不變。Electron 退役亦已完成：70/70 聚焦回歸、lint、網站建置／靜態驗證與 scratch 隔離單檔建置／驗證通過；不把這些自動證據當作新成品的瀏覽器或跨平台實測。手動下載入口與既有 EXE 保留，其他工作線不變。
+
 圖片標記方案 B 前兩階段已人工驗收；第三階段來源、92 項聚焦回歸及獨立審查通過，使用者其後回報「目前功能良好」，不補寫未提供的逐項輸出驗收。本輪第 10 節橫向懸浮面板、五段粗細、快速色票與指定操作提示已完成來源整合，102/102 聚焦回歸、品質檢查及 v4 舊讀取器拒讀驗證通過；獨立聚焦審查 `deleg_707a10f8` 為 PASS，主代理核對 24 份來源／測試及架構未漂移，目前等待使用者確認本輪樣式。既有列印文案失敗保留；Agent 正式應用／瀏覽器仍未核准，獨立 DEMO 的瀏覽器證據不等同正式實測。其他工作線及各自驗收保持原狀。
 
 一頁四張排版計畫於 2026-11-02 依使用者「確認問題已解決，可以收束當前計畫」完成收束。純上下縮圖與末頁空格修正已由使用者人工驗收通過；直接回歸 48/48、lint／build 及前輪 Word 獨立審查證據保留。計畫 completed、結果 partial，分類為 closed_with_validation_gaps；Word／列印等未逐項回報矩陣與既有列印文案斷言失敗只保留驗證邊界，不再作本計畫強制待辦。結果見 `docs/result/2026-09-30-four-image-layout-result.md`；其他工作線與未核准副作用保持原狀。
 
-Electron Windows x64 免安裝候選工作線已進入執行：使用者於 2026-08-28 核准依正式計畫開始實作，source、依賴安裝、自動驗證與本機打包閘門已消耗。第一輪計畫健全性審查為 `REQUEST_CHANGES`，必要修正已寫回，聚焦複審 `deleg_e1ea7501` 為 `PASS`。Windows 人工 UAT、commit、push 與部署仍未核准；現有 `src/utils/log.ts` 未暫存修改屬使用者既有工作，必須完整保護。
+Electron 免安裝候選與桌面新版偵測工作線已於 2026-11-03 退役；原計畫改為 superseded，實際封裝、複審及驗證缺口保留於歷史結果。Windows 桌面人工驗收因退役取消，不再作待辦，也不改記為通過。既有 release 成品未清除，commit、push 與部署未核准。
 
 上一條整理模式批次圖片編輯計畫已完成：C0–C4 原始碼與自動驗證完成，C5 由使用者於 2026-08-26 人工瀏覽器驗收成功，最後文件聚焦複審 `deleg_d2568d4b` 為 `PASS`；Agent 未啟動或操作瀏覽器。完整前端測試 108/110 的兩項既有範圍外失敗保留，commit、push 與部署仍未核准。單一專案圖片上限已調整為 1000 張，資產儲存、專案封存與圖片輸出的總量上限已調整為 200 MiB。
 
@@ -204,6 +186,8 @@ Electron Windows x64 免安裝候選工作線已進入執行：使用者於 2026
 
 ## Recent results
 
+- `docs/result/2026-11-03-retire-electron-result.md`
+- `docs/result/2026-11-03-singlefile-html-result.md`
 - `docs/result/2026-09-30-four-image-layout-result.md`
 - `docs/result/2026-08-26-project-resource-limits-result.md`
 - `docs/result/2026-08-26-batch-image-editing-result.md`
@@ -224,9 +208,11 @@ Electron Windows x64 免安裝候選工作線已進入執行：使用者於 2026
 
 ## 導航
 
+- Electron 退役計畫：`docs/plans/2026-11-03-retire-electron.md`
+- 單一 HTML 離線版計畫：`docs/plans/2026-11-03-singlefile-html.md`
 - 圖片標記與局部放大計畫（方案 B）：`docs/plans/2026-10-30-image-annotation.md`
 - 一頁四張排版計畫：`docs/plans/2026-09-30-four-image-layout.md`
-- Electron Windows x64 免安裝候選計畫：`docs/plans/2026-08-28-electron-portable-mvp.md`
+- 歷史 Electron Windows x64 免安裝候選計畫（已退役）：`docs/plans/2026-08-28-electron-portable-mvp.md`
 - 整理模式批次圖片編輯計畫：`docs/plans/2026-08-26-batch-image-editing.md`
 - Python 執行階段退役計畫：`docs/plans/2026-08-25-retire-python-runtime.md`
 - Python 執行階段退役結果：`docs/result/2026-08-25-retire-python-runtime-result.md`

@@ -492,7 +492,6 @@ test('App 真實回呼只寫目前圖片；換圖、同 ID 換專案及旋轉後
     '@/layout': {Nav: () => null}, '@/features': {ImagePreview: Preview}, '@/features/PrintPreview': {PrintPreviewView: () => null},
     '@/layout/Sidebar.tsx': {__esModule: true, default: Sidebar},
     '@/features/Upload/ExternalImageDropOverlay.tsx': empty,
-    '@/features/Intro/ModalDesktopUpdate.tsx': empty,
     '@/features/ImagePreview/annotationGeometry.ts': g,
   }
   const source = readFileSync(new URL('../../App.tsx', import.meta.url), 'utf8')

@@ -114,6 +114,7 @@ const forbidden = [
   'save_docx',
   'save_images',
   'api.pigeonhand.tw/web/apps/1/',
+  'imagePigeonDesktop',
 ]
 for (const value of forbidden) {
   const hits = textFiles.filter(path => readFileSync(path, 'utf8').includes(value))

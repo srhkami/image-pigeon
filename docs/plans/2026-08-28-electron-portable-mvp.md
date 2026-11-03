@@ -1,8 +1,11 @@
 ---
 type: plan
 id: plan-image-pigeon-electron-portable-mvp-2026-08-28
-status: active
-canonical: true
+status: superseded
+canonical: false
+superseded_by: docs/plans/2026-11-03-retire-electron.md
+retired_at: 2026-11-03
+execution_authority: historical_only
 scope: image-pigeon
 created_at: 2026-08-28
 branch:
@@ -11,7 +14,7 @@ branch:
   status: existing_dirty
 execution:
   status: partial
-  current_checkpoint: windows_manual_uat_pending
+  current_checkpoint: retired_with_validation_gaps
 result: docs/result/2026-08-28-electron-portable-mvp-result.md
 review:
   type: plan_sanity
@@ -32,7 +35,7 @@ approval_gates:
   dependency_install: approved_consumed_2026-08-28
   automated_test: approved_consumed_2026-08-28
   local_package_build: approved_consumed_2026-08-28
-  windows_manual_uat: user_operated_after_handoff
+  windows_manual_uat: cancelled_by_retirement_2026-11-03
   signing: closed
   installer: closed
   deployment: closed
@@ -46,6 +49,10 @@ related:
 ---
 
 # Electron Windows x64 免安裝候選計畫
+
+## 2026-11-03 退役處置
+
+使用者確認單檔版驗收通過並要求退役 Electron。本計畫已被退役計畫取代，不再具有執行權威；尚未執行的 Windows 人工驗收取消，不改記為通過。舊產物及實際執行證據保留。以下各節完整保留退役前的歷史契約與進度，不是目前建置或待辦指令。
 
 ## 1. 目標與決策
 

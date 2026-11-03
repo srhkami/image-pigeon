@@ -1,14 +1,17 @@
 ---
 type: plan
 id: plan-image-pigeon-electron-update-check-2026-09-30
-status: active
-canonical: true
+status: superseded
+canonical: false
+superseded_by: docs/plans/2026-11-03-retire-electron.md
+retired_at: 2026-11-03
+execution_authority: historical_only
 scope: image-pigeon
 path_semantics: repository-root-relative
 created_at: 2026-09-30
 execution:
   status: partial
-  current_checkpoint: package_330_verified_windows_uat_pending
+  current_checkpoint: retired_with_validation_gaps
 result: docs/result/2026-09-30-electron-update-check-result.md
 approval_gates:
   planning_docs: approved_2026-09-30
@@ -49,6 +52,10 @@ allowed_new:
 ---
 
 # EXE 新版偵測與首頁檢查新版入口
+
+## 2026-11-03 退役處置
+
+使用者確認單檔版驗收通過並要求退役 Electron。桌面偵測、橋接、提示與封裝路徑退役，首頁手動檢查新版入口保留；未完成的 Windows 桌面驗收因退役取消，不視為通過。以下各節為退役前歷史契約與實際進度，已不具執行權威；後續以退役計畫為準，不執行原允許清單或打包命令。
 
 ## 目標與範圍
 

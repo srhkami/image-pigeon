@@ -7,6 +7,9 @@ verified_against_source_at: 2026-09-30
 annotation_verified_against_source_at: 2026-10-31
 magnification_verified_against_source_at: 2026-11-02
 annotation_style_verified_against_source_at: 2026-11-02
+singlefile_source_verified_at: 2026-11-03
+electron_retired_at: 2026-11-03
+singlefile_manual_acceptance: user_attested_2026-11-03
 ---
 
 # image-pigeon 現行架構
@@ -35,6 +38,14 @@ HTTPS 靜態主機
 ```
 
 開發使用 Vite dev server；production build 由 `pnpm run build` 產生。`vite.config.ts` 使用相對 `base`，使同一份產物可部署於 HTTPS 網站根目錄或子路徑。
+
+## 單一 HTML 離線交付
+
+`pnpm run build:singlefile` 使用獨立的 `vite.singlefile.config.ts`，沿用原 React／Vite 設定，再由鎖定的 vite-plugin-singlefile 將程式、樣式及匯入圖片內嵌；單檔專用轉換另外內嵌 public 的網站圖示與兩張品牌圖，不修改原首頁 DOM 或網站設定。輸出只有 `release/html-<version>/image-pigeon-<version>.html`，沒有相鄰資產依賴；建置後由 `scripts/verify-singlefile-build.mjs` 檢查單檔結構、必要圖片、內嵌程式及可辨識資源／網路載入。
+
+`browserPreferenceStorage.ts` 為主題及功能介紹已讀狀態提供安全讀寫；瀏覽器拒絕儲存時使用預設值及目前元件狀態，不影響專案檔保存。單檔仍使用既有瀏覽器圖片、標記、封存、ZIP、DOCX 與列印路徑，沒有 Electron 專用啟動版本查詢；手動下載入口保留。
+
+此交付目標為直接以 file:// 開啟，不取代必須由 HTTP(S) 提供的網站 dist，也不改網站 CSP。使用者於 2026-11-03 回報單檔版驗收通過（user_attested）；Agent 僅取得來源／產物自動證據，不擴張為 Agent 瀏覽器實測或未具名的平台矩陣。計畫及結果見 `docs/plans/2026-11-03-singlefile-html.md`、`docs/result/2026-11-03-singlefile-html-result.md`。
 
 ## ProjectV2 與資產生命週期
 
@@ -94,13 +105,13 @@ ProjectV2
 - 固定外部網站入口集中於 `src/services/browserExternalNavigation.ts`，只在使用者明確點擊後開啟，且不攜帶應用程式資料。
 - `scripts/verify-static-build.mjs` 會驗證靜態資產引用並拒絕退役 runtime 與網路 sink。
 
-## Electron 桌面專用版本查詢
+## 桌面退役與手動下載
 
-同一份 `dist/` 可由 Electron 沙箱載入，圖片與輸出仍沿用本機前端流程。桌面主程序新增固定公開版本端點的單次 GET，透過單用途預載與 IPC 回傳必要純文字資訊；無橋接的網頁版不查詢。總逾時與回應上限、主視窗頂層來源驗證、無參數介面及既有權限／導覽拒絕維持最小邊界。
+依 `docs/adr/0004-retire-electron.md`，Electron 桌面殼、打包設定與命令、專用依賴、預載橋接及啟動新版提示均已退役。網站與單檔直接使用同一份純前端功能，不提供背景版本查詢，也沒有原生檔案或桌面 API。
 
-首頁 Intro 的版本資訊旁固定有「檢查新版」，與偵測結果無關；使用者主動點擊後才開啟 v2 的固定 Google 雲端資料夾。桌面新版提示只在遠端版本較新且未關閉／忽略時顯示，下載入口同樣使用固定允許網址，不採用 API 的任意下載連結、不自動更新，也不發送圖片、專案或備註。
+首頁 Intro 的版本資訊旁保留「檢查新版」；使用者主動點擊後才開啟既有固定 Google 雲端資料夾。不自動下載或安裝，也不發送圖片、專案或備註。
 
-此桌面例外依 `docs/adr/0003-electron-update-check-boundary.md` 與 `docs/plans/2026-09-30-electron-update-check.md`，不取代網頁版零背景請求、不改網站 CSP，也不代表已完成 EXE 打包或 Windows 人工驗收。
+舊 EXE 與既有 release 成品保留，但不是目前建置目標；歷史桌面計畫、結果及 ADR-0003 僅作證據。Windows 桌面人工驗收因退役取消，不視為通過。
 
 ## 驗證邊界
 

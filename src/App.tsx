@@ -24,7 +24,6 @@ import {browserImportOperationCoordinator, browserProjectOperationCoordinator} f
 import {getActiveItemIdAfterRemovingItems} from '@/features/ImagePreview/wheelNavigation.ts'
 import type {AnnotationEditor, LayoutPreference, MagnificationTool} from '@/types/project.ts'
 import {EMPTY_ANNOTATIONS} from '@/features/ImagePreview/annotationGeometry.ts'
-import ModalDesktopUpdate from '@/features/Intro/ModalDesktopUpdate.tsx'
 
 const DEFAULT_PRINT_OPTIONS: PrintPreviewOptions = {title: '照片黏貼表', fontSize: '18', alignVertical: 'center'}
 
@@ -220,7 +219,6 @@ function App() {
         </main>
       </div>
       {dragDepth > 0 && <ExternalImageDropOverlay/>}
-      <ModalDesktopUpdate/>
       <Toaster position='top-center' reverseOrder={false}/>
     </div>
   )

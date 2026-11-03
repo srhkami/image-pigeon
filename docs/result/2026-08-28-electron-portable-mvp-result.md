@@ -2,11 +2,19 @@
 title: Electron Windows x64 免安裝候選執行結果
 date: 2026-08-28
 status: partial
+canonical: false
+retired_at: 2026-11-03
+closure_status: retired_with_validation_gaps
+superseded_by: docs/result/2026-11-03-retire-electron-result.md
 plan: docs/plans/2026-08-28-electron-portable-mvp.md
 workstream: workstream-electron-portable-mvp-2026-08-28
 ---
 
 # Electron Windows x64 免安裝候選執行結果
+
+## 2026-11-03 退役處置
+
+Electron 專用來源及依賴已由退役計畫移除；未完成的 Windows 人工驗收因使用者採用單檔版而取消，不改記為通過。既有 EXE 保留。以下為退役前實際證據，含當時的檔案、命令與待驗清單；不再代表現行來源或強制待辦。
 
 ## 結論
 

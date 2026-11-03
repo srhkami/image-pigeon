@@ -2,7 +2,6 @@
   "name": "image-pigeon",
   "private": true,
   "version": "3.3.0",
-  "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,9 +10,9 @@
     "test:frontend": "node --test tests/*.test.ts src/features/ImagePreview/*.test.ts src/features/PrintPreview/*.test.ts src/services/*.test.ts src/features/Upload/*.test.ts src/features/Output/*.test.ts",
     "preview": "vite preview",
     "verify:static": "node scripts/verify-static-build.mjs",
-    "build:electron": "pnpm run build && pnpm run verify:static",
-    "package:electron:win": "pnpm run build:electron && electron-builder --win portable --x64",
-    "verify:electron:package": "node scripts/verify-electron-package.mjs"
+    "build:singlefile": "tsc -b && vite build --config vite.singlefile.config.ts && node scripts/verify-singlefile-build.mjs",
+    "verify:singlefile": "node scripts/verify-singlefile-build.mjs",
+    "test:singlefile": "node --test scripts/singlefileBuild.test.ts src/services/browserPreferenceStorage.test.ts"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.8.1",
@@ -48,14 +47,13 @@
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^5.2.0",
     "daisyui": "^5.7.14",
-    "electron": "44.0.0",
-    "electron-builder": "26.15.3",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^16.5.0",
     "typescript": "~5.7.3",
     "typescript-eslint": "^8.65.0",
-    "vite": "^7.3.6"
+    "vite": "^7.3.6",
+    "vite-plugin-singlefile": "2.3.4"
   }
 }

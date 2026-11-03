@@ -2,13 +2,16 @@
 type: result
 id: result-image-pigeon-electron-update-check-2026-09-30
 status: partial
-canonical: true
+canonical: false
+retired_at: 2026-11-03
+closure_status: retired_with_validation_gaps
+superseded_by: docs/result/2026-11-03-retire-electron-result.md
 scope: image-pigeon
 path_semantics: repository-root-relative
 implements: docs/plans/2026-09-30-electron-update-check.md
 updated_at: 2026-11-02
 execution:
-  current_checkpoint: package_330_verified_windows_uat_pending
+  current_checkpoint: retired_with_validation_gaps
 review:
   status: pass
   delegation: deleg_2ccf796d
@@ -30,6 +33,10 @@ approval_gates:
 ---
 
 # EXE 更新偵測執行結果
+
+## 2026-11-03 退役處置
+
+Electron 專用來源、依賴與桌面新版提示已退役，首頁手動檢查新版保留。Windows 桌面人工驗收因退役取消，不改寫既有 partial 或歷史審查結果；舊 EXE 與下列退役前證據保留。本文其餘命令、檔案引用及待驗清單僅屬歷史，不再作現行建置或催驗依據。
 
 ## 更新偵測原始碼與自動驗證（2026-09-30 歷史證據）
 
